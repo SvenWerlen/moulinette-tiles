@@ -1,0 +1,38 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+  <h3>{{pretty filename}}</h3>
+  <div class="tileres draggable"><img width="400" height="400" src="{{assetURL}}" title="{{localize "mtte.dragTile"}}"/></div>
+  <p>  
+    <i>Search provided by <a href="https://www.patreon.com/moulinette">Moulinette</a>.</i>
+  </p>
+  {{#if pack.pubWebsite}}
+  <p>  
+    {{localize "mtte.imageFrom"}} <a href="{{pack.pubWebsite}}" target="_blank">{{pack.publisher}}</a> (<a href="{{pack.url}}" target="_blank">{{pack.name}}</a>)
+  </p>
+  {{/if}}
+  {{#unless pack.pubWebsite}}
+  <p>  
+    {{localize "mtte.imageFrom"}} {{pack.publisher}} ({{pack.name}})
+  </p>
+  {{/unless}}
+  {{#if pack.licenseUrl}}
+  <p>  
+    {{localize "mtte.license"}} <a href="{{pack.licenseUrl}}" target="_blank">{{pack.license}}</a>
+  </p>
+  {{/if}}
+  {{#unless pack.pubWebsite}}
+  <p>  
+    {{localize "mtte.license"}} {{localize "mtte.unknownLicense"}}
+  </p>
+  {{/unless}}
+  <footer>
+    <div class="actions">
+      {{#if pack.licenseUrl}}
+      <button class="download" title="{{localize "mtte.downloadImageToolTip"}}"><i class="fas fa-cloud-download-alt"></i> {{localize "mtte.downloadImage"}}</button>
+      {{/if}}
+      {{#unless pack.licenseUrl}}
+      <button class="clipboard" title="{{localize "mtte.clipboardImageToolTip"}}"><i class="fas fa-clipboard"></i> {{localize "mtte.clipboardImage"}}</button>
+      {{/unless}}
+      <button class="createTile" title="{{localize "mtte.createTileToolTip"}}"><i class="fas fa-puzzle-piece"></i> {{localize "mtte.createTile"}}</button>
+    </div>
+  </footer>
+</form>

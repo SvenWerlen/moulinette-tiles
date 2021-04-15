@@ -1,0 +1,18 @@
+.mtte.forge .tileres {
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.mtte.forge .tileres:hover {
+  opacity: 50%;
+}
+
+.mtte.forge .tileres img {
+  object-fit: contain;
+  border: none;
+  margin: 2px;
+}
+
+.mtte.forge .tileres.draggable {
+  cursor: grab;
+}
