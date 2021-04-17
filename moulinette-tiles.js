@@ -5,6 +5,7 @@
 Hooks.once("ready", async function () {
   if (game.user.isGM) {
     // create default home folder for game icons
+    await game.moulinette.applications.MoulinetteFileUtil.createFolderIfMissing(".", "moulinette");
     await game.moulinette.applications.MoulinetteFileUtil.createFolderIfMissing("moulinette", "moulinette/tiles");
     await game.moulinette.applications.MoulinetteFileUtil.createFolderIfMissing("moulinette/tiles", "moulinette/tiles/custom");
     
