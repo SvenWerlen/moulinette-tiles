@@ -11,6 +11,8 @@
   "mtte.downloadImageSuccess": "Image successfully downloaded! Path copied into clipboard.",
   "mtte.downloadImageToolTip": "Download image into Foundry VTT",
   "mtte.dragTile": "Drag tile and drop it on your scene",
+  "mtte.errorCreateTile": "In order to create a tile, drag the image and drop it on the scene!",
+  "mtte.errorDownload": "Image couldn't be downloaded from website. Try again later!",
   "mtte.howto": "Help",
   "mtte.howtoToolTip": "Howto: how does it work? How to install new images/tiles.",
   "mtte.imageFrom": "Image from",

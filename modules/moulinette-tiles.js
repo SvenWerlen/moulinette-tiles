@@ -151,7 +151,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   
         // download & upload image
         fetch(tile.assetURL).catch(function(e) {
-          ui.notifications.error(game.i18n.localize("ERROR.mtteDownload"));
+          ui.notifications.error(game.i18n.localize("mtte.errorDownload"));
           console.log(`Moulinette Tiles | Cannot download image ${imageName}`, e)
           return;
         }).then( res => {

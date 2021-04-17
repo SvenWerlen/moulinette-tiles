@@ -39,8 +39,8 @@ export class MoulinetteTileResult extends FormApplication {
   _updateObject(event) {
     event.preventDefault();
     if(event.submitter.className == "createTile") {
-      ui.notifications.error(game.i18n.localize("ERROR.mtteCreateTile"));
-      throw game.i18n.localize("ERROR.mtteCreateTile");
+      ui.notifications.error(game.i18n.localize("mtte.errorCreateTile"));
+      throw game.i18n.localize("mtte.errorCreateTile");
     } else if(event.submitter.className == "download") {
       this._downloadFile();
     } else if(event.submitter.className == "clipboard") {
@@ -79,7 +79,7 @@ export class MoulinetteTileResult extends FormApplication {
   async _downloadFile() {
     // download & upload image
     const res = await fetch(this.data.assetURL).catch(function(e) {
-      ui.notifications.error(game.i18n.localize("ERROR.mtteDownload"));
+      ui.notifications.error(game.i18n.localize("mtte.errorDownload"));
       console.log(`Moulinette TileResult | Cannot download image ${this.data.filename}`, e)
       return false;
     });
