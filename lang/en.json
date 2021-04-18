@@ -16,7 +16,7 @@
   "mtte.dragTile": "Drag tile and drop it on your scene",
   "mtte.dropasActor": "Drop token/image as actor",
   "mtte.dropasActorDescription": "You are about to create a token from the dragged image. Choose the options below and confirm.",
-  "mtte.dropmode": "Drag-and-drop mode",
+  "mtte.dropmode": "Drag & drop mode",
   "mtte.dropmodeToolTip": "Choose what kind of asset will be generated",
   "mtte.errorCreateTile": "In order to create a tile, drag the image and drop it on the scene!",
   "mtte.errorDownload": "Image couldn't be downloaded from website. Try again later!",

@@ -32,7 +32,8 @@ Hooks.once("ready", async function () {
         {id: "howto", icon: "fas fa-question-circle" ,name: game.i18n.localize("mtte.howto"), help: game.i18n.localize("mtte.howtoToolTip") }
       ]
     })
-    
+   
+    game.moulinette.applications["MoulinetteDropAsActor"] = MoulinetteDropAsActor
     console.log("Moulinette Tiles | Module loaded")
   }
 });
