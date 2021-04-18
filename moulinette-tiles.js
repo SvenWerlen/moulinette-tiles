@@ -1,4 +1,13 @@
 
+import { MoulinetteDropAsActor } from "./modules/moulinette-dropas-actor.js"
+
+Hooks.once("init", async function () {
+  console.log("Moulinette Tiles | Init") 
+  game.settings.register("moulinette", "tileMode", { scope: "world", config: false, type: String, default: "tile" })
+  game.settings.register("moulinette", "tileActorId", { scope: "world", config: false, type: String })
+  game.settings.register("moulinette", "tileActorLink", { scope: "world", config: false, type: Boolean, default: true })
+})
+
 /**
  * Ready: define new moulinette forge module
  */
@@ -27,3 +36,23 @@ Hooks.once("ready", async function () {
     console.log("Moulinette Tiles | Module loaded")
   }
 });
+
+/**
+ * Manage canvas dr
+ */
+Hooks.on('dropCanvasData', (canvas, data) => { 
+  if(data.source == "mtte") {
+    if(data.type == "JournalEntry") {
+      import("./modules/moulinette-tiles.js").then( c => {
+        c.MoulinetteTiles.createArticle(data)
+      })
+      return false;
+    }
+    else if(data.type == "Actor") {
+      new MoulinetteDropAsActor(data).render(true)
+      return false;
+    }
+  }
+});
+
+

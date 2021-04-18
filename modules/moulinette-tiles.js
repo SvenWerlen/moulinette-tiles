@@ -63,13 +63,26 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // keep html for later usage
     this.html = html
     
+    // when click on tile
     this.html.find(".tileres").click(this._onShowTile.bind(this))
     
-    // re-apply drag-drop
-    const el = this.html[0]
-    //this._dragDrop.forEach(d => d.bind(el));
+    // when choose mode
+    this.html.find(".options input").click(this._onChooseMode.bind(this))
   }
   
+  
+  /**
+   * Footer: Dropmode
+   */
+  async getFooter() {
+    const mode = game.settings.get("moulinette", "tileMode")
+    return `<div class="options">
+      ${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i> 
+      <input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${game.i18n.localize("mtte.tile")}
+      <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${game.i18n.localize("mtte.article")}
+      <input class="dropmode" type="radio" name="mode" value="actor" ${mode == "actor" ? "checked" : ""}> ${game.i18n.localize("mtte.actor")}
+    </div>`
+  }
   
   /**
    * Implements actions
@@ -121,44 +134,58 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   onDragStart(event) {
     const div = event.currentTarget;
     const idx = div.dataset.idx;
-    if(this.searchResults && idx > 0 && idx <= this.searchResults.length) { 
-      
-      const tile = this.searchResults[idx-1]
-      const pack = this.assetsPacks[tile.pack]
-      if(!pack.isRemote) {
-        const filePath = `${pack.path}${tile.filename}`
-  
-        // Set drag data
-        const dragData = {
-          type: "Tile",
-          img: filePath,
-          tileSize: 100
-        };
-        event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-      }
-      else {
-        const folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
-        const imageName = tile.filename.split('/').pop()
-        const filePath = `moulinette/tiles/${folderName}/${imageName}`
-  
-        // Set drag data
-        const dragData = {
-          type: "Tile",
-          img: filePath,
-          tileSize: 100
-        };
-        event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-  
-        // download & upload image
-        fetch(tile.assetURL).catch(function(e) {
-          ui.notifications.error(game.i18n.localize("mtte.errorDownload"));
-          console.log(`Moulinette Tiles | Cannot download image ${imageName}`, e)
-          return;
-        }).then( res => {
-          res.blob().then( blob => game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], imageName, { type: blob.type, lastModified: new Date() }), imageName, "moulinette/tiles", `moulinette/tiles/${folderName}`, false) )
-        });
-      }
+    const mode = game.settings.get("moulinette", "tileMode")
+    
+    // invalid action
+    if(!this.searchResults || idx < 0 || idx > this.searchResults.length) return
+    
+    const tile = this.searchResults[idx-1]
+    const pack = this.assetsPacks[tile.pack]
+
+    let filePath;
+    let imageName;
+    
+    if(!pack.isRemote) {
+      imageName = tile.filename.split('/').pop()
+      filePath = `${pack.path}${tile.filename}`
     }
+    else {
+      const folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
+      imageName = tile.filename.split('/').pop()
+      filePath = `moulinette/tiles/${folderName}/${imageName}`
+
+      // download & upload image
+      fetch(tile.assetURL).catch(function(e) {
+        ui.notifications.error(game.i18n.localize("mtte.errorDownload"));
+        console.log(`Moulinette Tiles | Cannot download image ${imageName}`, e)
+        return;
+      }).then( res => {
+        res.blob().then( blob => game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], imageName, { type: blob.type, lastModified: new Date() }), imageName, "moulinette/tiles", `moulinette/tiles/${folderName}`, false) )
+      });
+    }
+    
+    let dragData = {}
+    if(mode == "tile") {
+      dragData = {
+        type: "Tile",
+        img: filePath,
+        tileSize: 100
+      };
+    } else if(mode == "article") {
+      dragData = {
+        type: "JournalEntry",
+        name: imageName,
+        img: filePath
+      };
+    } else if(mode == "actor") {
+      dragData = {
+        type: "Actor",
+        img: filePath
+      };
+    }
+    
+    dragData.source = "mtte"
+    event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
   
   _onShowTile(event) {
@@ -170,6 +197,40 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       const result = this.searchResults[idx-1]
       new MoulinetteTileResult(duplicate(result), duplicate(this.assetsPacks[result.pack]), this.tab).render(true)
     }
+  }
+  
+    
+  _onChooseMode(event) {
+    const source = event.currentTarget;
+    let mode = ["tile","article","actor"].includes(source.value) ? source.value : "tile"
+    game.settings.set("moulinette", "tileMode", mode)
+  }
+
+  
+  /**
+   * Generate an article from the dragged image
+   */
+  static async createArticle(data) {
+    // generate journal
+    const entry = await JournalEntry.create( {name: data.name, img: data.img} )
+    const coord = canvas.grid.getSnappedPosition(data.x - canvas.grid.w/2, data.y - canvas.grid.h/2)
+    
+    // Default Note data
+    const noteData = {
+      entryId: entry._id,
+      x: coord.x + canvas.grid.w/2,
+      y: coord.y + canvas.grid.h/2,
+      icon: CONST.DEFAULT_NOTE_ICON,
+      iconSize: 40,
+      textAnchor: CONST.TEXT_ANCHOR_POINTS.BOTTOM,
+      fontSize: 48,
+      fontFamily: CONFIG.defaultFontFamily
+    };
+
+    // Create a NoteConfig sheet instance to finalize the creation
+    const note = canvas.notes.preview.addChild(new Note(noteData));
+    await note.draw();
+    note.sheet.render(true);
   }
   
 }

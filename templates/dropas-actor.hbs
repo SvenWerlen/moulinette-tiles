@@ -1,0 +1,21 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+  <p>  
+    <i>{{localize "mtte.dropasActorDescription"}}</i>
+  </p>
+  <div class="form-group">
+    <label><b>{{localize "mtte.actor"}}</b></label>
+    <select class="actors">
+      {{#each actors as |a|}}<option value="{{a.id}}" {{#if a.selected}}selected{{/if}}>{{a.name}}</option>{{/each}}
+    </select>
+  </div>
+  <div class="form-group">
+    <label><b>{{localize "TOKEN.CharLink"}}</b></label>
+    <input type="checkbox" name="actorLink" data-dtype="Boolean" {{#if actorLink}}checked="checked"{{/if}}>
+  </div>
+  <footer>
+    <div class="actions">
+      <button class="dialog-button ok default"><i class="fas fa-check"></i> {{localize "mtte.createToken"}}</button>
+      <button class="dialog-button cancel"><i class="fas fa-times"></i> {{localize "Cancel"}}</button>
+    </div>
+  </footer>
+</form>

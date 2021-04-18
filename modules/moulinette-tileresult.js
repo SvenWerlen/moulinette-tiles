@@ -14,6 +14,7 @@ export class MoulinetteTileResult extends FormApplication {
       this.folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
       this.filePath = `moulinette/tiles/${this.folderName}/${this.imageName}`
     } else {
+      this.imageName = tile.filename.split('/').pop()
       this.filePath = `${pack.path}${tile.filename}`
     }
   }
@@ -53,27 +54,33 @@ export class MoulinetteTileResult extends FormApplication {
   }
   
   _onDragStart(event) {
-    const div = event.currentTarget;
+    const mode = game.settings.get("moulinette", "tileMode")
 
-    // Set drag data
-    const dragData = {
-      type: "Tile",
-      img: this.filePath,
-      tileSize: 100
-    };
-    
-    // Create the drag preview for the image
-    const img = div.querySelector("img")
-    const w = img.naturalWidth * canvas.stage.scale.x;
-    const h = img.naturalHeight * canvas.stage.scale.y;
-    const preview = DragDrop.createDragImage(img, w, h);
-    
-    //event.dataTransfer.setDragImage(preview, w/2, h/2);
-    event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
-    
     if(this.data.pack.isRemote) {
       this._downloadFile()
     }
+    
+    let dragData = {}
+    if(mode == "tile") {
+      dragData = {
+        type: "Tile",
+        img: this.filePath,
+        tileSize: 100
+      };
+    } else if(mode == "article") {
+      dragData = {
+        type: "JournalEntry",
+        name: this.imageName,
+        img: this.filePath
+      };
+    } else if(mode == "actor") {
+      dragData = {
+        type: "Actor",
+        img: this.filePath
+      };
+    }    
+    dragData.source = "mtte"
+    event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
 
   async _downloadFile() {
