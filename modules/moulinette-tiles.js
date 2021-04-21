@@ -67,7 +67,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     this.html.find(".tileres").click(this._onShowTile.bind(this))
     
     // when choose mode
-    this.html.find(".options input").click(this._onChooseMode.bind(this))
+    this.html.find(".options .dropmode").click(this._onChooseMode.bind(this))
+    // when change DPI
+    this.html.find(".options .tilesize").change(this._onChooseDPI.bind(this))
   }
   
   
@@ -76,11 +78,16 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    */
   async getFooter() {
     const mode = game.settings.get("moulinette", "tileMode")
-    return `<div class="options">
+    const size = game.settings.get("moulinette", "tileSize")
+    return `<div class="options"><div class="option">
       ${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i> 
       <input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${game.i18n.localize("mtte.tile")}
       <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${game.i18n.localize("mtte.article")}
       <input class="dropmode" type="radio" name="mode" value="actor" ${mode == "actor" ? "checked" : ""}> ${game.i18n.localize("mtte.actor")}
+      </div><div class="option">
+      ${game.i18n.localize("FILES.TileSize")} <i class="fas fa-question-circle" title="${game.i18n.localize("FILES.TileSizeHint")}"></i> 
+      <input class="tilesize" type="text" name="tilesize" value="${size}" maxlength="4">
+      </div>
     </div>`
   }
   
@@ -135,6 +142,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const div = event.currentTarget;
     const idx = div.dataset.idx;
     const mode = game.settings.get("moulinette", "tileMode")
+    const size = game.settings.get("moulinette", "tileSize")
     
     // invalid action
     if(!this.searchResults || idx < 0 || idx > this.searchResults.length) return
@@ -169,7 +177,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       dragData = {
         type: "Tile",
         img: filePath,
-        tileSize: 100
+        tileSize: size
       };
     } else if(mode == "article") {
       dragData = {
@@ -205,7 +213,13 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     let mode = ["tile","article","actor"].includes(source.value) ? source.value : "tile"
     game.settings.set("moulinette", "tileMode", mode)
   }
-
+  
+  _onChooseDPI(event) {
+    const source = event.currentTarget;
+    if(!isNaN(source.value)) {
+      game.settings.set("moulinette", "tileSize", Number(source.value))
+    }
+  }
   
   /**
    * Generate an article from the dragged image

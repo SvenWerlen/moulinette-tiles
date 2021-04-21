@@ -29,3 +29,12 @@
   text-align: right;
 }
 
+.mtte.forge .options .option {
+  display: inline;
+  margin-right: 30px;
+}
+
+.mtte.forge .options .tilesize {
+  margin-left: 5px;
+  width: 45px
+}

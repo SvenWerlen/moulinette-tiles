@@ -55,6 +55,7 @@ export class MoulinetteTileResult extends FormApplication {
   
   _onDragStart(event) {
     const mode = game.settings.get("moulinette", "tileMode")
+    const size = game.settings.get("moulinette", "tileSize")
 
     if(this.data.pack.isRemote) {
       this._downloadFile()
@@ -65,7 +66,7 @@ export class MoulinetteTileResult extends FormApplication {
       dragData = {
         type: "Tile",
         img: this.filePath,
-        tileSize: 100
+        tileSize: size
       };
     } else if(mode == "article") {
       dragData = {

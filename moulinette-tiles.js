@@ -4,6 +4,7 @@ import { MoulinetteDropAsActor } from "./modules/moulinette-dropas-actor.js"
 Hooks.once("init", async function () {
   console.log("Moulinette Tiles | Init") 
   game.settings.register("moulinette", "tileMode", { scope: "world", config: false, type: String, default: "tile" })
+  game.settings.register("moulinette", "tileSize", { scope: "world", config: false, type: Number, default: 100 })
   game.settings.register("moulinette", "tileActorId", { scope: "world", config: false, type: String })
   game.settings.register("moulinette", "tileActorLink", { scope: "world", config: false, type: Boolean, default: true })
 })
