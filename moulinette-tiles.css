@@ -38,3 +38,15 @@
   margin-left: 5px;
   width: 45px
 }
+
+.mtte.forge .options .macro {
+  margin-left: 5px;
+  width: 100px
+}
+
+.showcase {
+  font-style: italic;
+  margin: 20px;
+  padding: 10px;
+  border: 2px solid darkgray;
+}

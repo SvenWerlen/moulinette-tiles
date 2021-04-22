@@ -60,6 +60,16 @@ export class MoulinetteDropAsActor extends FormApplication {
     if ( !canvas.grid.hitArea.contains(td.x, td.y) ) return false;
 
     // Submit the Token creation request and activate the Tokens layer (if not already active)
-    return Token.create(td);
+    const newToken = await Token.create(td);
+    
+    // Call macro
+    const macro = game.macros.find(o => o.name === game.settings.get("moulinette", "tileMacro"))
+    if(macro) {
+      game.moulinette.param = [newToken]
+      macro.execute()
+      delete game.moulinette.param
+    } else {
+      console.warn(`Moulinette Tiles | Macro ${game.settings.get("moulinette", "tileMacro")} couldn't be found!`)
+    }
   }    
 }

@@ -52,6 +52,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
         assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL}"/></div>`)
       })
     
+    if(assets.length > 0 && pack >= 0 && this.assetsPacks[pack].isRemote) {
+      assets.push(`<div class="showcase">${game.i18n.localize("mtte.showCaseForgottenAdventures")}</div>`)
+    }
+    
     return assets
   }
   
@@ -67,9 +71,31 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     this.html.find(".tileres").click(this._onShowTile.bind(this))
     
     // when choose mode
-    this.html.find(".options .dropmode").click(this._onChooseMode.bind(this))
+    this.html.find(".options .dropmode").click(event => {
+      const source = event.currentTarget;
+      let mode = ["tile","article","actor"].includes(source.value) ? source.value : "tile"
+      game.settings.set("moulinette", "tileMode", mode)
+      // update macro
+      const macroPrefs = game.settings.get("moulinette", "tileMacro")
+      const macro = macroPrefs[mode] ? macroPrefs[mode] : ""
+      this.html.find(".options .macro").val(macro)
+    })
+    
     // when change DPI
-    this.html.find(".options .tilesize").change(this._onChooseDPI.bind(this))
+    this.html.find(".options .tilesize").change(event => {
+      const source = event.currentTarget;
+      if(!isNaN(source.value)) {
+        game.settings.set("moulinette", "tileSize", Number(source.value))
+      }
+    })
+    
+    // when change macro
+    this.html.find(".options .macro").change(event => {
+      const tileMode = game.settings.get("moulinette", "tileMode")
+      const macroPrefs = game.settings.get("moulinette", "tileMacro")
+      macroPrefs[tileMode] = event.currentTarget.value
+      game.settings.set("moulinette", "tileMacro", macroPrefs)
+    })
   }
   
   
@@ -79,14 +105,20 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   async getFooter() {
     const mode = game.settings.get("moulinette", "tileMode")
     const size = game.settings.get("moulinette", "tileSize")
+    const macro = MoulinetteTiles.getMacroName()
     return `<div class="options"><div class="option">
       ${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i> 
-      <input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${game.i18n.localize("mtte.tile")}
-      <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${game.i18n.localize("mtte.article")}
-      <input class="dropmode" type="radio" name="mode" value="actor" ${mode == "actor" ? "checked" : ""}> ${game.i18n.localize("mtte.actor")}
-      </div><div class="option">
-      ${game.i18n.localize("FILES.TileSize")} <i class="fas fa-question-circle" title="${game.i18n.localize("FILES.TileSizeHint")}"></i> 
-      <input class="tilesize" type="text" name="tilesize" value="${size}" maxlength="4">
+        <input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${game.i18n.localize("mtte.tile")}
+        <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${game.i18n.localize("mtte.article")}
+        <input class="dropmode" type="radio" name="mode" value="actor" ${mode == "actor" ? "checked" : ""}> ${game.i18n.localize("mtte.actor")}
+      </div>
+      <div class="option">
+        ${game.i18n.localize("FILES.TileSize")} <i class="fas fa-question-circle" title="${game.i18n.localize("FILES.TileSizeHint")}"></i> 
+        <input class="tilesize" type="text" name="tilesize" value="${size}" maxlength="4">
+      </div>
+      <div class="option">
+        ${game.i18n.localize("mtte.runMacro")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.runMacroToolTip")}"></i> 
+        <input class="macro" type="text" name="macro" value="${macro}">
       </div>
     </div>`
   }
@@ -221,6 +253,11 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
   }
   
+  static getMacroName() {
+    const tileMode = game.settings.get("moulinette", "tileMode")
+    return game.settings.get("moulinette", "tileMacro")[tileMode]
+  }
+  
   /**
    * Generate an article from the dragged image
    */
@@ -243,8 +280,56 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
     // Create a NoteConfig sheet instance to finalize the creation
     const note = canvas.notes.preview.addChild(new Note(noteData));
+    
+    // Call macro
+    const macroName = MoulinetteTiles.getMacroName()
+    const macro = game.macros.find(o => o.name === macroName)
+    if(macro) {
+      game.moulinette.param = [entry, note]
+      macro.execute()
+      delete game.moulinette.param
+    } else {
+      console.warn(`Moulinette Tiles | Macro ${macroName} couldn't be found!`)
+    }
+    
     await note.draw();
     note.sheet.render(true);
   }
+  
+  /**
+   * Generate a tile from the dragged image
+   */
+  static async createTile(data) {
+    if ( !data.img ) return;
+
+    // Determine the tile size
+    const tex = await loadTexture(data.img);
+    const ratio = canvas.dimensions.size / (data.tileSize || canvas.dimensions.size);
+    data.width = tex.baseTexture.width * ratio;
+    data.height = tex.baseTexture.height * ratio;
+
+    // Validate that the drop position is in-bounds and snap to grid
+    if ( !canvas.grid.hitArea.contains(data.x, data.y) ) return false;
+    data.x = data.x - (data.width / 2);
+    data.y = data.y - (data.height / 2);
+    //if ( !event.shiftKey ) mergeObject(data, canvas.grid.getSnappedPosition(data.x, data.y));
+
+    // Create the tile as hidden if the ALT key is pressed
+    //if ( event.altKey ) data.hidden = true;
+
+    // Create the Tile
+    const tile = await canvas.tiles.constructor.placeableClass.create(data);
+    
+    // Call macro
+    const macroName = MoulinetteTiles.getMacroName()
+    const macro = game.macros.find(o => o.name === macroName)
+    if(macro) {
+      game.moulinette.param = [tile]
+      macro.execute()
+      delete game.moulinette.param
+    } else {
+      console.warn(`Moulinette Tiles | Macro ${macroName} couldn't be found!`)
+    }
+  }    
   
 }
