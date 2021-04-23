@@ -26,6 +26,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    */
   async getAssetList(searchTerms, pack) {
     let assets = []
+    this.pack = pack
     
     // pack must be selected or terms provided
     if((!pack || pack < 0) && (!searchTerms || searchTerms.length == 0)) {
@@ -51,10 +52,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
         r.assetURL = `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
         assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL}"/></div>`)
       })
-    
-    if(assets.length > 0 && pack >= 0 && this.assetsPacks[pack].isRemote) {
-      assets.push(`<div class="showcase">${game.i18n.localize("mtte.showCaseForgottenAdventures")}</div>`)
-    }
     
     return assets
   }
@@ -96,6 +93,17 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       macroPrefs[tileMode] = event.currentTarget.value
       game.settings.set("moulinette", "tileMacro", macroPrefs)
     })
+    
+    // display hide show showCase
+    if(this.pack >= 0 && this.assetsPacks[this.pack].isShowCase) {
+      const pack = this.assetsPacks[this.pack]
+      const showCase = this.html.find(".showcase")
+      showCase.find(".link").text(pack.publisher)
+      showCase.find(".link").attr('href', pack.pubWebsite)
+      this.html.find(".showcase").show()
+    } else {
+      this.html.find(".showcase").hide()
+    }
   }
   
   
@@ -106,7 +114,8 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const mode = game.settings.get("moulinette", "tileMode")
     const size = game.settings.get("moulinette", "tileSize")
     const macro = MoulinetteTiles.getMacroName()
-    return `<div class="options"><div class="option">
+    return `<div class="showcase">${game.i18n.localize("mtte.showCase")}</div>
+      <div class="options"><div class="option">
       ${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i> 
         <input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${game.i18n.localize("mtte.tile")}
         <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${game.i18n.localize("mtte.article")}

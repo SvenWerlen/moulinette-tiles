@@ -46,7 +46,8 @@
 
 .showcase {
   font-style: italic;
-  margin: 20px;
-  padding: 10px;
+  font-size: small;
+  padding: 5px;
   border: 2px solid darkgray;
 }
+    

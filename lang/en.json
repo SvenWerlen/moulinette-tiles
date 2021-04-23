@@ -35,7 +35,7 @@
   "mtte.publisher": "Publisher",
   "mtte.runMacro": "Macro",
   "mtte.runMacroToolTip": "Executes a macro (by name) after creating the tile/article/token. Macro can use 'game.moulinette.param' to access created asset.",
-  "mtte.showCaseForgottenAdventures": "This pack is a showcase for quickly and easily experimenting the \"Tiles\" module. To download more Forgotten Adventures packs, visit <a href=\"https://www.forgotten-adventures.net\" target=\"_blank\">www.forgotten-adventures.net</a>. Read the <a href=\"https://github.com/SvenWerlen/moulinette-core/tree/main/docs\" target=\"_blank\">documentation</a> on how to bring and manage your assets.",
+  "mtte.showCase": "This pack is a showcase for quickly and easily experimenting the \"Tiles\" module. To download more packs, visit <a class=\"link\" href=\"\" target=\"_blank\"></a>. Read the <a href=\"https://github.com/SvenWerlen/moulinette-core/tree/main/docs\" target=\"_blank\">documentation</a> on how to bring and manage your assets.",
   "mtte.tile": "Tile",
   "mtte.tileresult": "Tile result",
   "mtte.tiles": "Tiles",

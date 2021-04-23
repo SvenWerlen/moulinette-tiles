@@ -35,7 +35,7 @@
   "mtte.publisher": "\u00c9diteur",
   "mtte.runMacro": "Macro",
   "mtte.runMacroToolTip": "Ex\u00e9cute une macro (par nom) apr\u00e8s avoir cr\u00e9\u00e9 une tuile/article/jeton. La macro peut acc\u00e9der \u00e0 l'objet cr\u00e9\u00e9 en utilisant 'game.moulinette.param'.",
-  "mtte.showCaseForgottenAdventures": "Ce pack est une vitrine pour tester rapidement et facilement le module \"Tuiles\". Pour t\u00e9l\u00e9charger plus de packs, visitez <a href=\"https://www.forgotten-adventures.net\" target=\"_blank\">www.forgotten-adventures.net</a>. Consultez la <a href=\"https://github.com/SvenWerlen/moulinette-core/tree/main/docs\" target=\"_blank\">documentation</a> pour tout savoir sur comment importer et g\u00e9rer vos \u00e9l\u00e9ments (assets).",
+  "mtte.showCase": "Ce pack est une vitrine pour tester rapidement et facilement le module \"Tuiles\". Pour t\u00e9l\u00e9charger plus de packs, visitez <a class=\"link\" href=\"\" target=\"_blank\"></a>. Consultez la <a href=\"https://github.com/SvenWerlen/moulinette-core/tree/main/docs\" target=\"_blank\">documentation</a> pour tout savoir sur comment importer et g\u00e9rer vos \u00e9l\u00e9ments (assets).",
   "mtte.tile": "Tuile",
   "mtte.tileresult": "R\u00e9sultat Tuile",
   "mtte.tiles": "Tuiles",
