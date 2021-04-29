@@ -12,10 +12,10 @@ export class MoulinetteTileResult extends FormApplication {
     if(pack.isRemote) {
       this.imageName = this.data.filename.split('/').pop()
       this.folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
-      this.filePath = `moulinette/tiles/${this.folderName}/${this.imageName}`
+      this.filePath =  game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `moulinette/tiles/${this.folderName}/${this.imageName}`
     } else {
       this.imageName = tile.filename.split('/').pop()
-      this.filePath = `${pack.path}${tile.filename}`
+      this.filePath = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${pack.path}/${tile.filename}`
     }
   }
   
@@ -96,7 +96,7 @@ export class MoulinetteTileResult extends FormApplication {
     await game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], this.imageName, { type: blob.type, lastModified: new Date() }), this.imageName, "moulinette/tiles", `moulinette/tiles/${this.folderName}`, false)
     
     // copy path into clipboard
-    navigator.clipboard.writeText(`moulinette/tiles/${this.folderName}/${this.imageName}`)
+    navigator.clipboard.writeText(game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `moulinette/tiles/${this.folderName}/${this.imageName}`)
     .catch(err => {
       console.warn("Moulinette TileResult | Not able to copy path into clipboard")
     });

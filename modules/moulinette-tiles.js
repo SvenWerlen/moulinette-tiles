@@ -15,7 +15,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * Returns the list of available packs
    */
   async getPackList() {
-    const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/data.json", "moulinette/images/custom/index.json"])
+    const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
+      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/data.json",
+      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
+      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"])
     this.assets = index.assets
     this.assetsPacks = index.packs
     return duplicate(this.assetsPacks)
@@ -48,7 +51,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     let idx = 0
     this.searchResults.forEach( r => {
         idx++
-        const URL = this.assetsPacks[r.pack].isRemote ? `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/assets/` : ""
+        const URL = this.assetsPacks[r.pack].isRemote ? `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/assets/` : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
         r.assetURL = `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
         assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL}"/></div>`)
       })
@@ -196,12 +199,12 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     if(!pack.isRemote) {
       imageName = tile.filename.split('/').pop()
-      filePath = `${pack.path}${tile.filename}`
+      filePath = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${pack.path}/${tile.filename}`
     }
     else {
       const folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
       imageName = tile.filename.split('/').pop()
-      filePath = `moulinette/tiles/${folderName}/${imageName}`
+      filePath = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `moulinette/tiles/${folderName}/${imageName}`
 
       // download & upload image
       fetch(tile.assetURL).catch(function(e) {
