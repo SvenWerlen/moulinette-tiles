@@ -50,7 +50,7 @@ Hooks.once("ready", async function () {
 });
 
 /**
- * Manage canvas dr
+ * Manage canvas drop
  */
 Hooks.on('dropCanvasData', (canvas, data) => { 
   if(data.source == "mtte") {

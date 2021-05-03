@@ -61,6 +61,7 @@ export class MoulinetteDropAsActor extends FormApplication {
 
     // Submit the Token creation request and activate the Tokens layer (if not already active)
     const newToken = await Token.create(td);
+    canvas.getLayer("TokenLayer").activate()
     
     // Call macro
     const macro = game.macros.find(o => o.name === game.settings.get("moulinette", "tileMacro"))

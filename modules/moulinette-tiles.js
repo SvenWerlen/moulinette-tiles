@@ -292,6 +292,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
     // Create a NoteConfig sheet instance to finalize the creation
     const note = canvas.notes.preview.addChild(new Note(noteData));
+    canvas.getLayer("NotesLayer").activate()
     
     // Call macro
     const macroName = MoulinetteTiles.getMacroName()
@@ -331,6 +332,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
     // Create the Tile
     const tile = await canvas.tiles.constructor.placeableClass.create(data);
+    canvas.getLayer("TilesLayer").activate()
     
     // Call macro
     const macroName = MoulinetteTiles.getMacroName()
