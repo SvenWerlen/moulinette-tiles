@@ -153,12 +153,14 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       // scan tiles
       let publishers = await FileUtil.scanAssets(MoulinetteTiles.FOLDER_CUSTOM_TILES, EXT)
       const customPath = game.settings.get("moulinette-core", "customPath")
+      publishers.push(...await FileUtil.scanSourceAssets("tiles", EXT))
       await FileUtil.upload(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", "moulinette/tiles", MoulinetteTiles.FOLDER_CUSTOM_TILES, true)
       // scan images
       publishers = await FileUtil.scanAssets(MoulinetteTiles.FOLDER_CUSTOM_IMAGES, EXT)
       if(customPath) {
         publishers.push(...await FileUtil.scanAssetsInCustomFolders(customPath, EXT))
       }
+      publishers.push(...await FileUtil.scanSourceAssets("images", EXT))
       await FileUtil.upload(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", "moulinette/images", MoulinetteTiles.FOLDER_CUSTOM_IMAGES, true)
       ui.notifications.info(game.i18n.localize("mtte.indexingDone"));
       return true
