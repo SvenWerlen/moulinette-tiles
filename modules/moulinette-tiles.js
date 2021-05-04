@@ -6,6 +6,7 @@ import { MoulinetteTileResult } from "./moulinette-tileresult.js"
 export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForgeModule {
 
   static FOLDER_CUSTOM_IMAGES   = "moulinette/images/custom"
+  static FOLDER_CUSTOM_TILES   = "moulinette/tiles/custom"
   
   constructor() {
     super()
@@ -149,8 +150,12 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
       this.html.find(".indexImages").prop("disabled", true);
       const EXT = ["gif","jpg","jpeg","png","webp","svg"]
-      let publishers = await FileUtil.scanAssets(MoulinetteTiles.FOLDER_CUSTOM_IMAGES, EXT)
+      // scan tiles
+      let publishers = await FileUtil.scanAssets(MoulinetteTiles.FOLDER_CUSTOM_TILES, EXT)
       const customPath = game.settings.get("moulinette-core", "customPath")
+      await FileUtil.upload(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", "moulinette/tiles", MoulinetteTiles.FOLDER_CUSTOM_TILES, true)
+      // scan images
+      publishers = await FileUtil.scanAssets(MoulinetteTiles.FOLDER_CUSTOM_IMAGES, EXT)
       if(customPath) {
         publishers.push(...await FileUtil.scanAssetsInCustomFolders(customPath, EXT))
       }
