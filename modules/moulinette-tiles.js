@@ -330,6 +330,13 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // Create the tile as hidden if the ALT key is pressed
     //if ( event.altKey ) data.hidden = true;
 
+    // make sure to always put tiles on top
+    let maxZ = 0
+    canvas.tiles.placeables.forEach( t => { 
+      if(t.zIndex > maxZ) maxZ = t.zIndex
+    })
+    data.z = maxZ
+    
     // Create the Tile
     const tile = await canvas.tiles.constructor.placeableClass.create(data);
     canvas.getLayer("TilesLayer").activate()

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.7.0] - 
 ### Changed
 - Canvas layer activation according to drag & drop mode (eg. drop a tile -> activates TilesLayer)
+- Make tile on top of other after drag&drop
 
 ## [1.6.0] - 2021-04-28
 ### Added
