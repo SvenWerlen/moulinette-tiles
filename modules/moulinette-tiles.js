@@ -53,7 +53,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     this.searchResults.forEach( r => {
         idx++
         const URL = this.assetsPacks[r.pack].isRemote ? `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/assets/` : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
-        r.assetURL = `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
+        r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
         assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL}"/></div>`)
       })
     
@@ -206,7 +206,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     if(!pack.isRemote) {
       imageName = tile.filename.split('/').pop()
-      filePath = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${pack.path}/${tile.filename}`
+      filePath =  tile.filename.match(/^https?:\/\//) ? tile.filename : game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${pack.path}/${tile.filename}`
     }
     else {
       const folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
