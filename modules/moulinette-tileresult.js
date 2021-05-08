@@ -3,10 +3,12 @@
  *************************/
 export class MoulinetteTileResult extends FormApplication {
   
+  static DEFAULT_WEBM_PREVIEW = "icons/svg/video.svg" // don't forget to change it also in moulinette-tiles.js
+  
   constructor(tile, pack, tab) {
     super()
     this.tab = tab
-    this.data = tile;
+    this.data = duplicate(tile);
     this.data.pack = pack;
     
     if(pack.isRemote) {
@@ -33,7 +35,14 @@ export class MoulinetteTileResult extends FormApplication {
     });
   }
   
-  getData() {
+  async getData() {
+    // support for webm
+    if(this.data.assetURL.endsWith(".webm")) {
+      this.data.isVideo = true
+      //let thumbnailURL = this.data.assetURL.substr(0, this.data.assetURL.lastIndexOf('.') + 1) + "webp"
+      //const req = await fetch(thumbnailURL, {method: 'HEAD'})
+      //this.data.assetURL = req.status != "200" ? MoulinetteTileResult.DEFAULT_WEBM_PREVIEW : thumbnailURL
+    }
     return this.data
   }
   

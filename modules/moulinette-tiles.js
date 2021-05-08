@@ -5,8 +5,9 @@ import { MoulinetteTileResult } from "./moulinette-tileresult.js"
  */
 export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForgeModule {
 
-  static FOLDER_CUSTOM_IMAGES   = "moulinette/images/custom"
-  static FOLDER_CUSTOM_TILES   = "moulinette/tiles/custom"
+  static FOLDER_CUSTOM_IMAGES = "moulinette/images/custom"
+  static FOLDER_CUSTOM_TILES  = "moulinette/tiles/custom"
+  static DEFAULT_WEBM_PREVIEW = "icons/svg/video.svg" // don't forget to change it also in moulinette-tileresult.js
   
   constructor() {
     super()
@@ -20,8 +21,20 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets",
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"])
-    this.assets = index.assets
+    
+    // remove thumbnails from assets
+    const webmList = index.assets.filter(i => i.filename.endsWith(".webm"))
+    const thumbList = webmList.map(i => i.filename.substr(0, i.filename.lastIndexOf('.') + 1) + "webp")
+    this.assets = index.assets.filter(a => {
+      if(thumbList.includes(a.filename)) {
+        // decrease count in pack
+        index.packs[a.pack].count--
+        return false;
+      }
+      return true;
+    })
     this.assetsPacks = index.packs
+    
     return duplicate(this.assetsPacks)
   }
   
@@ -50,12 +63,27 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     })
     
     let idx = 0
-    this.searchResults.forEach( r => {
+    for(const r of this.searchResults) {
         idx++
+<<<<<<< HEAD
         const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
         r.assetURL = `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
         assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL}"/></div>`)
       })
+=======
+        const URL = this.assetsPacks[r.pack].isRemote ? `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/assets/` : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+        r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
+        if(r.filename.endsWith(".webm")) {
+          // check if preview exists
+          let thumbnailURL = r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp"
+          const req = await fetch(thumbnailURL, {method: 'HEAD'})
+          if(req.status != "200") thumbnailURL = MoulinetteTiles.DEFAULT_WEBM_PREVIEW
+          assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${thumbnailURL}"/></div>`)
+        } else {
+          assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL}"/></div>`)
+        }
+      }
+>>>>>>> main
     
     return assets
   }
@@ -149,7 +177,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     if(classList.contains("indexImages")) {
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
       this.html.find(".indexImages").prop("disabled", true);
-      const EXT = ["gif","jpg","jpeg","png","webp","svg"]
+      const EXT = ["gif","jpg","jpeg","png","webp","svg", "webm"]
       // scan tiles
       let publishers = await FileUtil.scanAssets(MoulinetteTiles.FOLDER_CUSTOM_TILES, EXT)
       const customPath = game.settings.get("moulinette-core", "customPath")
@@ -206,7 +234,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     if(!pack.isRemote) {
       imageName = tile.filename.split('/').pop()
-      filePath = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${pack.path}/${tile.filename}`
+      filePath =  tile.filename.match(/^https?:\/\//) ? tile.filename : game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${pack.path}/${tile.filename}`
     }
     else {
       const folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
