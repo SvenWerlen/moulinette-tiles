@@ -64,26 +64,19 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     let idx = 0
     for(const r of this.searchResults) {
-        idx++
-<<<<<<< HEAD
-        const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
-        r.assetURL = `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
+      idx++
+      const URL = this.assetsPacks[r.pack].isRemote ? `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/assets/` : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+      r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
+      if(r.filename.endsWith(".webm")) {
+        // check if preview exists
+        let thumbnailURL = r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp"
+        const req = await fetch(thumbnailURL, {method: 'HEAD'})
+        if(req.status != "200") thumbnailURL = MoulinetteTiles.DEFAULT_WEBM_PREVIEW
+        assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${thumbnailURL}"/></div>`)
+      } else {
         assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL}"/></div>`)
-      })
-=======
-        const URL = this.assetsPacks[r.pack].isRemote ? `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/assets/` : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
-        r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
-        if(r.filename.endsWith(".webm")) {
-          // check if preview exists
-          let thumbnailURL = r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp"
-          const req = await fetch(thumbnailURL, {method: 'HEAD'})
-          if(req.status != "200") thumbnailURL = MoulinetteTiles.DEFAULT_WEBM_PREVIEW
-          assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${thumbnailURL}"/></div>`)
-        } else {
-          assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL}"/></div>`)
-        }
       }
->>>>>>> main
+    }
     
     return assets
   }
