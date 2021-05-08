@@ -38,9 +38,10 @@ export class MoulinetteTileResult extends FormApplication {
   async getData() {
     // support for webm
     if(this.data.assetURL.endsWith(".webm")) {
-      let thumbnailURL = this.data.assetURL.substr(0, this.data.assetURL.lastIndexOf('.') + 1) + "webp"
-      const req = await fetch(thumbnailURL, {method: 'HEAD'})
-      this.data.assetURL = req.status != "200" ? MoulinetteTileResult.DEFAULT_WEBM_PREVIEW : thumbnailURL
+      this.data.isVideo = true
+      //let thumbnailURL = this.data.assetURL.substr(0, this.data.assetURL.lastIndexOf('.') + 1) + "webp"
+      //const req = await fetch(thumbnailURL, {method: 'HEAD'})
+      //this.data.assetURL = req.status != "200" ? MoulinetteTileResult.DEFAULT_WEBM_PREVIEW : thumbnailURL
     }
     return this.data
   }
