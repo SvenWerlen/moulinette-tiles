@@ -65,7 +65,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     let idx = 0
     for(const r of this.searchResults) {
       idx++
-      const URL = this.assetsPacks[r.pack].isRemote ? `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/assets/` : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+      const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
       r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
       if(r.filename.endsWith(".webm")) {
         // check if preview exists
