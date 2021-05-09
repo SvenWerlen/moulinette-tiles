@@ -17,8 +17,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * Returns the list of available packs
    */
   async getPackList() {
+    const user = await game.moulinette.applications.Moulinette.getUser()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
-      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets",
+      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + user.id,
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"])
     
