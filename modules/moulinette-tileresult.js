@@ -15,9 +15,11 @@ export class MoulinetteTileResult extends FormApplication {
       this.imageName = this.data.filename.split('/').pop()
       this.folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
       this.filePath =  game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `moulinette/tiles/${this.folderName}/${this.imageName}`
+      this.data.sas = game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
     } else {
       this.imageName = tile.filename.split('/').pop()
       this.filePath = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${pack.path}/${tile.filename}`
+      this.data.sas = ""
     }
   }
   
@@ -39,9 +41,6 @@ export class MoulinetteTileResult extends FormApplication {
     // support for webm
     if(this.data.assetURL.endsWith(".webm")) {
       this.data.isVideo = true
-      //let thumbnailURL = this.data.assetURL.substr(0, this.data.assetURL.lastIndexOf('.') + 1) + "webp"
-      //const req = await fetch(thumbnailURL, {method: 'HEAD'})
-      //this.data.assetURL = req.status != "200" ? MoulinetteTileResult.DEFAULT_WEBM_PREVIEW : thumbnailURL
     }
     return this.data
   }
@@ -54,7 +53,7 @@ export class MoulinetteTileResult extends FormApplication {
     } else if(event.submitter.className == "download") {
       this._downloadFile();
     } else if(event.submitter.className == "clipboard") {
-      navigator.clipboard.writeText(this.data.assetURL)
+      navigator.clipboard.writeText(this.filePath)
       .catch(err => {
         console.warn("Moulinette TileResult | Not able to copy path into clipboard")
       });
@@ -95,7 +94,7 @@ export class MoulinetteTileResult extends FormApplication {
 
   async _downloadFile() {
     // download & upload image
-    const res = await fetch(this.data.assetURL).catch(function(e) {
+    const res = await fetch(this.data.assetURL + this.data.sas).catch(function(e) {
       ui.notifications.error(game.i18n.localize("mtte.errorDownload"));
       console.log(`Moulinette TileResult | Cannot download image ${this.data.filename}`, e)
       return false;
@@ -118,7 +117,6 @@ export class MoulinetteTileResult extends FormApplication {
     super.activateListeners(html);
     this.bringToTop()
     this.html = html
-    html.find(".thumb").css('background', `url(${this.data.assetURL}) 50% 50% no-repeat`)
   }
   
 }

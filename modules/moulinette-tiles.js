@@ -67,15 +67,17 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     for(const r of this.searchResults) {
       idx++
       const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+      // sas (Shared access signature) for accessing remote files (Azure)
+      r.sas = this.assetsPacks[r.pack].isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
       r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
       if(r.filename.endsWith(".webm")) {
         // check if preview exists
         let thumbnailURL = r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp"
         const req = await fetch(thumbnailURL, {method: 'HEAD'})
         if(req.status != "200") thumbnailURL = MoulinetteTiles.DEFAULT_WEBM_PREVIEW
-        assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${thumbnailURL}"/></div>`)
+        assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${thumbnailURL + r.sas}"/></div>`)
       } else {
-        assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL}"/></div>`)
+        assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL + r.sas}"/></div>`)
       }
     }
     
@@ -236,7 +238,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       filePath = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `moulinette/tiles/${folderName}/${imageName}`
 
       // download & upload image
-      fetch(tile.assetURL).catch(function(e) {
+      fetch(tile.assetURL + tile.sas).catch(function(e) {
         ui.notifications.error(game.i18n.localize("mtte.errorDownload"));
         console.log(`Moulinette Tiles | Cannot download image ${imageName}`, e)
         return;
