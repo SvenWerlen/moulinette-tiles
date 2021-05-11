@@ -7,7 +7,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
   static FOLDER_CUSTOM_IMAGES = "moulinette/images/custom"
   static FOLDER_CUSTOM_TILES  = "moulinette/tiles/custom"
-  static DEFAULT_WEBM_PREVIEW = "icons/svg/video.svg" // don't forget to change it also in moulinette-tileresult.js
   
   constructor() {
     super()
@@ -40,6 +39,24 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   }
   
   /**
+   * Generate a new asset (HTML) for the given result and idx
+   */
+  generateAsset(r, idx) {
+    const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    // sas (Shared access signature) for accessing remote files (Azure)
+    r.sas = this.assetsPacks[r.pack].isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
+    r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
+    if(r.filename.endsWith(".webm")) {
+      const thumbnailURL = r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp"
+      return `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}">` +
+        `<img width="100" class="cc_image" height="100" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
+        `<video width="100" height="100" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video></div>`
+    } else {
+      return `<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL + r.sas}"/></div>`
+    }
+  }
+  
+  /**
    * Implements getAssetList
    */
   async getAssetList(searchTerms, pack) {
@@ -63,21 +80,25 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       return true;
     })
     
-    let idx = 0
-    for(const r of this.searchResults) {
-      idx++
-      const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
-      // sas (Shared access signature) for accessing remote files (Azure)
-      r.sas = this.assetsPacks[r.pack].isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
-      r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
-      if(r.filename.endsWith(".webm")) {
-        // check if preview exists
-        let thumbnailURL = r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp"
-        const req = await fetch(thumbnailURL, {method: 'HEAD'})
-        if(req.status != "200") thumbnailURL = MoulinetteTiles.DEFAULT_WEBM_PREVIEW
-        assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${thumbnailURL + r.sas}"/></div>`)
-      } else {
-        assets.push(`<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL + r.sas}"/></div>`)
+    const viewMode = 2
+    
+    // view #1 (all mixed)
+    if(viewMode == 1) {
+      let idx = 0
+      for(const r of this.searchResults) {
+        idx++
+        assets.push(this.generateAsset(r, idx))
+      }
+    }
+    // view #2 (by folder)
+    else {
+      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults);
+      const keys = Object.keys(folders).sort()
+      for(const k of keys) {
+        assets.push(`<div class="folder"><h2>${k}</h2></div>`)
+        for(const a of folders[k]) {
+          assets.push(this.generateAsset(a, a.idx))
+        }
       }
     }
     
@@ -132,6 +153,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     } else {
       this.html.find(".showcase").hide()
     }
+    
+    // display hide video
+    this.html.find(".tileres.video").mouseover(this._toggleOnVideo.bind(this))
+    this.html.find(".tileres.video").mouseout(this._toggleOffVideo.bind(this))
   }
   
   
@@ -294,6 +319,32 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     if(!isNaN(source.value)) {
       game.settings.set("moulinette", "tileSize", Number(source.value))
     }
+  }
+  
+  _toggleOnVideo(event) {
+    event.preventDefault();
+    const source = event.currentTarget;
+    const video = $(source).find("video")
+    const videoSrc = video.find("source")
+    $(source).find("img").hide()
+    $(source).css("background-image", "none")
+    video.show()
+    // play video
+    videoSrc.attr('src', videoSrc.attr('data-src'));
+    video.trigger('load');
+  }
+  
+  _toggleOffVideo(event) {
+    event.preventDefault();
+    const source = event.currentTarget;
+    const video = $(source).find("video")
+    const videoSrc = video.find("source")
+    video.hide()
+    $(source).find("img").show()
+    $(source).css("background-image", "url(../../icons/svg/video.svg)")
+    // stop video
+    videoSrc.attr('src', '');
+    video.trigger('pause');
   }
   
   static getMacroName() {

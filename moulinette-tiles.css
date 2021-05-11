@@ -13,6 +13,30 @@
   margin: 2px;
 }
 
+.mtte.forge .tileres.video video {
+  display: none;
+  border: none;
+  margin: 2px;
+}
+
+.mtte.forge .fallback {
+    background-image: url(../../icons/svg/video.svg);
+    display: inline-block;
+    min-width: 100px; 
+    min-height: 100px;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.mtte.forge .cc_image {
+    min-width: 100px;
+    min-height: 100px;
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
 .mtte.forge .tileres.draggable {
   cursor: grab;
 }

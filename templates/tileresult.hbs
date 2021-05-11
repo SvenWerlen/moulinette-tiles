@@ -2,11 +2,11 @@
   <h3>{{pretty filename}}</h3>
   <div class="tileres draggable">
     {{#unless isVideo}}
-    <img width="400" height="400" src="{{assetURL}}" title="{{localize "mtte.dragTile"}}"/>
+    <img width="400" height="400" src="{{assetURL}}{{sas}}" title="{{localize "mtte.dragTile"}}"/>
     {{/unless}}
     {{#if isVideo}}
     <video width="400" height="400" autoplay loop muted>
-      <source src="{{assetURL}}" type="video/webm">
+      <source src="{{assetURL}}{{sas}}" type="video/webm">
       Your browser does not support the video tag.
     </video> 
     {{/if}}
