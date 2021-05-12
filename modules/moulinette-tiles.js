@@ -80,10 +80,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       return true;
     })
     
-    const viewMode = 2
+    const viewMode = game.settings.get("moulinette", "displayMode")
     
     // view #1 (all mixed)
-    if(viewMode == 1) {
+    if(viewMode == "tiles") {
       let idx = 0
       for(const r of this.searchResults) {
         idx++
@@ -92,7 +92,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
     // view #2 (by folder)
     else {
-      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults);
+      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults, this.assetsPacks);
       const keys = Object.keys(folders).sort()
       for(const k of keys) {
         assets.push(`<div class="folder"><h2>${k}</h2></div>`)
