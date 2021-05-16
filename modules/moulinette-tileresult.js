@@ -17,8 +17,9 @@ export class MoulinetteTileResult extends FormApplication {
       this.filePath =  game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `moulinette/tiles/${this.folderName}/${this.imageName}`
       this.data.sas = game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
     } else {
+      const baseURL = pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
       this.imageName = tile.filename.split('/').pop()
-      this.filePath = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${pack.path}/${tile.filename}`
+      this.filePath = baseURL + `${pack.path}/${tile.filename}`
       this.data.sas = ""
     }
   }

@@ -22,11 +22,13 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"])
     
-    // remove thumbnails from assets
+    console.log(index)
+    
+    // remove thumbnails and non-images from assets
     const webmList = index.assets.filter(i => i.filename.endsWith(".webm"))
     const thumbList = webmList.map(i => i.filename.substr(0, i.filename.lastIndexOf('.') + 1) + "webp")
     this.assets = index.assets.filter(a => {
-      if(thumbList.includes(a.filename)) {
+      if(a.type != "img" || thumbList.includes(a.filename)) {
         // decrease count in pack
         index.packs[a.pack].count--
         return false;
@@ -42,11 +44,12 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * Generate a new asset (HTML) for the given result and idx
    */
   generateAsset(r, idx) {
-    const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const pack = this.assetsPacks[r.pack]
+    const URL = pack.isRemote || pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     const showThumbs = game.settings.get("moulinette-tiles", "tileShowVideoThumb");
     // sas (Shared access signature) for accessing remote files (Azure)
-    r.sas = this.assetsPacks[r.pack].isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
-    r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
+    r.sas = pack.isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
+    r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${r.filename}`
     if(r.filename.endsWith(".webm")) {
       const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp" : ""
       return `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}">` +
@@ -255,8 +258,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     let imageName;
     
     if(!pack.isRemote) {
+      const baseURL = pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
       imageName = tile.filename.split('/').pop()
-      filePath =  tile.filename.match(/^https?:\/\//) ? tile.filename : game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${pack.path}/${tile.filename}`
+      filePath =  tile.filename.match(/^https?:\/\//) ? tile.filename : baseURL + `${pack.path}/${tile.filename}`
     }
     else {
       const folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
