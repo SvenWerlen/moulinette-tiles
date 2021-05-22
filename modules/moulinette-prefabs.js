@@ -15,9 +15,16 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
   async getPackList() {
     const user = await game.moulinette.applications.Moulinette.getUser()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
-      game.moulinette.applications.MoulinetteClient.SERVER_URL + `/assets/${game.moulinette.user.id}/prefabs`])
+      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id])
     
-    this.assets = index.assets
+    // remove non-prefab
+    this.assets = index.assets.filter(a => {
+      if(!a.data || a.data["type"] !== "prefab") {
+        index.packs[a.pack].count-- // decrease count in pack
+        return false;
+      }
+      return true;
+    })
     this.assetsPacks = index.packs
     return duplicate(this.assetsPacks)
   }
@@ -26,13 +33,13 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
    * Generate a new asset (HTML) for the given result and idx
    */
   generateAsset(r, idx) {
-    const URL = game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const pack = this.assetsPacks[r.pack]
+    const URL = pack.isLocal || pack.isRemote ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     // sas (Shared access signature) for accessing remote files (Azure)
-    r.sas = this.assetsPacks[r.pack].isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
-    r.assetURL = `${URL}${this.assetsPacks[r.pack].path}/${r.filename}`
-    const thumb = `${URL}${this.assetsPacks[r.pack].path}/${r.data.thumb}`
+    r.sas = pack.isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
+    r.baseURL = `${URL}${pack.path}/`
     
-    return `<div class="tileres draggable" title="${r.data.name}" data-idx="${idx}"><img width="100" height="100" src="${thumb + r.sas}"/></div>`
+    return `<div class="tileres draggable" title="${r.data.name}" data-idx="${idx}"><img width="100" height="100" src="${r.baseURL + r.data.img + r.sas}"/></div>`
   }
   
   /**
@@ -105,9 +112,8 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
 
     let dragData = {
       type: "Actor",
-      prefab: true,
-      url: prefab.assetURL + prefab.sas,
-      prefix: pack.prefix
+      prefab: prefab,
+      pack: pack
     };
     
     dragData.source = "mtte"
@@ -123,15 +129,26 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     if ( !game.user.can("TOKEN_CREATE") ) {
       return ui.notifications.warn(`You do not have permission to create new Tokens!`);
     }
-
+    
+    const prefab = data.prefab
+    const pack = data.pack
+      
     // Acquire dropped data and import the actor
-    fetch(data.url).catch(function(e) {
+    fetch(prefab.baseURL + prefab.filename + prefab.sas).catch(function(e) {
       ui.notifications.error(game.i18n.localize("mtte.errorDownload"));
       console.log("Moulinette Prefabs | Cannot download json data from prefab", e)
       return;
     }).then( async function(res) {
-      const actorData = await res.json()
-      const actor = await Actor.create(actorData);
+            
+      // download all dependencies
+      const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(prefab, pack, "cloud")
+      
+      // replace all DEPS
+      let jsonAsText = await res.text()
+      for(let i = 0; i<paths.length; i++) {
+        jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
+      }
+      const actor = await Actor.create(JSON.parse(jsonAsText));
       
       // Prepare the Token data
       const token = await Token.fromActor(actor, {x: data.x, y: data.y});

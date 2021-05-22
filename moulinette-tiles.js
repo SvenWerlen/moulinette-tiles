@@ -39,7 +39,7 @@ Hooks.once("setup", async function () {
       {id: "howto", icon: "fas fa-question-circle" ,name: game.i18n.localize("mtte.howto"), help: game.i18n.localize("mtte.howtoToolTip") }
     ]
   })
-  /*
+  
   const moduleClassPrefabs = (await import("./modules/moulinette-prefabs.js")).MoulinettePrefabs
   game.moulinette.forge.push({
     id: "prefabs",
@@ -48,7 +48,7 @@ Hooks.once("setup", async function () {
     description: game.i18n.localize("mtte.prefabsDescription"),
     instance: new moduleClassPrefabs(),
     actions: []
-  })*/
+  })
   
   game.moulinette.applications["MoulinetteDropAsActor"] = MoulinetteDropAsActor
   Array.prototype.push.apply(game.moulinette.macros, MoulinetteMacros.macros)
