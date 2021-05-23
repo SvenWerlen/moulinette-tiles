@@ -22,8 +22,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"])
     
-    console.log(index)
-    
     // remove thumbnails and non-images from assets
     const webmList = index.assets.filter(i => i.filename.endsWith(".webm"))
     const thumbList = webmList.map(i => i.filename.substr(0, i.filename.lastIndexOf('.') + 1) + "webp")
