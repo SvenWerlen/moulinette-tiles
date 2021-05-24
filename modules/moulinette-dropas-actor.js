@@ -21,7 +21,7 @@ export class MoulinetteDropAsActor extends FormApplication {
   getData() {
     const actorId = game.settings.get("moulinette", "tileActorId");
     const actorLink = game.settings.get("moulinette", "tileActorLink");
-    const actors = game.actors.map( a => { return { id: a._id, name: a.name, selected: a._id == actorId } })
+    const actors = game.actors.map( a => { return { id: a.id, name: a.name, selected: a.id == actorId } })
     return { actors: actors, actorId: actorId, actorLink: actorLink }
   }
   
@@ -49,8 +49,17 @@ export class MoulinetteDropAsActor extends FormApplication {
   
   async createToken(actor, linked) {
     // Prepare the Token data
-    const token = await Token.fromActor(actor, {x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
-    const td = token.data;
+    let token;
+    let td;
+    // @COMPATIBILITY 0.7-0.8 (https://foundryvtt.wiki/en/migrations/foundry-core-0_8_x)
+    // The biggest change is to Tokens, which now have a TokenDocument. The recommended way to create a token from an Actor is no longer Token.fromActor but instead passing the result from Actor#getTokenData to TokenDocument's constructor.
+    if(game.data.version.startsWith("0.7")) {
+      token = await Token.fromActor(actor, {x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+      td = token.data
+    } else {
+      token = await actor.getTokenData({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+      td = token
+    }
 
     // Adjust token position
     const hg = canvas.dimensions.size / 2;
@@ -60,7 +69,12 @@ export class MoulinetteDropAsActor extends FormApplication {
     if ( !canvas.grid.hitArea.contains(td.x, td.y) ) return false;
 
     // Submit the Token creation request and activate the Tokens layer (if not already active)
-    const newToken = await Token.create(td);
+    let newToken;
+    if(game.data.version.startsWith("0.7")) {
+      newToken = await Token.create(td);
+    } else {
+      newToken = await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [td], { parent: canvas.scene })
+    }
     canvas.getLayer("TokenLayer").activate()
     
     // Call macro

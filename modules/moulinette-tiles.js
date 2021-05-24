@@ -50,11 +50,11 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${r.filename}`
     if(r.filename.endsWith(".webm")) {
       const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp" + r.sas : ""
-      return `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}">` +
+      return `<div class="tileres video mttedraggable fallback" title="${r.filename}" data-idx="${idx}">` +
         `<img width="100" class="cc_image" height="100" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
         `<video width="100" height="100" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video></div>`
     } else {
-      return `<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL + r.sas}"/></div>`
+      return `<div class="tileres mttedraggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL + r.sas}"/></div>`
     }
   }
   
@@ -365,7 +365,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     // Default Note data
     const noteData = {
-      entryId: entry._id,
+      entryId: entry.id,
       x: coord.x + canvas.grid.w/2,
       y: coord.y + canvas.grid.h/2,
       icon: CONST.DEFAULT_NOTE_ICON,
@@ -376,7 +376,13 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     };
 
     // Create a NoteConfig sheet instance to finalize the creation
-    const note = canvas.notes.preview.addChild(new Note(noteData));
+    let note;
+    if(game.data.version.startsWith("0.7")) {
+      note = canvas.notes.preview.addChild(new Note(noteData));
+    } else {
+      note = (await canvas.scene.createEmbeddedDocuments(Note.embeddedName, [noteData], { parent: canvas.scene }))[0]
+      console.log(note)
+    }
     canvas.getLayer("NotesLayer").activate()
     
     // Call macro
@@ -390,7 +396,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       console.warn(`Moulinette Tiles | Macro ${macroName} couldn't be found!`)
     }
     
-    await note.draw();
+    if(game.data.version.startsWith("0.7")) {
+      await note.draw();
+    }
     note.sheet.render(true);
   }
   
@@ -415,16 +423,26 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // Create the tile as hidden if the ALT key is pressed
     //if ( event.altKey ) data.hidden = true;
 
+    // @COMPATIBILITY 0.7-0.8 (https://foundryvtt.wiki/en/migrations/foundry-core-0_8_x)
+    // The TilesLayer was merged with the BackgroundLayer in a new type of Canvas Layer: MapLayer, which contains 1 background image and an arbitrary number of tiles. There are two MapLayers in 0.8 canvases: BackgroundLayer and ForegroundLayer.
+    const canvasClass = game.data.version.startsWith("0.7") ? canvas.tokens : canvas.background
+    const layer = game.data.version.startsWith("0.7") ? canvas.getLayer("TilesLayer") : canvas.getLayer("BackgroundLayer")
+    
     // make sure to always put tiles on top
     let maxZ = 0
-    canvas.tiles.placeables.forEach( t => { 
+    canvasClass.placeables.forEach( t => { 
       if(t.zIndex > maxZ) maxZ = t.zIndex
     })
     data.z = maxZ
     
     // Create the Tile
-    const tile = await canvas.tiles.constructor.placeableClass.create(data);
-    canvas.getLayer("TilesLayer").activate()
+    let tile;
+    if(game.data.version.startsWith("0.7")) {
+      tile = await canvasClass.constructor.placeableClass.create(data);
+    } else {
+      tile = (await canvas.scene.createEmbeddedDocuments(Tile.embeddedName, [data], { parent: canvas.scene }))[0]
+    }
+    layer.activate()
     
     // Call macro
     const macroName = MoulinetteTiles.getMacroName()

@@ -102,7 +102,7 @@ export class MoulinetteTileResult extends FormApplication {
     });
 
     const blob = await res.blob()
-    await game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], this.imageName, { type: blob.type, lastModified: new Date() }), this.imageName, "moulinette/tiles", `moulinette/tiles/${this.folderName}`, false)
+    await game.moulinette.applications.MoulinetteFileUtil.uploadFile(new File([blob], this.imageName, { type: blob.type, lastModified: new Date() }), this.imageName, `moulinette/tiles/${this.folderName}`, false)
     
     // copy path into clipboard
     navigator.clipboard.writeText(game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `moulinette/tiles/${this.folderName}/${this.imageName}`)
