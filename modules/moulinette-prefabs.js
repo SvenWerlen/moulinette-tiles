@@ -9,10 +9,21 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     super()
   }
   
+  clearCache() {
+    this.assets = null
+    this.assetsPacks = null
+    this.searchResults = null
+    this.pack = null
+  }
+  
   /**
    * Returns the list of available packs
    */
   async getPackList() {
+    if(this.assetsPacks) {
+      return duplicate(this.assetsPacks)
+    }
+    
     const user = await game.moulinette.applications.Moulinette.getUser()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id])
@@ -36,7 +47,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     const pack = this.assetsPacks[r.pack]
     const URL = pack.isLocal || pack.isRemote ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     // sas (Shared access signature) for accessing remote files (Azure)
-    r.sas = pack.isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
+    r.sas = pack.sas ? "?" + pack.sas : ""
     r.baseURL = `${URL}${pack.path}/`
     
     return `<div class="tileres draggable" title="${r.data.name}" data-idx="${idx}"><img width="100" height="100" src="${r.baseURL + r.data.img + r.sas}"/></div>`

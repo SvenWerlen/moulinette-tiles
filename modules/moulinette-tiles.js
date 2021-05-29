@@ -12,10 +12,21 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     super()
   }
   
+  clearCache() {
+    this.assets = null
+    this.assetsPacks = null
+    this.searchResults = null
+    this.pack = null
+  }
+  
   /**
    * Returns the list of available packs
    */
   async getPackList() {
+    if(this.assetsPacks) {
+      return duplicate(this.assetsPacks)
+    }
+      
     const user = await game.moulinette.applications.Moulinette.getUser()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
@@ -46,7 +57,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const URL = pack.isRemote || pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     const showThumbs = game.settings.get("moulinette-tiles", "tileShowVideoThumb");
     // sas (Shared access signature) for accessing remote files (Azure)
-    r.sas = pack.isRemote && game.moulinette.user.sas ? "?" + game.moulinette.user.sas : ""
+    r.sas = pack.sas ? "?" + pack.sas : ""
     r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${r.filename}`
     if(r.filename.endsWith(".webm")) {
       const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp" + r.sas : ""
