@@ -65,7 +65,8 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
         `<img width="100" class="cc_image" height="100" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
         `<video width="100" height="100" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video></div>`
     } else {
-      return `<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${r.assetURL + r.sas}"/></div>`
+      const thumbnailURL = pack.isRemote ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + r.sas : r.assetURL + r.sas
+      return `<div class="tileres draggable" title="${r.filename}" data-idx="${idx}"><img width="100" height="100" src="${thumbnailURL}"/></div>`
     }
   }
   
