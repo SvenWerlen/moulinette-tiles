@@ -75,16 +75,19 @@ export class MoulinetteDropAsActor extends FormApplication {
     } else {
       newToken = await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [td], { parent: canvas.scene })
     }
-    canvas.getLayer("TokenLayer").activate()
+    // sometimes throws exceptions
+    try {
+      canvas.getLayer("TokenLayer").activate()
+    } catch(e) {}
     
     // Call macro
-    const macro = game.macros.find(o => o.name === game.settings.get("moulinette", "tileMacro"))
-    if(macro) {
-      game.moulinette.param = [newToken]
-      macro.execute()
-      delete game.moulinette.param
-    } else {
-      console.warn(`Moulinette Tiles | Macro ${game.settings.get("moulinette", "tileMacro")} couldn't be found!`)
-    }
+    import("./moulinette-tiles.js").then( c => {
+      const macros = c.MoulinetteTiles.getMacros()
+      for(const macro of macros) {
+        game.moulinette.param = [newToken]
+        macro.execute()
+        delete game.moulinette.param
+      }
+    })
   }    
 }

@@ -180,7 +180,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   async getFooter() {
     const mode = game.settings.get("moulinette", "tileMode")
     const size = game.settings.get("moulinette", "tileSize")
-    const macro = MoulinetteTiles.getMacroName()
+    const macro = MoulinetteTiles.getMacroNames()
     return `<div class="showcase">${game.i18n.localize("mtte.showCase")}</div>
       <div class="options"><div class="option">
       ${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i> 
@@ -362,9 +362,29 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     video.trigger('pause');
   }
   
-  static getMacroName() {
+  static getMacroNames() {
     const tileMode = game.settings.get("moulinette", "tileMode")
-    return game.settings.get("moulinette", "tileMacro")[tileMode]
+    const macros = game.settings.get("moulinette", "tileMacro")[tileMode]
+    return macros ? macros : ""
+  }
+  
+  static getMacros() {
+    const tileMode = game.settings.get("moulinette", "tileMode")
+    const macros = game.settings.get("moulinette", "tileMacro")[tileMode]
+    const results = []
+    
+    if(macros) {
+      const list = macros.split(",")
+      for( const macroName of list ) {
+        const macro = game.macros.find(o => o.name === macroName.trim())
+        if(macro) {
+          results.push(macro)
+        } else {
+          console.warn(`Moulinette Tiles | Macro ${macroName} couldn't be found!`)
+        }
+      }
+    }
+    return results;
   }
   
   /**
@@ -398,14 +418,11 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     canvas.getLayer("NotesLayer").activate()
     
     // Call macro
-    const macroName = MoulinetteTiles.getMacroName()
-    const macro = game.macros.find(o => o.name === macroName)
-    if(macro) {
+    const macros = MoulinetteTiles.getMacros()
+    for(const macro of macros) {
       game.moulinette.param = [entry, note]
       macro.execute()
       delete game.moulinette.param
-    } else {
-      console.warn(`Moulinette Tiles | Macro ${macroName} couldn't be found!`)
     }
     
     if(game.data.version.startsWith("0.7")) {
@@ -457,14 +474,11 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     layer.activate()
     
     // Call macro
-    const macroName = MoulinetteTiles.getMacroName()
-    const macro = game.macros.find(o => o.name === macroName)
-    if(macro) {
+    const macros = MoulinetteTiles.getMacros()
+    for(const macro of macros) {
       game.moulinette.param = [tile]
       macro.execute()
       delete game.moulinette.param
-    } else {
-      console.warn(`Moulinette Tiles | Macro ${macroName} couldn't be found!`)
     }
   }    
   
