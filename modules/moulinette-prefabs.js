@@ -50,7 +50,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     r.sas = pack.sas ? "?" + pack.sas : ""
     r.baseURL = `${URL}${pack.path}/`
     
-    return `<div class="tileres draggable" title="${r.data.name}" data-idx="${idx}"><img width="100" height="100" src="${r.baseURL + r.data.img + r.sas}"/></div>`
+    return `<div class="tileres draggable" title="${r.data.name}" data-idx="${idx}" data-path="${r.filename}"><img width="100" height="100" src="${r.baseURL + r.data.img + r.sas}"/></div>`
   }
   
   /**
@@ -88,17 +88,21 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       }
     }
     // view #2 (by folder)
-    else {
+    else if(viewMode == "list" || viewMode == "browse") {
       const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults, this.assetsPacks);
       const keys = Object.keys(folders).sort()
       for(const k of keys) {
-        assets.push(`<div class="folder"><h2>${k}</h2></div>`)
+        if(viewMode == "browse") {
+          assets.push(`<div class="folder expand" data-path="${k}"><h2>${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+        } else {
+          assets.push(`<div class="folder" data-path="${k}"><h2>${k} (${folders[k].length})</div>`)
+        }
         for(const a of folders[k]) {
           assets.push(this.generateAsset(a, a.idx))
         }
       }
     }
-    
+        
     return assets
   }
   
