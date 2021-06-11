@@ -72,6 +72,9 @@ Hooks.once("ready", async function () {
  */
 Hooks.on('dropCanvasData', (canvas, data) => { 
   if(data.source == "mtte") {
+    if(data.pack && data.pack.isRemote) {
+      ui.notifications.info(game.i18n.localize("mtte.downloadInProgress"));
+    }
     if(data.type == "JournalEntry") {
       import("./modules/moulinette-tiles.js").then( c => {
         c.MoulinetteTiles.createArticle(data)

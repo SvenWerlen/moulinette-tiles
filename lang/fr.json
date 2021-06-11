@@ -13,7 +13,6 @@
   "mtte.customReferencesPacks": "Packs disponibles sur Internet (que vous pouvez t\u00e9l\u00e9charger)",
   "mtte.customReferencesToolTip": "Moulinette fournit une liste de r\u00e9f\u00e9rences (ex: jetons gratuits au t\u00e9l\u00e9chargement).",
   "mtte.downloadImage": "T\u00e9l\u00e9charger",
-  "mtte.downloadImageSuccess": "L'image a \u00e9t\u00e9 t\u00e9l\u00e9charg\u00e9e avec succ\u00e8s! Chemin (path) copi\u00e9 dans le presse-papier.",
   "mtte.downloadImageToolTip": "T\u00e9l\u00e9charger l'image dans Foundry VTT",
   "mtte.dragTile": "Glisser-d\u00e9poser la tuile sur la sc\u00e8ne",
   "mtte.dropasActor": "D\u00e9poser jeton/image en tant que jeton (acteur)",
