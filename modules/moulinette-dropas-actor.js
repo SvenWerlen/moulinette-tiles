@@ -77,7 +77,8 @@ export class MoulinetteDropAsActor extends FormApplication {
     if(game.data.version.startsWith("0.7")) {
       newToken = await Token.create(td);
     } else {
-      newToken = await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [td], { parent: canvas.scene })
+      newToken = (await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [td], { parent: canvas.scene }))[0]
+      newToken = newToken._object
     }
     // sometimes throws exceptions
     try {

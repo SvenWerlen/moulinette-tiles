@@ -355,7 +355,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const tileMode = game.settings.get("moulinette", "tileMode")
     const macros = game.settings.get("moulinette", "tileMacro")[tileMode]
     const results = []
-    
     if(macros) {
       const list = macros.split(",")
       for( const macroName of list ) {
@@ -433,7 +432,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       note = canvas.notes.preview.addChild(new Note(noteData));
     } else {
       note = (await canvas.scene.createEmbeddedDocuments(Note.embeddedName, [noteData], { parent: canvas.scene }))[0]
-      console.log(note)
+      note = note._object
     }
     canvas.getLayer("NotesLayer").activate()
     
@@ -441,6 +440,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const macros = MoulinetteTiles.getMacros()
     for(const macro of macros) {
       game.moulinette.param = [entry, note]
+      console.log("EXECUTE MACRO")
       macro.execute()
       delete game.moulinette.param
     }
@@ -493,6 +493,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       tile = await canvasClass.constructor.placeableClass.create(data);
     } else {
       tile = (await canvas.scene.createEmbeddedDocuments(Tile.embeddedName, [data], { parent: canvas.scene }))[0]
+      tile = tile._object
     }
     layer.activate()
     
