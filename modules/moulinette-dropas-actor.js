@@ -48,6 +48,10 @@ export class MoulinetteDropAsActor extends FormApplication {
   }
   
   async createToken(actor, linked) {
+    // Download asset
+    const cTiles = await import("./moulinette-tiles.js")
+    await cTiles.MoulinetteTiles.downloadAsset(this.data)
+    
     // Prepare the Token data
     let token;
     let td;
@@ -81,13 +85,11 @@ export class MoulinetteDropAsActor extends FormApplication {
     } catch(e) {}
     
     // Call macro
-    import("./moulinette-tiles.js").then( c => {
-      const macros = c.MoulinetteTiles.getMacros()
-      for(const macro of macros) {
-        game.moulinette.param = [newToken]
-        macro.execute()
-        delete game.moulinette.param
-      }
-    })
+    const macros = cTiles.MoulinetteTiles.getMacros()
+    for(const macro of macros) {
+      game.moulinette.param = [newToken]
+      macro.execute()
+      delete game.moulinette.param
+    }
   }    
 }

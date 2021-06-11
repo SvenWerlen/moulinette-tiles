@@ -268,46 +268,25 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const tile = this.searchResults[idx-1]
     const pack = this.assetsPacks[tile.pack]
 
-    let filePath;
-    let imageName;
-    
-    if(!pack.isRemote) {
-      const baseURL = pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
-      imageName = tile.filename.split('/').pop()
-      filePath =  tile.filename.match(/^https?:\/\//) ? tile.filename : baseURL + `${pack.path}/${tile.filename}`
-    }
-    else {
-      const folderName = `${pack.publisher} ${pack.name}`.replace(/[\W_]+/g,"-").toLowerCase()
-      imageName = tile.filename.split('/').pop()
-      filePath = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `moulinette/tiles/${folderName}/${imageName}`
-
-      // download & upload image
-      fetch(tile.assetURL + tile.sas).catch(function(e) {
-        ui.notifications.error(game.i18n.localize("mtte.errorDownload"));
-        console.log(`Moulinette Tiles | Cannot download image ${imageName}`, e)
-        return;
-      }).then( res => {
-        res.blob().then( blob => game.moulinette.applications.MoulinetteFileUtil.upload(new File([blob], imageName, { type: blob.type, lastModified: new Date() }), imageName, "moulinette/tiles", `moulinette/tiles/${folderName}`, false) )
-      });
-    }
-    
     let dragData = {}
     if(mode == "tile") {
       dragData = {
         type: "Tile",
-        img: filePath,
+        tile: tile,
+        pack: pack,
         tileSize: size
       };
     } else if(mode == "article") {
       dragData = {
         type: "JournalEntry",
-        name: imageName,
-        img: filePath
+        tile: tile,
+        pack: pack
       };
     } else if(mode == "actor") {
       dragData = {
         type: "Actor",
-        img: filePath
+        tile: tile,
+        pack: pack
       };
     }
     
@@ -390,13 +369,50 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
     return results;
   }
+
+  
+  /**
+   * Download the asset received from event
+   */
+  static async downloadAsset(data) {
+    if(data.tile.search) {
+      const today = new Date()
+      const imageFileName = data.tile.filename
+      const publisher = game.moulinette.applications.MoulinetteFileUtil.generatePathFromName(data.tile.search.src)
+      const pack = `${today.getFullYear()}-${(today.getMonth() < 9 ? "0" : "") + (today.getMonth() + 1)}-${(today.getDate() < 10 ? "0" : "" ) + today.getDate()}`
+      const path = `moulinette/images/${publisher}/${pack}`
+      
+      // download & upload image
+      const headers = { method: "POST", headers: { 'Content-Type': 'application/json'}, body: JSON.stringify({ url: data.tile.search.url }) }
+      const res = await fetch(game.moulinette.applications.MoulinetteClient.SERVER_URL + "/search/download", headers)
+      const blob = await res.blob()
+      await game.moulinette.applications.MoulinetteFileUtil.uploadFile(new File([blob], imageFileName, { type: blob.type, lastModified: today }), imageFileName, path, false)
+      data.img = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${path}/${imageFileName}`
+    }
+    else if(!data.pack.isRemote) {
+      const baseURL = data.pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+      data.img =  data.tile.filename.match(/^https?:\/\//) ? data.tile.filename : baseURL + `${data.pack.path}/${data.tile.filename}`
+    }
+    else {
+      await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(data.tile, data.pack, "tiles")
+      data.img = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + game.moulinette.applications.MoulinetteFileUtil.getMoulinetteBasePath("tiles", data.pack.publisher, data.pack.name) + data.tile.filename      
+    }
+
+    // Clear useless info
+    delete data.pack
+    delete data.tile
+  }
   
   /**
    * Generate an article from the dragged image
    */
   static async createArticle(data) {
+    if ( !data.tile || !data.pack ) return;
+    await MoulinetteTiles.downloadAsset(data)
+    
     // generate journal
-    const entry = await JournalEntry.create( {name: data.name, img: data.img} )
+    const name = data.img.split('/').pop()
+    const entry = await JournalEntry.create( {name: name, img: data.img} )
     const coord = canvas.grid.getSnappedPosition(data.x - canvas.grid.w/2, data.y - canvas.grid.h/2)
     
     // Default Note data
@@ -434,13 +450,16 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
     note.sheet.render(true);
   }
+
+  
   
   /**
    * Generate a tile from the dragged image
    */
   static async createTile(data) {
-    if ( !data.img ) return;
-
+    if ( !data.tile || !data.pack ) return;
+    await MoulinetteTiles.downloadAsset(data)
+    
     // Determine the tile size
     const tex = await loadTexture(data.img);
     const ratio = canvas.dimensions.size / (data.tileSize || canvas.dimensions.size);
