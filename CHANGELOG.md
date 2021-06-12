@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.3.3] - 2021-06-10
+## [2.3.4] - 2021-06-12
 ### Added
 - Support for new view mode (browse)
 ### Fixed
 - Tiles don't show up if download not yet finished
 - Macros not working anymore (ex: shadow)
+- Indexing doesn't clear the cache
 
 ## [2.2.0] - 2021-06-04
 ### Changed

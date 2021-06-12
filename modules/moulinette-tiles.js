@@ -230,6 +230,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       publishers.push(...await FileUtil.scanSourceAssets("images", EXT))
       await FileUtil.uploadFile(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", MoulinetteTiles.FOLDER_CUSTOM_IMAGES, true)
       ui.notifications.info(game.i18n.localize("mtte.indexingDone"));
+      // clear cache
+      game.moulinette.cache.clear()
+      this.clearCache()
       return true
     }
     else if(classList.contains("listPacks")) {
