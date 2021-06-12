@@ -2,7 +2,7 @@
   "name": "moulinette-tiles",
   "title": "Moulinette Forge Tiles (module)",
   "description": "This module for Moulinette adds capabilities for downloading tiles and adding them to your scenes.",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "author": "Sven Werlen",
   "esmodules": ["moulinette-tiles.js"],
   "styles": ["moulinette-tiles.css"],
@@ -25,8 +25,8 @@
     }
   ],
   "url": "https://github.com/SvenWerlen/moulinette-tiles",
-  "download": "https://github.com/SvenWerlen/moulinette-tiles/archive/v-2.3.4.zip",
+  "download": "https://github.com/SvenWerlen/moulinette-tiles/archive/v-2.3.5.zip",
   "manifest": "https://raw.githubusercontent.com/SvenWerlen/moulinette-tiles/master/module.json",
   "minimumCoreVersion": "0.7.6",
-  "compatibleCoreVersion": "0.8.5"
+  "compatibleCoreVersion": "0.8.6"
 }
