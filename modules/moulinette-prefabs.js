@@ -166,16 +166,21 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       const actor = await Actor.create(JSON.parse(jsonAsText));
       
       // Prepare the Token data
-      const token = await Token.fromActor(actor, {x: data.x, y: data.y});
-      const td = token.data;
+      let tokenData
+      if(game.data.version.startsWith("0.7")) {
+        const token = await Token.fromActor(actor, {x: data.x, y: data.y});
+        tokenData = token.data
+      } else {
+        tokenData = await actor.getTokenData({x: data.x, y: data.y})
+      }
       
       // Adjust token position
       const hg = canvas.dimensions.size / 2;
-      td.x -= td.width * hg;
-      td.y -= td.height * hg;
-      if ( !canvas.grid.hitArea.contains(td.x, td.y) ) return false;
+      tokenData.x -= tokenData.width * hg;
+      tokenData.y -= tokenData.height * hg;
+      if ( !canvas.grid.hitArea.contains(tokenData.x, tokenData.y) ) return false;
               
-      Token.create(td)
+      Token.create(tokenData)
       canvas.getLayer("TokenLayer").activate()
     })
   }
