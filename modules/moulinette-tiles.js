@@ -408,15 +408,47 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   }
   
   /**
-   * Generate an article from the dragged image
+   * Generates moulinette folders
+   */
+  static async getOrCreateArticleFolder(publisher, pack) {
+    let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" )
+    console.log("here")
+    // main
+    if( moulinetteFolder.length == 0 ) {
+      moulinetteFolder = await Folder.create({name:"Moulinette", type:"JournalEntry", parent: null})
+    } else {
+      moulinetteFolder = moulinetteFolder[0]
+    }
+    // publisher level
+    let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
+    if( publisherFolder.length == 0 ) {
+      publisherFolder = await Folder.create({name: publisher, type: "JournalEntry", parent: moulinetteFolder._id })
+    } else {
+      publisherFolder = publisherFolder[0]
+    }
+    // pack level
+    let packFolder = publisherFolder.children.filter( c => c.name == pack )
+    if( packFolder.length == 0 ) {
+      packFolder = await Folder.create({name: pack, type: "JournalEntry", parent: publisherFolder._id })
+    } else {
+      packFolder = packFolder[0]
+    }
+    return packFolder
+  }
+  
+  /**
+   * Generates an article from the dragged image
    */
   static async createArticle(data) {
     if ( !data.tile || !data.pack ) return;
-    await MoulinetteTiles.downloadAsset(data)
+    
+    console.log(data.pack)
+    const folder = await MoulinetteTiles.getOrCreateArticleFolder(data.pack.publisher, data.pack.name)
+    await MoulinetteTiles.downloadAsset(data)    
     
     // generate journal
     const name = data.img.split('/').pop()
-    const entry = await JournalEntry.create( {name: name, img: data.img} )
+    const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder._id} )
     const coord = canvas.grid.getSnappedPosition(data.x - canvas.grid.w/2, data.y - canvas.grid.h/2)
     
     // Default Note data
