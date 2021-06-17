@@ -28,5 +28,5 @@
   "download": "https://github.com/SvenWerlen/moulinette-tiles/archive/v-2.4.0.zip",
   "manifest": "https://raw.githubusercontent.com/SvenWerlen/moulinette-tiles/master/module.json",
   "minimumCoreVersion": "0.7.6",
-  "compatibleCoreVersion": "0.8.6"
+  "compatibleCoreVersion": "0.8.7"
 }

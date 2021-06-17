@@ -56,12 +56,12 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
   /**
    * Implements getAssetList
    */
-  async getAssetList(searchTerms, pack) {
+  async getAssetList(searchTerms, pack, publisher) {
     let assets = []
     this.pack = pack
     
     // pack must be selected or terms provided
-    if((!pack || pack < 0) && (!searchTerms || searchTerms.length == 0)) {
+    if((!pack || pack < 0) && (!publisher || publisher.length == 0) && (!searchTerms || searchTerms.length == 0)) {
       return []
     }
     
@@ -70,6 +70,8 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     this.searchResults = this.assets.filter( pf => {
       // pack doesn't match selection
       if( pack >= 0 && pf.pack != pack ) return false
+      // publisher doesn't match selection
+      if( publisher && publisher != this.assetsPacks[pf.pack].publisher ) return false
       // check if text match
       for( const f of searchTerms ) {
         if( pf.data.name.toLowerCase().indexOf(f) < 0 ) return false
