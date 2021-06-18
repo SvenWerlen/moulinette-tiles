@@ -137,6 +137,36 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
   
+  
+  /**
+   * Generates moulinette folders
+   */
+  static async getOrCreateActorFolder(publisher, pack) {
+    let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" )
+
+    // main
+    if( moulinetteFolder.length == 0 ) {
+      moulinetteFolder = await Folder.create({name:"Moulinette", type:"Actor", parent: null})
+    } else {
+      moulinetteFolder = moulinetteFolder[0]
+    }
+    // publisher level
+    let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
+    if( publisherFolder.length == 0 ) {
+      publisherFolder = await Folder.create({name: publisher, type: "Actor", parent: moulinetteFolder._id })
+    } else {
+      publisherFolder = publisherFolder[0]
+    }
+    // pack level
+    let packFolder = publisherFolder.children.filter( c => c.name == pack )
+    if( packFolder.length == 0 ) {
+      packFolder = await Folder.create({name: pack, type: "Actor", parent: publisherFolder._id })
+    } else {
+      packFolder = packFolder[0]
+    }
+    return packFolder
+  }
+  
   /**
    * Generate a prefab (ie actor)
    */
@@ -165,7 +195,14 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       for(let i = 0; i<paths.length; i++) {
         jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
       }
-      const actor = await Actor.create(JSON.parse(jsonAsText));
+      
+      // Prepare folders
+      const folder = await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
+      
+      // Create actor
+      const actorData = JSON.parse(jsonAsText)
+      actorData.folder = folder
+      const actor = await Actor.create(actorData);
       
       // Prepare the Token data
       let tokenData

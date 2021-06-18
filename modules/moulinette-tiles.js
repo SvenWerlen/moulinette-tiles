@@ -412,7 +412,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    */
   static async getOrCreateArticleFolder(publisher, pack) {
     let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" )
-    console.log("here")
+
     // main
     if( moulinetteFolder.length == 0 ) {
       moulinetteFolder = await Folder.create({name:"Moulinette", type:"JournalEntry", parent: null})
@@ -442,7 +442,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   static async createArticle(data) {
     if ( !data.tile || !data.pack ) return;
     
-    console.log(data.pack)
     const folder = await MoulinetteTiles.getOrCreateArticleFolder(data.pack.publisher, data.pack.name)
     await MoulinetteTiles.downloadAsset(data)    
     
