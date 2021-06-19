@@ -73,7 +73,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Implements getAssetList
    */
-  async getAssetList(searchTerms, pack, publisher) {
+  async getAssetList(searchTerms, pack, publisher, type) {
     let assets = []
     this.pack = pack
     
@@ -89,6 +89,8 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       if( pack >= 0 && t.pack != pack ) return false
       // publisher doesn't match selection
       if( publisher && publisher != this.assetsPacks[t.pack].publisher ) return false
+      // remove webm if type specified
+      if( type && type != "imagevideo" && t.filename.endsWith(".webm") ) return false
       // check if text match
       for( const f of searchTerms ) {
         if( t.filename.toLowerCase().indexOf(f) < 0 ) return false
@@ -129,12 +131,16 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Implements listeners
    */
-  activateListeners(html) {
+  activateListeners(html, callbackSelect) {
     // keep html for later usage
     this.html = html
     
     // when click on tile
-    this.html.find(".tileres").click(this._onShowTile.bind(this))
+    if(callbackSelect) {
+      this.html.find(".tileres").click(this._onSelect.bind(this,callbackSelect))
+    } else {
+      this.html.find(".tileres").click(this._onShowTile.bind(this))
+    }
     
     // when choose mode
     this.html.find(".options .dropmode").click(event => {
@@ -310,6 +316,20 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
   }
   
+  async _onSelect(onSelectBind, event) {
+    event.preventDefault();
+    const source = event.currentTarget;
+    const idx = source.dataset.idx;
+    
+    if(this.searchResults && idx > 0 && idx <= this.searchResults.length) {
+      const tile = this.searchResults[idx-1]
+      const pack = this.assetsPacks[tile.pack]
+      const data = { type: "Tile", tile: tile, pack: pack }
+      await MoulinetteTiles.downloadAsset(data)
+      if ( onSelectBind ) onSelectBind(data.img);
+    }
+  }
+  
     
   _onChooseMode(event) {
     const source = event.currentTarget;
@@ -377,6 +397,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   
   /**
    * Download the asset received from event
+   * - data.img will be set with local path
    */
   static async downloadAsset(data) {
     if(data.tile.search) {
