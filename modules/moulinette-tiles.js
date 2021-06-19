@@ -411,7 +411,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * Generates moulinette folders
    */
   static async getOrCreateArticleFolder(publisher, pack) {
-    let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" )
+    let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" && f.type == "JournalEntry" )
 
     // main
     if( moulinetteFolder.length == 0 ) {

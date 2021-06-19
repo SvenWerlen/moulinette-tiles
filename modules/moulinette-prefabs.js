@@ -142,7 +142,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
    * Generates moulinette folders
    */
   static async getOrCreateActorFolder(publisher, pack) {
-    let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" )
+    let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" && f.type == "Actor" )
 
     // main
     if( moulinetteFolder.length == 0 ) {
@@ -196,12 +196,9 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
         jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
       }
       
-      // Prepare folders
-      const folder = await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
-      
       // Create actor
       const actorData = JSON.parse(jsonAsText)
-      actorData.folder = folder
+      actorData.folder = await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
       const actor = await Actor.create(actorData);
       
       // Prepare the Token data
