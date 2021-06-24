@@ -535,7 +535,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // @COMPATIBILITY 0.7-0.8 (https://foundryvtt.wiki/en/migrations/foundry-core-0_8_x)
     // The TilesLayer was merged with the BackgroundLayer in a new type of Canvas Layer: MapLayer, which contains 1 background image and an arbitrary number of tiles. There are two MapLayers in 0.8 canvases: BackgroundLayer and ForegroundLayer.
     const canvasClass = game.data.version.startsWith("0.7") ? canvas.tiles : canvas.background
-    const layer = game.data.version.startsWith("0.7") ? canvas.getLayer("TilesLayer") : (canvas.activeLayer.name == "ForegroundLayer" ? canvas.activeLayer : canvas.getLayer("BackgroundLayer"))
+    const layer = game.data.version.startsWith("0.7") ? canvas.getLayer("TilesLayer") : (canvas.activeLayer && canvas.activeLayer.name == "ForegroundLayer" ? canvas.activeLayer : canvas.getLayer("BackgroundLayer"))
     
     // make sure to always put tiles on top
     let maxZ = 0
@@ -553,7 +553,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       tile = (await canvas.scene.createEmbeddedDocuments(Tile.embeddedName, [data], { parent: canvas.scene }))[0]
       tile = tile._object
     }
-    layer.activate()
+    if(canvas.activeLayer != layer) {
+      layer.activate()
+    } 
     
     // Call macro
     const macros = MoulinetteTiles.getMacros()
