@@ -192,21 +192,22 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   async getFooter() {
     const mode = game.settings.get("moulinette", "tileMode")
     const size = game.settings.get("moulinette", "tileSize")
+    const compact = game.settings.get("moulinette-core", "uiMode") == "compact"
     const macro = MoulinetteTiles.getMacroNames()
     return `<div class="showcase">${game.i18n.localize("mtte.showCase")}</div>
-      <div class="options"><div class="option">
-      ${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i> 
-        <input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${game.i18n.localize("mtte.tile")}
-        <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${game.i18n.localize("mtte.article")}
-        <input class="dropmode" type="radio" name="mode" value="actor" ${mode == "actor" ? "checked" : ""}> ${game.i18n.localize("mtte.actor")}
+      <div class="options"><div class="option">` +
+      (compact ? "" : `${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i>`) +
+      `<input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${compact ? game.i18n.localize("mtte.tile").substring(0,2) : game.i18n.localize("mtte.tile")}
+        <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${compact ? game.i18n.localize("mtte.article").substring(0,2) : game.i18n.localize("mtte.article")}
+        <input class="dropmode" type="radio" name="mode" value="actor" ${mode == "actor" ? "checked" : ""}> ${compact ? game.i18n.localize("mtte.actor").substring(0,2) : game.i18n.localize("mtte.actor")}
       </div>
-      <div class="option">
-        ${game.i18n.localize("FILES.TileSize")} <i class="fas fa-question-circle" title="${game.i18n.localize("FILES.TileSizeHint")}"></i> 
-        <input class="tilesize" type="text" name="tilesize" value="${size}" maxlength="4">
+      <div class="option">` +
+      (compact ? "" : `${game.i18n.localize("FILES.TileSize")} <i class="fas fa-question-circle" title="${game.i18n.localize("FILES.TileSizeHint")}"></i>`) +
+      `<input class="tilesize" type="text" name="tilesize" value="${size}" maxlength="4">
       </div>
-      <div class="option">
-        ${game.i18n.localize("mtte.runMacro")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.runMacroToolTip")}"></i> 
-        <input class="macro" type="text" name="macro" value="${macro}">
+      <div class="option">` +
+      (compact ? "" : `${game.i18n.localize("mtte.runMacro")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.runMacroToolTip")}"></i>`) + 
+      `<input class="macro" type="text" name="macro" value="${macro}" placeholder="${game.i18n.localize("mtte.macroExample")}">
       </div>
     </div>`
   }
