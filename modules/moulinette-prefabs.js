@@ -95,7 +95,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       const keys = Object.keys(folders).sort()
       for(const k of keys) {
         if(viewMode == "browse") {
-          assets.push(`<div class="folder expand" data-path="${k}"><h2>${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand">${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
           assets.push(`<div class="folder" data-path="${k}"><h2>${k} (${folders[k].length})</div>`)
         }
