@@ -30,6 +30,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const user = await game.moulinette.applications.Moulinette.getUser()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
+      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"])
     
@@ -56,8 +57,18 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const pack = this.assetsPacks[r.pack]
     const URL = pack.isRemote || pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     const showThumbs = game.settings.get("moulinette-tiles", "tileShowVideoThumb");
+    let sasThumb = null
+    
+    // pre-signed url for accessing Digital Ocean Bucket
+    if(Array.isArray(pack.sas)) {
+      r.sas = pack.sas[2*idx-2]
+      sasThumb = pack.sas[2*idx-1]
+    }
     // sas (Shared access signature) for accessing remote files (Azure)
-    r.sas = pack.sas ? "?" + pack.sas : ""
+    else {
+      r.sas = pack.sas ? "?" + pack.sas : ""
+      sasThumb = r.sas
+    }
     r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${r.filename}`
     if(r.filename.endsWith(".webm")) {
       const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp" + r.sas : ""
@@ -65,7 +76,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
         `<img width="100" class="cc_image" height="100" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
         `<video width="100" height="100" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video></div>`
     } else {
-      const thumbnailURL = pack.isRemote ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + r.sas : r.assetURL + r.sas
+      const thumbnailURL = pack.isRemote ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + sasThumb : r.assetURL + r.sas
       return `<div class="tileres draggable" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}"><img width="100" height="100" src="${thumbnailURL}"/></div>`
     }
   }

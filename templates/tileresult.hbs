@@ -2,7 +2,7 @@
   <h3>{{pretty filename}}</h3>
   <div class="tileres draggable">
     {{#unless isVideo}}
-    <img width="400" height="400" src="{{assetURL}}{{sas}}" title="{{localize "mtte.dragTile"}}"/>
+    <img id="previewImage" width="400" height="400" src="{{assetURL}}{{sas}}" title="{{localize "mtte.dragTile"}}"/>
     {{/unless}}
     {{#if isVideo}}
     <video width="400" height="400" autoplay loop muted>
@@ -13,6 +13,9 @@
   </div>
   <p>  
     <i>Search provided by <a href="https://www.patreon.com/moulinette">Moulinette</a>.</i>
+  </p>
+  <p>  
+    {{localize "mtte.imageSize"}} : <span class="imageSizes">? x ?</span>
   </p>
   {{#if pack.pubWebsite}}
   <p>  
@@ -43,6 +46,7 @@
       <button class="clipboard" title="{{localize "mtte.clipboardImageToolTip"}}"><i class="fas fa-clipboard"></i> {{localize "mtte.clipboardImage"}}</button>
       {{/unless}}
       <button class="createTile" title="{{localize "mtte.createTileToolTip"}}"><i class="fas fa-puzzle-piece"></i> {{localize "mtte.createTile"}}</button>
+      <button class="createScene" title="{{localize "mtte.createSceneToolTip"}}"><i class="fas fa-map"></i> {{localize "mtte.createScene"}}</button>
     </div>
   </footer>
 </form>
