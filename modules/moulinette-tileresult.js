@@ -75,6 +75,13 @@ export class MoulinetteTileResult extends FormApplication {
         const data = { tile: this.tile, pack: this.pack }
         const cTiles = await import("../../moulinette-tiles/modules/moulinette-tiles.js")
         await cTiles.MoulinetteTiles.downloadAsset(data)
+        
+        // put path into clipboard
+        navigator.clipboard.writeText(data.img)
+        .catch(err => {
+          console.warn("Moulinette TileResult | Not able to copy path into clipboard")
+        });
+        ui.notifications.info(game.i18n.localize("mtte.clipboardImageSuccess"));
       }
     } else if(event.submitter.className == "clipboard") {
       // only copy to clipboard if local
