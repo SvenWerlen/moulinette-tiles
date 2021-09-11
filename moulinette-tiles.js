@@ -1,6 +1,7 @@
 
 import { MoulinetteDropAsActor } from "./modules/moulinette-dropas-actor.js"
 import { MoulinetteMacros } from "./modules/moulinette-macros.js"
+import { MoulinetteTilesFavorites } from "./modules/moulinette-tiles-favorites.js"
 
 
 Hooks.once("init", async function () {
@@ -54,7 +55,6 @@ Hooks.once("setup", async function () {
   Array.prototype.push.apply(game.moulinette.macros, MoulinetteMacros.macros)
 });
 
-
 /**
  * Ready: define new moulinette forge module
  */
@@ -63,6 +63,7 @@ Hooks.once("ready", async function () {
     // create default home folder for game icons
     await game.moulinette.applications.MoulinetteFileUtil.createFolderRecursive("moulinette/tiles/custom");
     await game.moulinette.applications.MoulinetteFileUtil.createFolderRecursive("moulinette/images/custom");
+    game.moulinette.applications["MoulinetteTilesFavorites"] = MoulinetteTilesFavorites
     console.log("Moulinette Tiles | Module loaded")
   }
 });
@@ -72,6 +73,10 @@ Hooks.once("ready", async function () {
  */
 Hooks.on('dropCanvasData', (canvas, data) => { 
   if(data.source == "mtte") {
+
+    // push into history
+    game.moulinette.forge.find( f => f.id == "tiles" ).instance.addToHistory( data.pack, data.tile )
+
     if(data.pack && data.pack.isRemote) {
       ui.notifications.info(game.i18n.localize("mtte.downloadInProgress"));
     }

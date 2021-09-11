@@ -1,0 +1,19 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+  <h3>{{assetName}}</h3>
+  <div class="tileres">
+    <img id="previewImage" width="100" height="100" src="{{url}}"/>
+  </div>
+  <p>
+    <b>{{localize "mtte.imageFrom"}}</b>: <a href="{{creatorUrl}}" target="_blank">{{creator}}</a> ({{pack}})
+  </p>
+  <p>  
+    <b>{{localize "mtte.imagePath"}}</b>: <pre>{{assetPath}}</pre>
+  </p>
+  <footer>
+  {{#if creatorUrl}}
+  <p>
+    <a href="{{creatorUrl}}" target="_blank"><button><i class="fas fa-external-link-alt"></i> {{localize "mtte.creatorWebsite"}}</button></a>
+  </p>
+  {{/if}}
+  <footer>
+</form>

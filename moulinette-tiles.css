@@ -1,6 +1,7 @@
 .mtte.forge .tileres {
   display: inline-flex;
   cursor: pointer;
+  position: relative;
 }
 
 .mtte.forge .tileres:hover {
@@ -74,3 +75,158 @@
   border: 2px solid darkgray;
 }
     
+.showcase.clickable {
+  cursor: pointer;
+}
+
+.mtte .fav {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.mtte .fav .info {
+  margin-left: 3px;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  line-height: 18px;
+  box-sizing: content-box;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 3px #000;
+  color: #BBB;
+  text-align: center;
+  border: 1px solid #000;
+  border-radius: 3px;
+}
+
+#moulinette-favorites header {
+  display: none;
+}
+
+#moulinette-favorites .window-content {
+  background: none;
+}
+
+#moulinette-favorites .tabs {
+  color: white;
+  border-bottom: 1px solid white;
+  padding-bottom: 3px;
+}
+
+#moulinette-favorites .tileres:hover {
+  background: white;
+}
+
+#moulinette-favorites .sidebar {
+  position: relative;
+  height: 100%;
+}
+
+#moulinette-favorites nav, #moulinette-favorites footer, #moulinette-favorites .tiles {
+  position: absolute;
+}
+
+#moulinette-favorites nav {
+  height: 52px;
+  width: 100%;
+}
+
+#moulinette-favorites nav a {
+  margin: 2px;
+}
+
+#moulinette-favorites .tiles {
+  top: 54px;
+  bottom: 30px;
+  width: 100%;
+}
+
+#moulinette-favorites footer {
+  font-size: 20px;
+  color: white;
+  height: 30px;
+  bottom: 0px;
+  width: 100%;
+  border-top: 1px solid white;
+  padding-top: 5px;
+  text-align: center;
+}
+
+#moulinette-favorites footer .action {
+  padding-right: 3px;
+}
+
+#moulinette-favorites-settings .invisible {
+  color: darkred;
+}
+
+#moulinette-favorites-settings ol {
+  margin: 0px;
+  padding: 0px;
+}
+
+#moulinette-favorites-settings input {
+  margin-left: 5px;
+}
+
+#moulinette-favorites-settings .actions button.search {
+  margin-left: 5px;
+  max-width: 30px;
+}
+
+#moulinette-favorites-settings .actions button.add, #moulinette-favorites-settings .actions button.apply, #moulinette-favorites-settings .actions button.cancel {
+  max-width: 150px;
+}
+
+#moulinette-favorites-settings .actions a {
+  padding-right: 8px;
+}
+
+#moulinette-favorites-settings #main {
+  position: relative;
+  height: 100%;
+}
+
+#moulinette-favorites-settings #main .groups, #moulinette-favorites-settings footer {
+  position: absolute;
+}
+
+#moulinette-favorites-settings #main .groups {
+  top: 0px;
+  bottom: 110px;
+  width: 100%;
+}
+
+#moulinette-favorites-settings #main footer {
+  height: 105px;
+  bottom: 0px;
+  width: 100%;
+}
+
+#moulinette-favorites-settings .item-list .id {
+  padding-left: 5px;
+  max-width: 100px;
+}
+
+#moulinette-favorites-settings .item-list .iconImg {
+  max-width: 35px;
+}
+
+#moulinette-favorites-settings .item-list .count {
+  max-width: 50px;
+}
+
+#moulinette-favorites-settings .item-list .actions {
+  max-width: 60px;
+}
+
+#moulinette-favorites-settings footer .edit {
+  display: none;
+}
+
+#moulinette-favorites-settings .groups .item:hover {
+  color: white;
+  background-color: #777;
+}

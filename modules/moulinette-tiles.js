@@ -1,4 +1,5 @@
 import { MoulinetteTileResult } from "./moulinette-tileresult.js"
+import { MoulinetteAvailableAssets } from "./moulinette-available.js"
 
 /**
  * Forge Module for tiles
@@ -16,6 +17,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     this.assets = null
     this.assetsPacks = null
     this.searchResults = null
+    this.matchesCloud = null
     this.pack = null
   }
   
@@ -69,16 +71,23 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       r.sas = pack.sas ? "?" + pack.sas : ""
       sasThumb = r.sas
     }
+    let html = ""
     r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${r.filename}`
     if(r.filename.endsWith(".webm")) {
       const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp" + r.sas : ""
-      return `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}">` +
+      html = `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}">` +
         `<img width="100" class="cc_image" height="100" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
-        `<video width="100" height="100" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video></div>`
+        `<video width="100" height="100" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video>`
     } else {
       const thumbnailURL = pack.isRemote ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + sasThumb : r.assetURL + r.sas
-      return `<div class="tileres draggable" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}"><img width="100" height="100" src="${thumbnailURL}"/></div>`
+      html = `<div class="tileres draggable" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}"><img width="100" height="100" src="${thumbnailURL}"/>`
     }
+    const favs = this.isFavorite(pack, r)
+    html += `<div class="fav">`
+    for( const f of favs ) {
+      html += `<i class="info ${f}"></i>`
+    }
+    return html + "</div></div>"
   }
   
   /**
@@ -93,7 +102,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       return []
     }
     
-    searchTerms = searchTerms.split(" ")
+    const searchTermsList = searchTerms.split(" ")
     // filter list according to search terms and selected pack or publisher
     this.searchResults = this.assets.filter( t => {
       // pack doesn't match selection
@@ -103,7 +112,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       // remove webm if type specified
       if( type && type != "imagevideo" && t.filename.endsWith(".webm") ) return false
       // check if text match
-      for( const f of searchTerms ) {
+      for( const f of searchTermsList ) {
         if( t.filename.toLowerCase().indexOf(f) < 0 ) return false
       }
       return true;
@@ -135,6 +144,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       }
     }
     
+    // retrieve available assets that the user doesn't have access to
+    this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, this.assetsPacks)
+    
     return assets
   }
   
@@ -152,6 +164,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     } else {
       this.html.find(".tileres").click(this._onShowTile.bind(this))
     }
+
+    // when right-click on tile
+    this.html.find(".tileres").mousedown(this._onMouseDown.bind(this))
     
     // when choose mode
     this.html.find(".options .dropmode").click(event => {
@@ -180,15 +195,30 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       game.settings.set("moulinette", "tileMacro", macroPrefs)
     })
     
-    // display hide show showCase
+    // display/hide showCase
+    const showCase = this.html.find(".showcase")
     if(this.pack >= 0 && this.assetsPacks[this.pack].isShowCase) {
       const pack = this.assetsPacks[this.pack]
-      const showCase = this.html.find(".showcase")
+      showCase.html(game.i18n.localize("mtte.showCase"))
       showCase.find(".link").text(pack.publisher)
       showCase.find(".link").attr('href', pack.pubWebsite)
-      this.html.find(".showcase").show()
-    } else {
-      this.html.find(".showcase").hide()
+      showCase.removeClass("clickable")
+      showCase.show()
+    } 
+    else if(this.matchesCloud && this.matchesCloud.length > 0) {
+      // display/hide additional content
+      let count = 0
+      this.matchesCloud.forEach( m => count += m.matches.length )
+      showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: count}))
+      showCase.addClass("clickable")
+      const matches = this.matchesCloud
+      showCase.click(ev => new MoulinetteAvailableAssets(duplicate(matches)).render(true))
+      showCase.show()
+    }
+    else {
+      showCase.html("")
+      showCase.removeClass("clickable")
+      showCase.hide()
     }
     
     // display hide video
@@ -205,7 +235,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const size = game.settings.get("moulinette", "tileSize")
     const compact = game.settings.get("moulinette-core", "uiMode") == "compact"
     const macro = MoulinetteTiles.getMacroNames()
-    return `<div class="showcase">${game.i18n.localize("mtte.showCase")}</div>
+    return `<div class="showcase"></div>
       <div class="options"><div class="option">` +
       (compact ? "" : `${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i>`) +
       `<input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${compact ? game.i18n.localize("mtte.tile").substring(0,2) : game.i18n.localize("mtte.tile")}
@@ -341,7 +371,25 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       if ( onSelectBind ) onSelectBind(data.img);
     }
   }
-  
+
+  async _onMouseDown(event) {
+    // right click
+    if(event.which == 3) {
+      event.preventDefault();
+      const source = event.currentTarget;
+      const idx = source.dataset.idx;
+
+      if(this.searchResults && idx > 0 && idx <= this.searchResults.length) {
+        const tile = this.searchResults[idx-1]
+        const pack = this.assetsPacks[tile.pack]
+        const icons = await this.toggleFavorite(pack, tile)
+
+        let html = ''
+        icons.forEach( i => html += `<i class="info ${i}"></i>` )
+        $(source).find(".fav").html(html)
+      }
+    }
+  }
     
   _onChooseMode(event) {
     const source = event.currentTarget;

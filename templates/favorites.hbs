@@ -1,0 +1,23 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+
+  <div class="sidebar">
+
+    <nav class="sheet-tabs tabs">
+      {{#each favorites as |f|}}
+        <a class="item {{#if f.active}}active{{/if}}" data-tab="{{f.id}}"><i class="{{f.icon}}"></i> </a>
+      {{/each}}
+    </nav>
+
+    <div class="tiles">
+        {{#each assets as |a|}}{{{a}}}{{/each}}
+    </div>
+
+    <footer>
+      <a class="action config"><i class="fas fa-cog"></i> </a>
+      <a class="action clear"><i class="fas fa-trash"></i> </a>
+    </footer>
+
+  </div>
+
+
+</form>
