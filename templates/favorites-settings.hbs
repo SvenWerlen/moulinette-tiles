@@ -12,14 +12,18 @@
           <div class="icon"><h3>{{localize "mtte.icon"}}</h3></div>
           <div class="iconImg"></div>
           <div class="count"><h3>{{localize "mtte.items"}}</h3></div>
+          <div class="count"><h3>{{localize "mtte.size"}}</h3></div>
+          <div class="count"><h3>{{localize "mtte.runMacro"}}</h3></div>
           <div class="actions"><h3>{{localize "mtte.actions"}}</h3></div>
         </li>
         {{#each favorites as |fav|}}
-        <li class="item flexrow {{#unless fav.visible}}invisible{{/unless}}" data-id="{{fav.id}}" data-icon="{{fav.icon}}">
+        <li class="item flexrow {{#unless fav.visible}}invisible{{/unless}}" data-id="{{fav.id}}">
           <div class="id">{{fav.id}}</div>
           <div class="icon">{{fav.icon}}</div>
           <div class="iconImg"><i class="{{fav.icon}}"></i></div>
           <div class="count">{{fav.items}}</div>
+          <div class="count">{{fav.size}}</div>
+          <div class="count">{{fav.macros}}</div>
           <div class="actions">
             <a class="toggle"><i class="fas fa-eye{{#unless fav.visible}}-slash{{/unless}}"></i> </a>
             {{#if fav.editable}}
@@ -45,6 +49,13 @@
         </div>
 
         <div class="form-group actions">
+          <div class="name">{{localize "mtte.groupTileSize"}} <i class="fas fa-question-circle" title="{{localize "mtte.groupTileSizeHint"}}"></i> :</div>
+          <input class="tilesize" id="tileSizeEdit" type="text" name="tilesize" maxlength="4">
+          <div class="macroLabel">{{localize "mtte.runMacro"}} <i class="fas fa-question-circle" title="{{localize "mtte.groupMacroHint"}}"></i> :</div>
+          <input class="macros" id="macrosEdit" type="text" name="macros">
+        </div>
+
+        <div class="form-group actions">
           <button type="button" class="cancel"><i class="fas fa-times"></i> {{localize "mtte.cancel"}}</button>
           <button type="button" class="apply"><i class="fas fa-save"></i> {{localize "mtte.apply"}}</button>
         </div>
@@ -57,6 +68,12 @@
           <input type="text" id="IconId" placeHolder="{{localize "mtte.idPlaceHolder"}}"/>
           <input type="text" id="IconInput" placeHolder="{{localize "mtte.iconPlaceHolder"}}"/>
           <button type="button" id="GetIconPicker" data-iconpicker-input="input#IconInput" data-iconpicker-preview="i#PreviewIcon" class="search"><i class="fas fa-search" id="PreviewIcon"></i></button>
+        </div>
+        <div class="form-group actions">
+          <div class="name">{{localize "mtte.groupTileSize"}} <i class="fas fa-question-circle" title="{{localize "mtte.groupTileSizeHint"}}"></i> :</div>
+          <input class="tilesize" id="tileSize" type="text" name="tilesize" maxlength="4">
+          <div class="macroLabel">{{localize "mtte.runMacro"}} <i class="fas fa-question-circle" title="{{localize "mtte.groupMacroHint"}}"></i> :</div>
+          <input class="macros" id="macros" type="text" name="macros">
         </div>
 
         <div class="form-group actions">

@@ -8,12 +8,15 @@
       {{/each}}
     </nav>
 
+    <div class="info">{{localize "mtte.clickToClose"}}</div>
+
     <div class="tiles">
         {{#each assets as |a|}}{{{a}}}{{/each}}
     </div>
 
     <footer>
       <a class="action config"><i class="fas fa-cog"></i> </a>
+      <a class="action mtte"><i class="fas fa-puzzle-piece"></i> </a>
       <a class="action clear"><i class="fas fa-trash"></i> </a>
     </footer>
 

@@ -30,6 +30,8 @@ export class MoulinetteTilesFavoritesSettings extends FormApplication {
         id: fav,
         icon: favs[fav].icon,
         items: favs[fav].list.length,
+        size: favs[fav].size > 0 ? favs[fav].size : "",
+        macros: favs[fav].macros && favs[fav].macros.length > 0 ? favs[fav].macros.split(",").length : 0,
         editable: fav != "history" && fav != "default",
         visible: !favs[fav].hidden
       })
@@ -78,13 +80,16 @@ export class MoulinetteTilesFavoritesSettings extends FormApplication {
   }
 
   /**
-   * User clicked on "Add Group"
+   * User clicked on any of the action button (on a group)
    */
   async _onAction(event) {
     event.preventDefault();
     const source = event.currentTarget;
     const id = $(source.closest(".item")).data("id")
-    const icon = $(source.closest(".item")).data("icon")
+    const favs = game.settings.get("moulinette", "favorites")
+    const icon = favs[id].icon
+    const size = favs[id].size > 0 ? `${favs[id].size}` : ""
+    const macros = favs[id].macros
 
     if(source.classList.contains("edit")) {
       if(id == "default" || id == "history") return;
@@ -93,6 +98,8 @@ export class MoulinetteTilesFavoritesSettings extends FormApplication {
       this.html.find("#IconIdEdit").val(id)
       this.html.find("#IconInputEdit").val(icon)
       this.html.find("#PreviewIconEdit").attr("class", icon);
+      this.html.find("#tileSizeEdit").val(size)
+      this.html.find("#macrosEdit").val(macros)
       this.html.find("footer .edit").show()
     } else if(source.classList.contains("delete")) {
       if(id == "default" || id == "history") return;
@@ -101,7 +108,6 @@ export class MoulinetteTilesFavoritesSettings extends FormApplication {
         title: game.i18n.localize("mtte.deleteGroup"),
         content: game.i18n.format("mtte.deleteGroupContent", { group: id }),
         yes: async function() {
-          const favs = game.settings.get("moulinette", "favorites")
           if( id in favs ) {
             delete favs[id]
             await game.settings.set("moulinette", "favorites", favs)
@@ -111,7 +117,6 @@ export class MoulinetteTilesFavoritesSettings extends FormApplication {
         no: () => {}
       });
     } else if(source.classList.contains("toggle")) {
-      const favs = game.settings.get("moulinette", "favorites")
       if( id in favs ) {
         if( favs[id].hidden ) { delete favs[id].hidden }
         else { favs[id].hidden = true }
@@ -128,6 +133,8 @@ export class MoulinetteTilesFavoritesSettings extends FormApplication {
     const oldID = this.html.find("#IconSourceIdEdit").val()
     const groupId = this.html.find("#IconIdEdit").val()
     const groupIcon = this.html.find("#IconInputEdit").val()
+    const tileSize = this.html.find("#tileSizeEdit").val()
+    const macros = this.html.find("#macrosEdit").val()
 
     if (!groupId.match(/^[0-9a-zA-Z]{3,10}$/)) {
       return ui.notifications.error(game.i18n.localize("mtte.errorGroupIdInvalid"));
@@ -145,6 +152,12 @@ export class MoulinetteTilesFavoritesSettings extends FormApplication {
     // edit new group
     const group = duplicate(favs[oldID])
     group.icon = groupIcon
+
+    // add additional data
+    group.size = tileSize.trim().length > 0 ? parseInt(tileSize) : ""
+    group.macros = macros.trim().length > 0 ? macros.trim() : ""
+
+    // replace
     delete favs[oldID]
     favs[groupId] = group
     await game.settings.set("moulinette", "favorites", favs)
@@ -159,6 +172,8 @@ export class MoulinetteTilesFavoritesSettings extends FormApplication {
     const source = event.currentTarget;
     const groupId = this.html.find("#IconId").val()
     const groupIcon = this.html.find("#IconInput").val()
+    const tileSize = this.html.find("#tileSize").val()
+    const macros = this.html.find("#macros").val()
 
     if (!groupId.match(/^[0-9a-zA-Z]{3,10}$/)) {
       return ui.notifications.error(game.i18n.localize("mtte.errorGroupIdInvalid"));
@@ -180,6 +195,11 @@ export class MoulinetteTilesFavoritesSettings extends FormApplication {
 
     // add new group
     favs[groupId] = { icon: groupIcon, list: [] }
+
+    // add additional data
+    favs[groupId].size = tileSize.trim().length > 0 ? parseInt(tileSize) : ""
+    favs[groupId].macros = macros.trim().length > 0 ? macros.trim() : ""
+
     await game.settings.set("moulinette", "favorites", favs)
     this.render()
   }

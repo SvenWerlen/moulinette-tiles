@@ -436,10 +436,16 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     return macros ? macros : ""
   }
   
-  static getMacros() {
+  static getMacros(data) {
     const tileMode = game.settings.get("moulinette", "tileMode")
-    const macros = game.settings.get("moulinette", "tileMacro")[tileMode]
+    let macros = game.settings.get("moulinette", "tileMacro")[tileMode]
     const results = []
+
+    // add specific macros
+    if(data.macros && data.macros.length > 0) {
+      macros = macros ? macros + "," + data.macros : data.macros
+    }
+
     if(macros) {
       const list = macros.split(",")
       for( const macroName of list ) {
@@ -554,7 +560,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     canvas.getLayer("NotesLayer").activate()
     
     // Call macro
-    const macros = MoulinetteTiles.getMacros()
+    const macros = MoulinetteTiles.getMacros(data)
     for(const macro of macros) {
       game.moulinette.param = [entry, note]
       console.log("EXECUTE MACRO")
@@ -618,7 +624,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     } 
     
     // Call macro
-    const macros = MoulinetteTiles.getMacros()
+    const macros = MoulinetteTiles.getMacros(data)
     for(const macro of macros) {
       game.moulinette.param = [tile]
       macro.execute()

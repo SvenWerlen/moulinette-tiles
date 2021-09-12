@@ -86,7 +86,7 @@ export class MoulinetteDropAsActor extends FormApplication {
     } catch(e) {}
     
     // Call macro
-    const macros = cTiles.MoulinetteTiles.getMacros()
+    const macros = cTiles.MoulinetteTiles.getMacros(actor)
     for(const macro of macros) {
       game.moulinette.param = [newToken]
       macro.execute()

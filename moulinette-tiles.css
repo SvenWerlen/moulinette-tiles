@@ -124,7 +124,7 @@
   height: 100%;
 }
 
-#moulinette-favorites nav, #moulinette-favorites footer, #moulinette-favorites .tiles {
+#moulinette-favorites nav, #moulinette-favorites footer, #moulinette-favorites .info, #moulinette-favorites .tiles {
   position: absolute;
 }
 
@@ -137,10 +137,20 @@
   margin: 2px;
 }
 
+#moulinette-favorites .info {
+  top: 55px;
+  font-style: italic;
+  color: #ccc;
+  font-size: 10px;
+  text-align: center;
+  width: 100%;
+}
+
 #moulinette-favorites .tiles {
-  top: 54px;
+  top: 68px;
   bottom: 30px;
   width: 100%;
+  overflow: scroll;
 }
 
 #moulinette-favorites footer {
@@ -155,7 +165,7 @@
 }
 
 #moulinette-favorites footer .action {
-  padding-right: 3px;
+  padding-right: 10px;
 }
 
 #moulinette-favorites-settings .invisible {
@@ -189,6 +199,16 @@
   height: 100%;
 }
 
+#moulinette-favorites-settings .tilesize {
+  max-width: 50px;
+}
+
+#moulinette-favorites-settings .macroLabel {
+  margin-left: 40px;
+  max-width: 113px;
+}
+
+
 #moulinette-favorites-settings #main .groups, #moulinette-favorites-settings footer {
   position: absolute;
 }
@@ -200,7 +220,7 @@
 }
 
 #moulinette-favorites-settings #main footer {
-  height: 105px;
+  height: 140px;
   bottom: 0px;
   width: 100%;
 }

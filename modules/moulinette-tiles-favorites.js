@@ -68,7 +68,6 @@ export class MoulinetteTilesFavorites extends FormApplication {
     const pack = this.assetsPacks.find(p => p.publisher == r.pub && p.name == r.pack)
 
     if(!pack) {
-      console.warn("No such asset found! (Moulinette Cloud asset?)", r)
       return null
     }
 
@@ -85,14 +84,23 @@ export class MoulinetteTilesFavorites extends FormApplication {
     let assets = []
     await this.getPackList()
 
+    let notFound = []
     let idx = 0
     const favs = game.settings.get("moulinette", "favorites")
-    for(const fav of favs[this.tab].list.reverse()) {
-      idx++
-      const html = this.generateAsset(fav, idx)
-      if(html) {
-        assets.push(html)
+    if(this.tab in favs) {
+      for(const fav of favs[this.tab].list.reverse()) {
+        idx++
+        const html = this.generateAsset(fav, idx)
+        if(html) {
+          assets.push(html)
+        } else {
+          notFound.push(fav)
+        }
       }
+    }
+
+    if(notFound.length > 0) {
+      console.warn("Some assets have not been found! (probably Moulinette Cloud assets)", notFound)
     }
 
     const favorites = []
@@ -119,6 +127,9 @@ export class MoulinetteTilesFavorites extends FormApplication {
    */
   activateListeners(html) {
     $("#controls").hide()
+    $("#logo").hide()
+    $("#navigation").hide()
+    $("#players").hide()
 
     // keep html for later usage
     this.html = html
@@ -148,6 +159,9 @@ export class MoulinetteTilesFavorites extends FormApplication {
   close() {
     super.close()
     $("#controls").show()
+    $("#logo").show()
+    $("#navigation").show()
+    $("#players").show()
   }
 
   async _removeFav(event) {
@@ -161,14 +175,16 @@ export class MoulinetteTilesFavorites extends FormApplication {
 
       // retrieve selected favorite
       const favs = game.settings.get("moulinette", "favorites")
-      const fav = favs[this.tab].list.reverse()[idx-1]
+      if(this.tab in favs) {
+        const fav = favs[this.tab].list.reverse()[idx-1]
 
-      // retrieve pack & tile
-      const pack = this.assetsPacks.find( p => p.publisher == fav.pub && p.name == fav.pack )
-      const tile = this.assets.find( a => a.pack = pack.idx && a.filename == fav.asset )
+        // retrieve pack & tile
+        const pack = this.assetsPacks.find( p => p.publisher == fav.pub && p.name == fav.pack )
+        const tile = this.assets.find( a => a.pack = pack.idx && a.filename == fav.asset )
 
-      game.moulinette.forge.find( f => f.id == "tiles" ).instance.toggleFavorite(pack, tile, true)
-      $(div).hide()
+        game.moulinette.forge.find( f => f.id == "tiles" ).instance.toggleFavorite(pack, tile, true)
+        $(div).hide()
+      }
     }
   }
 
@@ -214,24 +230,31 @@ export class MoulinetteTilesFavorites extends FormApplication {
     else if(source.classList.contains("config")) {
       (new MoulinetteTilesFavoritesSettings()).render(true)
     }
+    else if(source.classList.contains("mtte")) {
+      const forgeClass = game.moulinette.modules.find(m => m.id == "forge").class
+      new forgeClass("tiles").render(true)
+    }
   }
 
   _onDragStart(event) {
     const div = event.currentTarget;
     const idx = div.dataset.idx;
     const mode = game.settings.get("moulinette", "tileMode")
-    const size = game.settings.get("moulinette", "tileSize")
+    let size = game.settings.get("moulinette", "tileSize")
 
     // invalid action
     if(!this.assets || idx < 0 || idx > this.assets.length) return
 
     // retrieve selected favorite
     const favs = game.settings.get("moulinette", "favorites")
+    const favGroup = favs[this.tab]
     const fav = favs[this.tab].list.reverse()[idx-1]
+    if(favGroup.size > 0) { size = favGroup.size; }
 
     // retrieve pack & tile
     const pack = this.assetsPacks.find( p => p.publisher == fav.pub && p.name == fav.pack )
-    const tile = this.assets.find( a => a.pack = pack.idx && a.filename == fav.asset )
+    const tile = this.assets.find( a => a.pack == pack.idx && a.filename == fav.asset )
+    tile.sas = "?" + pack.sas
 
     let dragData = {}
     if(mode == "tile") {
@@ -239,19 +262,22 @@ export class MoulinetteTilesFavorites extends FormApplication {
         type: "Tile",
         tile: tile,
         pack: pack,
-        tileSize: size
+        tileSize: size,
+        macros: favGroup.macros && favGroup.macros.length > 0 ? favGroup.macros : ""
       };
     } else if(mode == "article") {
       dragData = {
         type: "JournalEntry",
         tile: tile,
-        pack: pack
+        pack: pack,
+        macros: favGroup.macros && favGroup.macros.length > 0 ? favGroup.macros : ""
       };
     } else if(mode == "actor") {
       dragData = {
         type: "Actor",
         tile: tile,
-        pack: pack
+        pack: pack,
+        macros: favGroup.macros && favGroup.macros.length > 0 ? favGroup.macros : ""
       };
     }
 
