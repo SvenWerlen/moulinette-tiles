@@ -39,6 +39,9 @@ export class MoulinetteAvailableAssets extends FormApplication {
       }
     }
 
+    // randomize results (avoid some publishers to always be listed first)
+    this.assets.sort((a,b) => 0.5 - Math.random())
+
     return { assets: this.assets.slice(0, MoulinetteAvailableAssets.MAX_ASSETS) };
   }
   

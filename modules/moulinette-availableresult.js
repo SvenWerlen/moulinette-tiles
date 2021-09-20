@@ -27,11 +27,13 @@ export class MoulinetteAvailableResult extends FormApplication {
 
     const client = new game.moulinette.applications.MoulinetteClient()
     const information = await client.get(`/asset/${this.creator}/${this.pack}`)
-    console.log(information)
 
     return { 
       creator: this.creator, 
       creatorUrl: information.status == 200 ? information.data.publisherUrl : null,
+      moulinetteUrl: "https://www.moulinette.cloud/getting-started/use-moulinette-to-access-creators-assets/",
+      tiers: information.data.tiers,
+      vanity: information.data.vanity,
       pack: this.pack,
       asset: this.asset, 
       url: "http://127.0.0.1:5000/static/thumbs/" + this.asset,
