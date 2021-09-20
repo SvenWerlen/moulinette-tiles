@@ -39,10 +39,10 @@
   {{/unless}}
   <footer>
     <div class="actions">
-      {{#if pack.licenseUrl}}
+      {{#if pack.isRemote}}
       <button class="download" title="{{localize "mtte.downloadImageToolTip"}}"><i class="fas fa-cloud-download-alt"></i> {{localize "mtte.downloadImage"}}</button>
       {{/if}}
-      {{#unless pack.licenseUrl}}
+      {{#unless pack.isRemote}}
       <button class="clipboard" title="{{localize "mtte.clipboardImageToolTip"}}"><i class="fas fa-clipboard"></i> {{localize "mtte.clipboardImage"}}</button>
       {{/unless}}
       <button class="createTile" title="{{localize "mtte.createTileToolTip"}}"><i class="fas fa-puzzle-piece"></i> {{localize "mtte.createTile"}}</button>
