@@ -36,7 +36,7 @@ export class MoulinetteAvailableResult extends FormApplication {
       vanity: information.data.vanity,
       pack: this.pack,
       asset: this.asset, 
-      url: "http://127.0.0.1:5000/static/thumbs/" + this.asset,
+      url: `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/thumbs/${this.asset}`,
       assetName: this.asset.split("/").pop(),
       assetPath: this.asset.substring(0, this.asset.lastIndexOf("/"))
     }

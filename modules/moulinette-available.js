@@ -6,7 +6,6 @@ import { MoulinetteAvailableResult } from "./moulinette-availableresult.js"
 export class MoulinetteAvailableAssets extends FormApplication {
   
   static MAX_ASSETS = 100
-  static BASE_URL = "http://127.0.0.1:5000/static/thumbs/"
   
   constructor(assets) {
     super()
@@ -35,7 +34,7 @@ export class MoulinetteAvailableAssets extends FormApplication {
       const pub = this.assetsData[p]
       for(let a = 0; a < pub.matches.length; a++) {
         const asset = pub.matches[a]
-        this.assets.push(`<div class="tileres" title="${a}" data-pidx="${p}" data-aidx="${a}"><img width="100" height="100" src="${MoulinetteAvailableAssets.BASE_URL}${asset}"/></div>`)
+        this.assets.push(`<div class="tileres" title="${a}" data-pidx="${p}" data-aidx="${a}"><img width="100" height="100" src="${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/thumbs/${asset}"/></div>`)
       }
     }
 
