@@ -145,7 +145,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
     
     // retrieve available assets that the user doesn't have access to
-    this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, this.assetsPacks)
+    this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, "tiles", this.assetsPacks)
     
     return assets
   }

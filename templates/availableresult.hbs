@@ -10,7 +10,7 @@
     <b>{{localize "mtte.requiredTiers"}}</b>:
     <ul>
     {{#each tiers as |t|}}
-      <li>{{t.title}} ({{t.amount}} $USD/mo) {{#if t.id}}- <a href="https://www.patreon.com/join/{{../vanity}}/checkout?rid={{t.id}}" target="_blank">{{localize "mtte.subscribe"}}</a></li>{{/if}}
+      <li>{{t.title}} ({{t.amount}} $USD) {{#if t.id}}- <a href="https://www.patreon.com/join/{{../vanity}}/checkout?rid={{t.id}}" target="_blank">{{localize "mtte.subscribe"}}</a></li>{{/if}}
     {{/each}}
     </ul>
   </p>
