@@ -197,7 +197,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     // display/hide showCase
     const showCase = this.html.find(".showcase")
-    if(this.pack >= 0 && this.assetsPacks[this.pack].isShowCase) {
+    if(this.pack >= 0 && this.assetsPacks[this.pack] && this.assetsPacks[this.pack].isShowCase) {
       const pack = this.assetsPacks[this.pack]
       showCase.html(game.i18n.localize("mtte.showCase"))
       showCase.find(".link").text(pack.publisher)

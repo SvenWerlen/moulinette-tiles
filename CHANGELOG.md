@@ -14,7 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Favorites : history, groups
 
-## [3.3.0] - 2021-08-21
+## [3.3.1] - 2021-08-21
+### Fixed
+- 3.3.1: Fix error in the console (isFavorite) when packId doesn't exist
 ### Added
 - Path copied into clipboard after downloading it (detail page only)
 
