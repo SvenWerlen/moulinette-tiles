@@ -2,6 +2,22 @@
   <p>  
     <i>{{localize "mtte.dropasActorDescription"}}</i>
   </p>
+
+  <h2>{{localize "mtte.asNewActor"}}</h2>
+  <div class="form-group">
+    <label><b>{{localize "mtte.actorType"}}</b></label>
+    <select class="actorsTypes">
+      {{#each actorTypes as |a|}}<option value="{{a.id}}" {{#if a.selected}}selected{{/if}}>{{a.name}}</option>{{/each}}
+    </select>
+  </div>
+  <footer>
+    <div class="actions">
+      <button class="dialog-button okNew1"><i class="fas fa-user-alt"></i> {{localize "mtte.createActor"}}</button>
+      <button class="dialog-button okNew2"><i class="fas fa-user-alt"></i> {{localize "mtte.createActorAndLink"}}</button>
+    </div>
+  </footer>
+  <br />
+  <h2>{{localize "mtte.asExistingActor"}}</h2>
   <div class="form-group">
     <label><b>{{localize "mtte.actor"}}</b></label>
     <select class="actors">
@@ -14,7 +30,7 @@
   </div>
   <footer>
     <div class="actions">
-      <button class="dialog-button ok default"><i class="fas fa-check"></i> {{localize "mtte.createToken"}}</button>
+      <button class="dialog-button ok default"><i class="fas fa-user-alt"></i> {{localize "mtte.createToken"}}</button>
       <button class="dialog-button cancel"><i class="fas fa-times"></i> {{localize "Cancel"}}</button>
     </div>
   </footer>

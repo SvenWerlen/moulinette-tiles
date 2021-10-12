@@ -1,6 +1,6 @@
 {
   "name": "moulinette-tiles",
-  "title": "Moulinette Forge Tiles (module)",
+  "title": "Moulinette Tiles (module)",
   "description": "This module for Moulinette adds capabilities for downloading tiles and adding them to your scenes.",
   "version": "3.5.1",
   "author": "Sven Werlen",

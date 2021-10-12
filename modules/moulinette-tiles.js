@@ -235,12 +235,17 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const size = game.settings.get("moulinette", "tileSize")
     const compact = game.settings.get("moulinette-core", "uiMode") == "compact"
     const macro = MoulinetteTiles.getMacroNames()
+
+    const tileMode = compact ? `<i class="fas fa-cubes" title="${game.i18n.localize("mtte.tile")}"></i>` : game.i18n.localize("mtte.tile")
+    const articleMode = compact ? `<i class="fas fa-book-open" title="${game.i18n.localize("mtte.article")}"></i>` : game.i18n.localize("mtte.article")
+    const tokenMode = compact ? `<i class="fas fa-users" title="${game.i18n.localize("mtte.actor")}"></i>` : game.i18n.localize("mtte.actor")
+
     return `<div class="showcase"></div>
       <div class="options"><div class="option">` +
       (compact ? "" : `${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i>`) +
-      `<input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${compact ? game.i18n.localize("mtte.tile").substring(0,2) : game.i18n.localize("mtte.tile")}
-        <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${compact ? game.i18n.localize("mtte.article").substring(0,2) : game.i18n.localize("mtte.article")}
-        <input class="dropmode" type="radio" name="mode" value="actor" ${mode == "actor" ? "checked" : ""}> ${compact ? game.i18n.localize("mtte.actor").substring(0,2) : game.i18n.localize("mtte.actor")}
+      `<input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${tileMode}
+        <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${articleMode}
+        <input class="dropmode" type="radio" name="mode" value="actor" ${mode == "actor" ? "checked" : ""}> ${tokenMode}
       </div>
       <div class="option">` +
       (compact ? "" : `${game.i18n.localize("FILES.TileSize")} <i class="fas fa-question-circle" title="${game.i18n.localize("FILES.TileSizeHint")}"></i>`) +

@@ -21,8 +21,12 @@ export class MoulinetteDropAsActor extends FormApplication {
   getData() {
     const actorId = game.settings.get("moulinette", "tileActorId");
     const actorLink = game.settings.get("moulinette", "tileActorLink");
+    const actorType = game.settings.get("moulinette", "tileActorType");
+
     const actors = game.actors.map( a => { return { id: a.id, name: a.name, selected: a.id == actorId } })
-    return { actors: actors, actorId: actorId, actorLink: actorLink }
+    const actorTypes = game.system.entityTypes.Actor.map( a => { return { id: a, name: a, selected: a == actorType } })
+
+    return { actors: actors, actorId: actorId, actorLink: actorLink, actorTypes: actorTypes }
   }
   
   activateListeners(html) {
@@ -44,6 +48,11 @@ export class MoulinetteDropAsActor extends FormApplication {
       game.settings.set("moulinette", "tileActorId", selActorId);
       game.settings.set("moulinette", "tileActorLink", linked);
     }
+    else if(source.classList.contains("okNew1")) {
+      this.createToken(null, false)
+    } else if(source.classList.contains("okNew2")) {
+      this.createToken(null, true)
+    }
     this.close()
   }
   
@@ -52,17 +61,32 @@ export class MoulinetteDropAsActor extends FormApplication {
     const cTiles = await import("./moulinette-tiles.js")
     await cTiles.MoulinetteTiles.downloadAsset(this.data)
     
-    // Prepare the Token data
-    let token;
-    let td;
-    // @COMPATIBILITY 0.7-0.8 (https://foundryvtt.wiki/en/migrations/foundry-core-0_8_x)
-    // The biggest change is to Tokens, which now have a TokenDocument. The recommended way to create a token from an Actor is no longer Token.fromActor but instead passing the result from Actor#getTokenData to TokenDocument's constructor.
-    if(game.data.version.startsWith("0.7")) {
-      token = await Token.fromActor(actor, {x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
-      td = token.data
-    } else {
-      token = await actor.getTokenData({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
-      td = token
+    let td = null
+
+    // Reusing existing actor
+    if(actor) {
+      td = await actor.getTokenData({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+    }
+    // Creating new actor
+    else {
+      const actorType = this.html.find(".actorsTypes").children("option:selected").val()
+      if(!game.system.entityTypes.Actor.includes(actorType)) {
+        return console.error(`MoulinetteDropAsActor | Invalid actor type ${actorType}`, game.system.entityTypes.Actor)
+      }
+      // keep preferences
+      game.settings.set("moulinette", "tileActorType", actorType);
+
+      // extracts the filename and replace all filename separators by spaces
+      const name = this.data.img.split("/").pop().split(".")[0].replaceAll("_", " ").replaceAll("-", " ").replace(/  +/g, ' ');
+      actor = await Actor.create({
+        name: name,
+        type: actorType,
+        img: this.data.img
+      });
+      td = await actor.getTokenData({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+
+      game.settings.set("moulinette", "tileActorId", actor.id);
+      game.settings.set("moulinette", "tileActorLink", linked);
     }
 
     // Adjust token position
@@ -73,13 +97,9 @@ export class MoulinetteDropAsActor extends FormApplication {
     if ( !canvas.grid.hitArea.contains(td.x, td.y) ) return false;
 
     // Submit the Token creation request and activate the Tokens layer (if not already active)
-    let newToken;
-    if(game.data.version.startsWith("0.7")) {
-      newToken = await Token.create(td);
-    } else {
-      newToken = (await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [td], { parent: canvas.scene }))[0]
-      newToken = newToken._object
-    }
+    let newToken = (await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [td], { parent: canvas.scene }))[0]
+    newToken = newToken._object
+
     // sometimes throws exceptions
     try {
       canvas.getLayer("TokenLayer").activate()

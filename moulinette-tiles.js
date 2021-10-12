@@ -11,6 +11,7 @@ Hooks.once("init", async function () {
   game.settings.register("moulinette", "tileMacro", { scope: "world", config: false, type: Object, default: {} })
   game.settings.register("moulinette", "tileActorId", { scope: "world", config: false, type: String })
   game.settings.register("moulinette", "tileActorLink", { scope: "world", config: false, type: Boolean, default: true })
+  game.settings.register("moulinette", "tileActorType", { scope: "world", config: false, type: String })
   
   game.settings.register("moulinette-tiles", "tileShowVideoThumb", {
     name: game.i18n.localize("mtte.configShowVideoThumb"), 
