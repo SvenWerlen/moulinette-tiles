@@ -17,6 +17,7 @@
   "mtte.clipboardImage": "Clipboard",
   "mtte.clipboardImageSuccess": "Image path successfully copied into clipboard!",
   "mtte.clipboardImageToolTip": "Copy path into clipboard. You can then reuse elsewhere.",
+  "mtte.clipboardUnsupported": "Your browser doesn't support/enable 'navigator.clipboard'!",
   "mtte.configShowVideoThumb": "Show video thumbnail",
   "mtte.configShowVideoThumbHint": "Tries to load a thumbnail for each video by looking for a matchin `webp` image. You may want to disable this feature if you don't have those images because it would result in a lot of errors in the console (fail to download).",
   "mtte.createActor": "Create actor",

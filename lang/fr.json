@@ -17,6 +17,7 @@
   "mtte.clipboardImage": "Presse-papier",
   "mtte.clipboardImageSuccess": "Le chemin (path) de l'image a \u00e9t\u00e9 copi\u00e9 dans le presse-papier avec succ\u00e8s!",
   "mtte.clipboardImageToolTip": "Copier le chemin vers le presse-papier. Vous pouvez ainsi le r\u00e9utiliser ailleurs.",
+  "mtte.clipboardUnsupported": "Votre navigateur ne supporte/active pas 'navigator.clipboard'!",
   "mtte.configShowVideoThumb": "Afficher vignette pour vid\u00e9os",
   "mtte.configShowVideoThumbHint": "Tente d'afficher une vignette pour chaque vid\u00e9o en recherchant une image `webp` correspondante. Vous voudriez d\u00e9sactiver cette fonctionnalit\u00e9 si vous n'avez pas de vignettes car cela va g\u00e9n\u00e9rer de nombreuses erreurs dans les journaux (tentatives de t\u00e9l\u00e9chargement).",
   "mtte.createActor": "Cr\u00e9er l'acteur",

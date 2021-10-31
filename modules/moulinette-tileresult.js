@@ -77,20 +77,28 @@ export class MoulinetteTileResult extends FormApplication {
         await cTiles.MoulinetteTiles.downloadAsset(data)
         
         // put path into clipboard
-        navigator.clipboard.writeText(data.img)
-        .catch(err => {
-          console.warn("Moulinette TileResult | Not able to copy path into clipboard")
-        });
-        ui.notifications.info(game.i18n.localize("mtte.clipboardImageSuccess"));
+        if(navigator.clipboard) {
+          navigator.clipboard.writeText(data.img)
+          .catch(err => {
+            console.warn("Moulinette TileResult | Not able to copy path into clipboard")
+          });
+          ui.notifications.info(game.i18n.localize("mtte.clipboardImageSuccess"));
+        } else {
+          ui.notifications.warn(game.i18n.localize("mtte.clipboardUnsupported"));
+        }
       }
     } else if(event.submitter.className == "clipboard") {
       // only copy to clipboard if local
       if(!this.pack.isRemote) {
-        navigator.clipboard.writeText(this.tile.assetURL)
-        .catch(err => {
-          console.warn("Moulinette TileResult | Not able to copy path into clipboard")
-        });
-        ui.notifications.info(game.i18n.localize("mtte.clipboardImageSuccess"));
+        if(navigator.clipboard) {
+          navigator.clipboard.writeText(this.tile.assetURL)
+          .catch(err => {
+            console.warn("Moulinette TileResult | Not able to copy path into clipboard")
+          });
+          ui.notifications.info(game.i18n.localize("mtte.clipboardImageSuccess"));
+        } else {
+          ui.notifications.warn(game.i18n.localize("mtte.clipboardUnsupported"));
+        }
       }
     } else if(event.submitter.className == "createScene") {
       const img = document.getElementById("previewImage") 
