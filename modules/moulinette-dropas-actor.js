@@ -78,7 +78,7 @@ export class MoulinetteDropAsActor extends FormApplication {
 
       // extracts the filename and replace all filename separators by spaces
       const name = this.data.img.split("/").pop().split(".")[0].replaceAll("_", " ").replaceAll("-", " ").replace(/  +/g, ' ');
-      actor = await Actor.create({
+      actor = await getDocumentClass("Actor").create({
         name: name,
         type: actorType,
         img: this.data.img
