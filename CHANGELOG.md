@@ -6,7 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.7.1] - 2021-10-31
 ### Fixed
-- Warning when 'navigator.clipboard' not supported
+- 3.7.1: Warning when 'navigator.clipboard' not supported
+- 3.7.2: Fix for supporting overloaded Actor.create()
 ### Changed
 - Rename tab Tiles => Tiles/Tokens to make it more intuitive
 
