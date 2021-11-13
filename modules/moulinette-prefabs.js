@@ -199,7 +199,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       // Create actor
       const actorData = JSON.parse(jsonAsText)
       actorData.folder = await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
-      const actor = await Actor.create(actorData);
+      const actor = await getDocumentClass("Actor").create(actorData);
       
       // Prepare the Token data
       let tokenData
