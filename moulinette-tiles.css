@@ -250,3 +250,65 @@
   color: white;
   background-color: #777;
 }
+
+#moulinetteSearch .content {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+#moulinetteSearch .header {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 50px;
+  overflow: hidden;
+  width: 100%;
+}
+
+#moulinetteSearch .main {
+  display: flex;
+  height: auto;
+  position: absolute;
+  top: 50px;
+  bottom: 0px;
+  left: 0px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+#moulinetteSearch .list {
+  height: auto;
+}
+
+#moulinetteSearch .filters {
+  padding: 5px;
+  min-width: 180px;
+}
+
+#moulinetteSearch .filters h2 {
+  font-size: 14px;
+  font-weight: bold;
+  border: 0px;
+  margin-top: 15px;
+  margin-bottom: 4px;
+}
+
+#moulinetteSearch .filters li {
+  list-style-type: none;
+}
+
+#moulinetteSearch .filters ul {
+  margin: 0px;
+  padding-left: 5px;
+}
+
+/*
+#moulinetteSearch .footer {
+  position: absolute;
+  bottom: 0px;
+  height: 60px;
+  left: 0px;
+  width: 100%;
+  overflow: hidden;
+}*/

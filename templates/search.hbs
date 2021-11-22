@@ -1,0 +1,22 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+  <div class="content">
+    {{#if error}}
+    <div class="error">{{error}}</div>
+    {{/if}}
+    {{#unless error}}
+
+    <div class="header">
+      <div class="form-group search">
+          <input id="search" type="text" placeholder="{{localize "mtte.search"}}"></input>
+          <button class="search"><i class="fas fa-search"></i></button>
+        </div>
+    </div>
+    <div class="main">
+      <div class="filters">
+      </div>
+      <div class="list">
+      </div>
+    </div>
+    {{/unless}}
+  </div>
+</form>

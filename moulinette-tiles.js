@@ -2,6 +2,7 @@
 import { MoulinetteDropAsActor } from "./modules/moulinette-dropas-actor.js"
 import { MoulinetteMacros } from "./modules/moulinette-macros.js"
 import { MoulinetteTilesFavorites } from "./modules/moulinette-tiles-favorites.js"
+import { MoulinetteSearch } from "./modules/moulinette-search.js"
 
 
 Hooks.once("init", async function () {
@@ -65,6 +66,7 @@ Hooks.once("ready", async function () {
     await game.moulinette.applications.MoulinetteFileUtil.createFolderRecursive("moulinette/tiles/custom");
     await game.moulinette.applications.MoulinetteFileUtil.createFolderRecursive("moulinette/images/custom");
     game.moulinette.applications["MoulinetteTilesFavorites"] = MoulinetteTilesFavorites
+    game.moulinette.applications["MoulinetteSearch"] = MoulinetteSearch
     console.log("Moulinette Tiles | Module loaded")
   }
 });
