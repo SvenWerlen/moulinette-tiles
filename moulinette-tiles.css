@@ -101,6 +101,24 @@
   border-radius: 3px;
 }
 
+.mtte .image {
+  display: flex;
+}
+
+.mtte .category {
+  margin-bottom: 10px;
+}
+
+.mtte .category .label {
+  width: 130px;
+  display: inline-block;
+  font-weight: bold;
+}
+
+.mtte .category select {
+  width: 220px;
+}
+
 #moulinette-favorites header {
   display: none;
 }
@@ -271,10 +289,23 @@
   height: auto;
   position: absolute;
   top: 50px;
-  bottom: 0px;
+  bottom: 30px;
   left: 0px;
   overflow-y: auto;
   width: 100%;
+  margin-bottom: 0px;
+}
+
+#moulinetteSearch .footer {
+  position: absolute;
+  bottom: 0px;
+  height: 25px;
+  left: 0px;
+  width: 100%;
+  overflow: hidden;
+  padding: 5px;
+  text-align: right;
+  padding-right: 25px;
 }
 
 #moulinetteSearch .list {
@@ -302,13 +333,3 @@
   margin: 0px;
   padding-left: 5px;
 }
-
-/*
-#moulinetteSearch .footer {
-  position: absolute;
-  bottom: 0px;
-  height: 60px;
-  left: 0px;
-  width: 100%;
-  overflow: hidden;
-}*/

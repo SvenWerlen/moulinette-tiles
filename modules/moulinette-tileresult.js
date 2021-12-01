@@ -3,6 +3,7 @@
  *************************/
 export class MoulinetteTileResult extends FormApplication {
   
+  static KEY_CATEGORY = "imageCategories"
   static DEFAULT_WEBM_PREVIEW = "icons/svg/video.svg" // don't forget to change it also in moulinette-tiles.js
   
   constructor(tile, pack, tab) {
@@ -19,7 +20,7 @@ export class MoulinetteTileResult extends FormApplication {
       classes: ["mtte", "forge", "searchresult"],
       title: game.i18n.localize("mtte.tileresult"),
       template: "modules/moulinette-tiles/templates/tileresult.hbs",
-      width: 420,
+      width: 820,
       height: "auto",
       dragDrop: [{dragSelector: ".tileres"}],
       closeOnSubmit: true,
@@ -28,11 +29,24 @@ export class MoulinetteTileResult extends FormApplication {
   }
   
   async getData() {
+    // retrieve categories
+    if(game.moulinette.cache.hasData(MoulinetteTileResult.KEY_CATEGORY)) {
+      this.categories = game.moulinette.cache.getData(MoulinetteTileResult.KEY_CATEGORY)
+    } else {
+      const categories = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/filtersImages.json`).catch(function(e) {
+        console.log(`MoulinetteTileResult | Cannot establish connection to server ${game.moulinette.applications.MoulinetteClient.SERVER_URL}`, e)
+      });
+      if(categories) {
+        this.categories = await categories.json()
+        this.categories.forEach(c => c.name = game.i18n.localize("mtte.filter" + c.id))
+        game.moulinette.cache.setData(MoulinetteTileResult.KEY_CATEGORY, this.categories)
+      }
+    }
     // support for webm
     if(this.tile.assetURL.endsWith(".webm")) {
       this.tile.isVideo = true
     }
-    return this.tile
+    return { tile: this.tile, categories: this.categories }
   }
   
   /*
