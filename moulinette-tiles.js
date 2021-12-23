@@ -76,7 +76,9 @@ Hooks.on('dropCanvasData', (canvas, data) => {
   if(data.source == "mtte") {
 
     // push into history
-    game.moulinette.forge.find( f => f.id == "tiles" ).instance.addToHistory( data.pack, data.tile )
+    if(data.type == "tile") {
+      game.moulinette.forge.find( f => f.id == "tiles" ).instance.addToHistory( data.pack, data.tile )
+    }
 
     if(data.pack && data.pack.isRemote) {
       ui.notifications.info(game.i18n.localize("mtte.downloadInProgress"));
