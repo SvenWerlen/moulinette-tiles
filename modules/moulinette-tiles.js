@@ -514,14 +514,14 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // publisher level
     let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
     if( publisherFolder.length == 0 ) {
-      publisherFolder = await Folder.create({name: publisher, type: "JournalEntry", parent: moulinetteFolder._id })
+      publisherFolder = await Folder.create({name: publisher, type: "JournalEntry", parent: moulinetteFolder.id })
     } else {
       publisherFolder = publisherFolder[0]
     }
     // pack level
     let packFolder = publisherFolder.children.filter( c => c.name == pack )
     if( packFolder.length == 0 ) {
-      packFolder = await Folder.create({name: pack, type: "JournalEntry", parent: publisherFolder._id })
+      packFolder = await Folder.create({name: pack, type: "JournalEntry", parent: publisherFolder.id })
     } else {
       packFolder = packFolder[0]
     }
@@ -539,7 +539,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     // generate journal
     const name = data.img.split('/').pop()
-    const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder._id} )
+    const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder.id} )
     const coord = canvas.grid.getSnappedPosition(data.x - canvas.grid.w/2, data.y - canvas.grid.h/2)
     
     // Default Note data
