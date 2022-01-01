@@ -9,7 +9,7 @@
   "version": "4.0.1",
   "minimumCoreVersion": "9",
   "compatibleCoreVersion": "9",
-  "scripts": [],
+  "scripts": ["elastic/elastic_app_search.umd.js"],
   "esmodules": [
     "moulinette-tiles.js"
   ],

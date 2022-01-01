@@ -6,9 +6,8 @@ export class MoulinetteTileResult extends FormApplication {
   static KEY_CATEGORY = "imageCategories"
   static DEFAULT_WEBM_PREVIEW = "icons/svg/video.svg" // don't forget to change it also in moulinette-tiles.js
   
-  constructor(tile, pack, tab) {
+  constructor(tile, pack) {
     super()
-    this.tab = tab
     this.tile = duplicate(tile);
     this.tile.pack = pack;
     this.pack = pack

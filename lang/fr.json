@@ -49,6 +49,7 @@
   "mtte.errorGroupIdInvalid": "L'identifiant de groupe ne peut contenir que des caract\u00e8res alphanum\u00e9rique (min/max 3/10 car)!",
   "mtte.errorGroupMaximum": "Vous avez atteint le nombre maximum de groupes!",
   "mtte.errorIconInvalid": "Ic\u00f4ne invalide! Utilisez le picker pour vous faciliter la saisie!",
+  "mtte.errorSearchResult": "Incapable de d\u00e9poser ceci sur la sc\u00e8ne. V\u00e9rifiez les journaux de la console.",
   "mtte.favoriteSettingsDescription": "Ajouter/supprimer des groupes de favoris. Les groupes sont tri\u00e9s par ID (historique toujours en premier).",
   "mtte.favorites": "Favoris",
   "mtte.filter": "Filtre (mots-cl\u00e9s)",

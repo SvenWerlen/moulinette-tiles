@@ -49,6 +49,7 @@
   "mtte.errorGroupIdInvalid": "Group ID may only contain alphanumeric characters (min/max 3/10 chars)!",
   "mtte.errorGroupMaximum": "You reached the maximum number of groups!",
   "mtte.errorIconInvalid": "Invalid icon! Consider using the picker",
+  "mtte.errorSearchResult": "Not able to drag this on the scene. Check console logs.",
   "mtte.favoriteSettingsDescription": "Add/remove groups of favorites. Groups are sorted by ID (history always first)",
   "mtte.favorites": "Favorites",
   "mtte.filter": "Keyword filter",
