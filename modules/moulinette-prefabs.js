@@ -153,14 +153,14 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     // publisher level
     let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
     if( publisherFolder.length == 0 ) {
-      publisherFolder = await Folder.create({name: publisher, type: "Actor", parent: moulinetteFolder._id })
+      publisherFolder = await Folder.create({name: publisher, type: "Actor", parent: moulinetteFolder.id })
     } else {
       publisherFolder = publisherFolder[0]
     }
     // pack level
     let packFolder = publisherFolder.children.filter( c => c.name == pack )
     if( packFolder.length == 0 ) {
-      packFolder = await Folder.create({name: pack, type: "Actor", parent: publisherFolder._id })
+      packFolder = await Folder.create({name: pack, type: "Actor", parent: publisherFolder.id })
     } else {
       packFolder = packFolder[0]
     }
@@ -176,6 +176,8 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     if ( !game.user.can("TOKEN_CREATE") ) {
       return ui.notifications.warn(`You do not have permission to create new Tokens!`);
     }
+
+    return ui.notifications.error(`Prefabs NOT yet working on FVTT 9.x!`);
     
     const prefab = data.prefab
     const pack = data.pack
@@ -202,13 +204,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       const actor = await getDocumentClass("Actor").create(actorData);
       
       // Prepare the Token data
-      let tokenData
-      if(game.data.version.startsWith("0.7")) {
-        const token = await Token.fromActor(actor, {x: data.x, y: data.y});
-        tokenData = token.data
-      } else {
-        tokenData = await actor.getTokenData({x: data.x, y: data.y})
-      }
+      let tokenData= await actor.getTokenData({x: data.x, y: data.y})
       
       // Adjust token position
       const hg = canvas.dimensions.size / 2;

@@ -24,7 +24,7 @@ export class MoulinetteDropAsActor extends FormApplication {
     const actorType = game.settings.get("moulinette", "tileActorType");
 
     const actors = game.actors.map( a => { return { id: a.id, name: a.name, selected: a.id == actorId } })
-    const actorTypes = game.system.entityTypes.Actor.map( a => { return { id: a, name: a, selected: a == actorType } })
+    const actorTypes = game.system.documentTypes.Actor.map( a => { return { id: a, name: a, selected: a == actorType } })
 
     return { actors: actors, actorId: actorId, actorLink: actorLink, actorTypes: actorTypes }
   }
@@ -70,8 +70,8 @@ export class MoulinetteDropAsActor extends FormApplication {
     // Creating new actor
     else {
       const actorType = this.html.find(".actorsTypes").children("option:selected").val()
-      if(!game.system.entityTypes.Actor.includes(actorType)) {
-        return console.error(`MoulinetteDropAsActor | Invalid actor type ${actorType}`, game.system.entityTypes.Actor)
+      if(!game.system.documentTypes.Actor.includes(actorType)) {
+        return console.error(`MoulinetteDropAsActor | Invalid actor type ${actorType}`, game.system.documentTypes.Actor)
       }
       // keep preferences
       game.settings.set("moulinette", "tileActorType", actorType);
@@ -102,7 +102,7 @@ export class MoulinetteDropAsActor extends FormApplication {
 
     // sometimes throws exceptions
     try {
-      canvas.getLayer("TokenLayer").activate()
+      canvas.tokens.activate()
     } catch(e) {}
     
     // Call macro

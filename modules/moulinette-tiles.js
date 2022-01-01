@@ -514,14 +514,14 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // publisher level
     let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
     if( publisherFolder.length == 0 ) {
-      publisherFolder = await Folder.create({name: publisher, type: "JournalEntry", parent: moulinetteFolder._id })
+      publisherFolder = await Folder.create({name: publisher, type: "JournalEntry", parent: moulinetteFolder.id })
     } else {
       publisherFolder = publisherFolder[0]
     }
     // pack level
     let packFolder = publisherFolder.children.filter( c => c.name == pack )
     if( packFolder.length == 0 ) {
-      packFolder = await Folder.create({name: pack, type: "JournalEntry", parent: publisherFolder._id })
+      packFolder = await Folder.create({name: pack, type: "JournalEntry", parent: publisherFolder.id })
     } else {
       packFolder = packFolder[0]
     }
@@ -539,7 +539,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     // generate journal
     const name = data.img.split('/').pop()
-    const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder._id} )
+    const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder.id} )
     const coord = canvas.grid.getSnappedPosition(data.x - canvas.grid.w/2, data.y - canvas.grid.h/2)
     
     // Default Note data
@@ -555,14 +555,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     };
 
     // Create a NoteConfig sheet instance to finalize the creation
-    let note;
-    if(game.data.version.startsWith("0.7")) {
-      note = canvas.notes.preview.addChild(new Note(noteData));
-    } else {
-      note = (await canvas.scene.createEmbeddedDocuments(Note.embeddedName, [noteData], { parent: canvas.scene }))[0]
-      note = note._object
-    }
-    canvas.getLayer("NotesLayer").activate()
+    let note = (await canvas.scene.createEmbeddedDocuments(Note.embeddedName, [noteData], { parent: canvas.scene }))[0]
+    note = note._object
+    canvas.notes.activate()
     
     // Call macro
     const macros = MoulinetteTiles.getMacros(data)
@@ -573,9 +568,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       delete game.moulinette.param
     }
     
-    if(game.data.version.startsWith("0.7")) {
-      await note.draw();
-    }
     note.sheet.render(true);
   }
 
@@ -602,11 +594,8 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
     // Create the tile as hidden if the ALT key is pressed
     //if ( event.altKey ) data.hidden = true;
-
-    // @COMPATIBILITY 0.7-0.8 (https://foundryvtt.wiki/en/migrations/foundry-core-0_8_x)
-    // The TilesLayer was merged with the BackgroundLayer in a new type of Canvas Layer: MapLayer, which contains 1 background image and an arbitrary number of tiles. There are two MapLayers in 0.8 canvases: BackgroundLayer and ForegroundLayer.
-    const canvasClass = game.data.version.startsWith("0.7") ? canvas.tiles : canvas.background
-    const layer = game.data.version.startsWith("0.7") ? canvas.getLayer("TilesLayer") : (canvas.activeLayer && canvas.activeLayer.name == "ForegroundLayer" ? canvas.activeLayer : canvas.getLayer("BackgroundLayer"))
+    const canvasClass = canvas.background
+    const layer = canvas.activeLayer && canvas.activeLayer.name == "ForegroundLayer" ? canvas.foreground : canvas.background
     
     // make sure to always put tiles on top
     let maxZ = 0
@@ -617,13 +606,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     // Create the Tile
     let tile;
-    if(game.data.version.startsWith("0.7")) {
-      tile = await canvasClass.constructor.placeableClass.create(data);
-    } else {
-      data.overhead = layer.name == "ForegroundLayer"
-      tile = (await canvas.scene.createEmbeddedDocuments(Tile.embeddedName, [data], { parent: canvas.scene }))[0]
-      tile = tile._object
-    }
+    data.overhead = layer.name == "ForegroundLayer"
+    tile = (await canvas.scene.createEmbeddedDocuments(Tile.embeddedName, [data], { parent: canvas.scene }))[0]
+    tile = tile._object
+
     if(canvas.activeLayer != layer) {
       layer.activate()
     } 
