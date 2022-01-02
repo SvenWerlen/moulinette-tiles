@@ -11,7 +11,6 @@ import { MoulinetteAvailableAssets } from "./moulinette-available.js"
 export class MoulinetteSearch extends FormApplication {
 
   static MAX_ASSETS = 100
-  static REGEX = "^https://assets.moulinette.cloud/static/thumbs/[^/]+/[^/]+/(.+)_thumb.webp$"
 
   constructor(tab) {
     super()
@@ -126,7 +125,8 @@ export class MoulinetteSearch extends FormApplication {
         // build assets
         let html = ""
         for(const r of resultList.results) {
-          html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}" data-path=""><img width="100" height="100" src="${r.getRaw("img")}"/></div>`
+          const imageURL = `https://assets.moulinette.cloud/static/thumbs/${r.getRaw("base")}/${r.getRaw("path")}_thumb.webp`
+          html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}" data-path=""><img width="100" height="100" src="${imageURL}"/></div>`
         }
 
         const totalResults = resultList.rawInfo.meta.page.total_results
@@ -240,12 +240,6 @@ export class MoulinetteSearch extends FormApplication {
       return console.warn("Moulinette Search | Not able find selected image from cache")
     }
 
-    const match = entry.getRaw("img").match(MoulinetteSearch.REGEX);
-    if(!match) {
-      console.warn("Moulinette Search | Not able to extract filename from image path")
-      return null;
-    }
-
     // retrieve pack from cache
     const packId = entry.getRaw("packid")
     const pack = this.cache.packs.find(p => p.packId == packId)
@@ -255,7 +249,7 @@ export class MoulinetteSearch extends FormApplication {
     }
 
     // retrieve tile from cache
-    const tile = this.cache.assets.find(a => a.pack == pack.idx && a.filename.startsWith(match[1]))
+    const tile = this.cache.assets.find(a => a.pack == pack.idx && a.filename.startsWith(entry.getRaw("path")))
     if(!tile) {
       console.warn(`Moulinette Search | Not able to find tile from pack "${pack.publisher} | ${pack.name}" with path "${match[1]}"`)
       return null;

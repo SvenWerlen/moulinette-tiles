@@ -32,7 +32,7 @@ export class MoulinetteTileResult extends FormApplication {
     if(game.moulinette.cache.hasData(MoulinetteTileResult.KEY_CATEGORY)) {
       this.categories = game.moulinette.cache.getData(MoulinetteTileResult.KEY_CATEGORY)
     } else {
-      const categories = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/filtersImages.json`).catch(function(e) {
+      const categories = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/categories.json`).catch(function(e) {
         console.log(`MoulinetteTileResult | Cannot establish connection to server ${game.moulinette.applications.MoulinetteClient.SERVER_URL}`, e)
       });
       if(categories) {
