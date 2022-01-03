@@ -310,11 +310,13 @@
 
 #moulinetteSearch .list {
   height: auto;
+  width: 100%;
 }
 
 #moulinetteSearch .filters {
   padding: 5px;
-  min-width: 220px;
+  min-width: 225px;
+  overflow-y: scroll;
 }
 
 #moulinetteSearch .filters h2 {

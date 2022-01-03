@@ -265,7 +265,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * - customReferences: list of downloadable content
    * - howto: help on how to use the module
    */
-  
   async onAction(classList) {
     const FileUtil = game.moulinette.applications.MoulinetteFileUtil
     if(classList.contains("indexImages")) {

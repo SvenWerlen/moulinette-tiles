@@ -6,6 +6,7 @@ import { MoulinetteAvailableAssets } from "./moulinette-available.js"
  *
  * Don't remove (used for translations)
  * mtte.filtercategory, mtte.filterpublisher, mtte.filterImageType, mtte.filterTokenType, mtte.filterTokenSex
+ * mtte.filtercatimagetype, mtte.filtercattokensex, mtte.filtercattokentype
  *
  */
 export class MoulinetteSearch extends FormApplication {
@@ -15,16 +16,9 @@ export class MoulinetteSearch extends FormApplication {
   constructor(tab) {
     super()
 
-    /*
     this.elastic = window.ElasticAppSearch.createClient({
-      endpointBase: "https://moulinette.ent.eastus2.azure.elastic-cloud.com",
-      searchKey: "search-ksjgexxsp1k1nxdowdgoetq5",
-      engineName: "moulinette"
-    })*/
-
-    this.elastic = window.ElasticAppSearch.createClient({
-      endpointBase: "https://my-deployment.ent.westus2.azure.elastic-cloud.com",
-      searchKey: "search-t9bbjv3qmmss6b34xx8j62ou",
+      endpointBase: "https://moulinette.ent.westus2.azure.elastic-cloud.com",
+      searchKey: "search-x4boevrybumc7j1kf6m4quun",
       engineName: "moulinette"
     })
   }
@@ -45,6 +39,20 @@ export class MoulinetteSearch extends FormApplication {
   }
 
   async getData() {
+    // retrieve categories
+    if(game.moulinette.cache.hasData(MoulinetteTileResult.KEY_CATEGORY)) {
+      this.categories = game.moulinette.cache.getData(MoulinetteTileResult.KEY_CATEGORY)
+    } else {
+      const categories = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/categories.json`).catch(function(e) {
+        console.log(`MoulinetteTileResult | Cannot establish connection to server ${game.moulinette.applications.MoulinetteClient.SERVER_URL}`, e)
+      });
+      if(categories) {
+        this.categories = await categories.json()
+        this.categories.forEach(c => c.name = game.i18n.localize("mtte.filter" + c.id))
+        game.moulinette.cache.setData(MoulinetteTileResult.KEY_CATEGORY, this.categories)
+      }
+    }
+
     this.cache = await game.moulinette.applications.Moulinette.fillMoulinetteCache()
     return {}
   }
@@ -104,16 +112,23 @@ export class MoulinetteSearch extends FormApplication {
       optionsFilters.all.push(value)
     }
 
+    const facets = {
+      publisher:[
+        { type: "value", name: "publisher", sort: { count: "desc" } }
+      ],
+      category:[
+        { type: "value", name: "category", sort: { count: "desc" } }
+      ]
+    }
+
+    for(const cat of this.categories) {
+      const schemaId = `cat${cat.id.toLowerCase()}`
+      facets[schemaId] = [{ type: "value", name: schemaId, sort: { count: "desc" }}]
+    }
+
     const options = {
       page: { size: MoulinetteSearch.MAX_ASSETS, current: page },
-      facets: {
-        publisher:[
-          { type: "value", name: "publisher", sort: { count: "desc" } }
-        ],
-        category:[
-          { type: "value", name: "category", sort: { count: "desc" } }
-        ]
-      },
+      facets: facets,
       filters:  optionsFilters
     }
 
@@ -121,6 +136,7 @@ export class MoulinetteSearch extends FormApplication {
       .search(terms, options)
       .then(resultList => {
         this.searchResults = resultList.rawInfo.meta.page
+        console.log(resultList)
 
         // build assets
         let html = ""
@@ -145,7 +161,21 @@ export class MoulinetteSearch extends FormApplication {
           let applied = ""
           let appliedCount = 0
           let filters = ""
-          for(const f of Object.keys(resultList.info.facets)) {
+
+          // add order on facets to be able to sort them
+          for(const k of Object.keys(resultList.info.facets)) {
+            const match = this.categories.filter(c => `cat${c.id.toLowerCase()}` == k)
+            if(match.length > 0) {
+              resultList.info.facets[k].order = match[0].order
+            } else if(k == "category") {
+              resultList.info.facets[k].order = 1
+            } else {
+              resultList.info.facets[k].order = 0
+            }
+          }
+          // filter facets
+          const filterKeys = Object.keys(resultList.info.facets).sort((a,b) => resultList.info.facets[a].order - resultList.info.facets[b].order);
+          for(const f of filterKeys) {
             const filterName = game.i18n.localize("mtte.filter" + f)
             // applied filter
             if(Object.keys(this.filters).includes(f)) {
@@ -154,7 +184,8 @@ export class MoulinetteSearch extends FormApplication {
             }
             else {
               const facets = resultList.info.facets[f][0].data
-              filters += `<h2 data-facet="${f}"><i class="fas fa-minus-square"></i> ${filterName} (${facets.length})</i></h2><ul data-filter="${f}">`
+              if(facets.length == 0) continue
+              filters += `<h2 data-facet="${f}"><i class="fas fa-minus-square"></i> ${filterName}</i></h2><ul data-filter="${f}">`
               for(const facet of facets) {
                 filters += `<li><a class="facet" data-facet="${facet.value}">${facet.value} (${facet.count})</a></li>`
               }
@@ -162,7 +193,7 @@ export class MoulinetteSearch extends FormApplication {
             }
           }
           if(applied.length > 0) {
-            filters = `<h2 data-facet="applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")} (${appliedCount})</h2><ul data-filter="applied">${applied}</ul>` + filters
+            filters = `<h2 data-facet="applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")}</h2><ul data-filter="applied">${applied}</ul>` + filters
           }
 
           this.html.find('.filters').html(filters)
@@ -171,7 +202,7 @@ export class MoulinetteSearch extends FormApplication {
         this._reEnableListeners()
       })
       .catch(error => {
-        console.log(`error: ${error}`);
+        console.error(error)
       });
   }
 

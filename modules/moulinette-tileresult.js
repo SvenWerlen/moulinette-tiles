@@ -22,7 +22,7 @@ export class MoulinetteTileResult extends FormApplication {
       width: 820,
       height: "auto",
       dragDrop: [{dragSelector: ".tileres"}],
-      closeOnSubmit: true,
+      closeOnSubmit: false,
       submitOnClose: false,
     });
   }
@@ -44,6 +44,30 @@ export class MoulinetteTileResult extends FormApplication {
     // support for webm
     if(this.tile.assetURL.endsWith(".webm")) {
       this.tile.isVideo = true
+    }
+
+    // apply categories
+    let categoriesValues = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/search/categories/${game.moulinette.user.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          packId: this.pack.packId,
+          asset: this.tile.filename,
+        })
+    }).catch(function(e) {
+      console.log(`MoulinetteTileResult | Something went wrong while fetching categories on the server`)
+      console.warn(e)
+    });
+    categoriesValues = await categoriesValues.json()
+    for(const c of this.categories) {
+      c.options = []
+      for(const v of c.values) {
+        c.options.push({
+          id: v,
+          name: game.i18n.localize("mtte.filterValue" + c.id),
+          selected: c.id in categoriesValues && categoriesValues[c.id] == v
+        })
+      }
     }
     return { tile: this.tile, categories: this.categories }
   }
@@ -81,7 +105,6 @@ export class MoulinetteTileResult extends FormApplication {
     event.preventDefault();
     if(event.submitter.className == "createTile") {
       ui.notifications.error(game.i18n.localize("mtte.errorCreateTile"));
-      throw game.i18n.localize("mtte.errorCreateTile");
     } else if(event.submitter.className == "download") {
       // only download if remote
       if(this.pack.isRemote) {
@@ -154,10 +177,36 @@ export class MoulinetteTileResult extends FormApplication {
         await newScene.update({thumb: tData.thumb}); // force generating the thumbnail
         
         ui.notifications.info(game.i18n.localize("mtte.forgingSuccess"), 'success')
+        this.close()
       } catch(e) {
         console.log(`Moulinette | Unhandled exception`, e)
         ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
       }      
+    }
+    else if(event.submitter.className == "saveCategories") {
+      const payloads = []
+      const parent = this
+      this.html.find('.combo').each(function(idx, sel) {
+        const categoryId = $(sel).data('id')
+        const categoryVal = $(sel).find(":selected").val()
+        payloads.push({
+          packId: parent.pack.packId,
+          asset: parent.tile.filename,
+          categoryKey: categoryId,
+          categoryVal: categoryVal
+        })
+      });
+
+      await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/search/categories/${game.moulinette.user.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloads)
+      }).catch(function(e) {
+        console.log(`MoulinetteTileResult | Something went wrong while updating the categories on the server`)
+        console.warn(e)
+      });
+
+      this.render()
     }
   }
   
