@@ -2,6 +2,7 @@
  * Tiles favorites
  *************************************************/
 import { MoulinetteTilesFavoritesSettings } from "./moulinette-tiles-favorites-settings.js"
+import { MoulinetteTilesFavoritesCategories } from "./moulinette-tiles-favorites-categories.js"
 
 export class MoulinetteTilesFavorites extends FormApplication {
   
@@ -119,7 +120,9 @@ export class MoulinetteTilesFavorites extends FormApplication {
       return a.id < b.id ? -1 : 1;
     });
 
-    return { assets: assets.slice(0, MoulinetteTilesFavorites.MAX_ASSETS), favorites: favorites };
+    const categories = this.tab != "history"
+
+    return { assets: assets.slice(0, MoulinetteTilesFavorites.MAX_ASSETS), favorites: favorites, showCategories: categories };
   }
   
   /**
@@ -186,6 +189,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
         $(div).hide()
       }
     }
+    this.render();
   }
 
   // re-enable listeners
@@ -209,7 +213,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
   /**
    * User clicks on one of the actions
    */
-  _onAction(event) {
+  async _onAction(event) {
     event.preventDefault();
     const source = event.currentTarget;
     if(source.classList.contains("clear")) {
@@ -230,6 +234,9 @@ export class MoulinetteTilesFavorites extends FormApplication {
     else if(source.classList.contains("mtte")) {
       const forgeClass = game.moulinette.modules.find(m => m.id == "forge").class
       new forgeClass("tiles").render(true)
+    }
+    else if(source.classList.contains("categories")) {
+      (new MoulinetteTilesFavoritesCategories(game.settings.get("moulinette", "currentFav"), this.assetsPacks)).render(true)
     }
   }
 

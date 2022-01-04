@@ -18,7 +18,7 @@ export class MoulinetteSearch extends FormApplication {
 
     this.elastic = window.ElasticAppSearch.createClient({
       endpointBase: "https://moulinette.ent.westus2.azure.elastic-cloud.com",
-      searchKey: "search-x4boevrybumc7j1kf6m4quun",
+      searchKey: "search-inzzcstcgv9giei4gxaubf2n",
       engineName: "moulinette"
     })
   }
@@ -72,6 +72,9 @@ export class MoulinetteSearch extends FormApplication {
     // click on facets
     html.find(".facet").click(this._onFilter.bind(this))
 
+    // click on options
+    html.find("input[type='checkbox']").click(this._onFilter.bind(this))
+
     // toggle expand/collapse facets
     html.find("h2").click(this._onToggleFacet.bind(this))
 
@@ -98,11 +101,12 @@ export class MoulinetteSearch extends FormApplication {
   /**
    * User interacted with the UI and a search must be triggered
    */
-  search(terms, filters = {}, page = 1) {
+  search(terms, filters = {}, options = {}, page = 1) {
 
     // store current terms & filters
     this.terms = terms
     this.filters = filters
+    this.searchOptions = options
 
     // prepare the request options
     const optionsFilters = { "all" : [] }
@@ -110,6 +114,15 @@ export class MoulinetteSearch extends FormApplication {
       const value = {}
       value[f] = filters[f]
       optionsFilters.all.push(value)
+    }
+
+    // apply permissions
+    if(!this.searchOptions.all) {
+      const perms = game.moulinette.user.pledges.map(v => Number(v.id))
+      perms.push(0) // 0 = free (available to anyone)
+      optionsFilters.all.push({
+        perm: perms
+      })
     }
 
     const facets = {
@@ -126,22 +139,22 @@ export class MoulinetteSearch extends FormApplication {
       facets[schemaId] = [{ type: "value", name: schemaId, sort: { count: "desc" }}]
     }
 
-    const options = {
+    const elasticOptions = {
       page: { size: MoulinetteSearch.MAX_ASSETS, current: page },
       facets: facets,
       filters:  optionsFilters
     }
 
     this.elastic
-      .search(terms, options)
+      .search(terms, elasticOptions)
       .then(resultList => {
         this.searchResults = resultList.rawInfo.meta.page
-        console.log(resultList)
+        //console.log(resultList)
 
         // build assets
         let html = ""
         for(const r of resultList.results) {
-          const imageURL = `https://assets.moulinette.cloud/static/thumbs/${r.getRaw("base")}/${r.getRaw("path")}_thumb.webp`
+          const imageURL = `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/thumbs/${r.getRaw("base")}/${r.getRaw("path")}_thumb.webp`
           html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}" data-path=""><img width="100" height="100" src="${imageURL}"/></div>`
         }
 
@@ -196,7 +209,12 @@ export class MoulinetteSearch extends FormApplication {
             filters = `<h2 data-facet="applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")}</h2><ul data-filter="applied">${applied}</ul>` + filters
           }
 
-          this.html.find('.filters').html(filters)
+          // add static filters
+          const staticFilters = `<h2 data-facet="visibility"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterVisibility")}</h2>` +
+            `<ul data-filter="visibility"><li><input type="checkbox" id="all" name="visibility" value="all" ${this.searchOptions.all ? "checked" : ""}>
+          <label for="all">${game.i18n.localize("mtte.searchAllCreators")}</label></li></ul>`
+
+          this.html.find('.filters').html(staticFilters + filters)
           this.html.find('.list').scrollTop(0).html(html)
         }
         this._reEnableListeners()
@@ -214,14 +232,20 @@ export class MoulinetteSearch extends FormApplication {
     const source = event.currentTarget;
     const filter = $(source).closest('ul').data('filter');
     const facet = source.dataset.facet;
-    if(filter == "applied") {
-      if(facet in this.filters) {
-        delete(this.filters[facet])
+    if(filter != "visibility") {
+      if(filter == "applied") {
+        if(facet in this.filters) {
+          delete(this.filters[facet])
+        }
+      } else {
+        this.filters[filter] = facet
       }
-    } else {
-      this.filters[filter] = facet
     }
-    this.search(this.terms, this.filters)
+    // check if all creators is selelected
+    const allCreators = this.html.find("#all").is(":checked")
+
+    // refresh the search
+    this.search(this.terms, this.filters, { all: allCreators })
   }
 
   /**
@@ -235,7 +259,7 @@ export class MoulinetteSearch extends FormApplication {
     if(bottom - 20 < height) {
       if(this.searchResults.current < this.searchResults.total_pages) {
         this.ignoreScroll = true // avoid multiple events to occur while scrolling
-        const nextPage = this.search(this.terms, this.filters, this.searchResults.current+1)
+        const nextPage = this.search(this.terms, this.filters, this.searchOptions, this.searchResults.current+1)
       }
     }
   }

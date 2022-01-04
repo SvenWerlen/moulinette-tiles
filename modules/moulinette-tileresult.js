@@ -29,7 +29,8 @@ export class MoulinetteTileResult extends FormApplication {
   
   async getData() {
     // retrieve categories
-    if(game.moulinette.cache.hasData(MoulinetteTileResult.KEY_CATEGORY)) {
+
+    if(false && game.moulinette.cache.hasData(MoulinetteTileResult.KEY_CATEGORY)) {
       this.categories = game.moulinette.cache.getData(MoulinetteTileResult.KEY_CATEGORY)
     } else {
       const categories = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/categories.json`).catch(function(e) {
@@ -37,7 +38,10 @@ export class MoulinetteTileResult extends FormApplication {
       });
       if(categories) {
         this.categories = await categories.json()
-        this.categories.forEach(c => c.name = game.i18n.localize("mtte.filter" + c.id))
+        this.categories.forEach(c => {
+          c.name = game.i18n.localize("mtte.filter" + c.id)
+          c.values.sort()
+        })
         game.moulinette.cache.setData(MoulinetteTileResult.KEY_CATEGORY, this.categories)
       }
     }
