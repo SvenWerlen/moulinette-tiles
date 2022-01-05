@@ -65,19 +65,21 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
   async _updateObject(event) {
     event.preventDefault();
     if(event.submitter.className == "applyCategories") {
+      $(event.submitter).prop('disabled',"disabled")
 
       // retrieve favorites
       const favs = duplicate(game.settings.get("moulinette", "favorites"))
 
+      SceneNavigation.displayProgressBar({label: game.i18n.localize("mtte.updating"), pct: 1});
+
       let idx = 0
+      let payloads = []
       for(const fav of this.elements) {
 
         // update progressBar
         idx++
-        SceneNavigation.displayProgressBar({label: game.i18n.localize("mtte.updating"), pct: Math.round(idx * 100 / this.elements.length)});
 
         // prepare payload
-        const payloads = []
         this.html.find('.combo').each(function(idx, sel) {
           const categoryId = $(sel).data('id')
           const categoryVal = $(sel).is(':visible') ? $(sel).find(":selected").val() : "-" // invisible means doesn't meet dependencies
@@ -92,19 +94,27 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
           }
         });
 
-        await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/search/categories/${game.moulinette.user.id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payloads)
-        }).catch(function(e) {
-          console.log(`MoulinetteTilesFavoritesCategories | Something went wrong while updating the categories on the server`)
-          console.warn(e)
-        });
+        // submit payload for each 10 entries (or if last)
+        if(idx % 10 == 0 || idx == this.elements.length) {
+          await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/search/categories/${game.moulinette.user.id}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payloads)
+          }).catch(function(e) {
+            console.log(`MoulinetteTilesFavoritesCategories | Something went wrong while updating the categories on the server`)
+            console.warn(e)
+          });
+
+          SceneNavigation.displayProgressBar({label: game.i18n.localize("mtte.updating"), pct: Math.round(idx * 100 / this.elements.length)});
+          payloads = []
+        }
       }
 
       // completed
       SceneNavigation.displayProgressBar({label: game.i18n.localize("mtte.updating"), pct: 100});
       ui.notifications.info(game.i18n.localize("mtte.categoriesUpdateCompleted"));
+
+      $(event.submitter).prop('disabled',"")
     }
   }
 
