@@ -1,3 +1,5 @@
+import { MoulinetteSearchUtils } from "./moulinette-searchUtils.js"
+
 /*************************************************
  * Tiles favorites Categories
  *************************************************/
@@ -34,7 +36,7 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
       title: game.i18n.localize("mtte.categories"),
       template: "modules/moulinette-tiles/templates/favorites-categories.hbs",
       width: 550,
-      height: "auto",
+      height: 600,
       resizable: false,
       closeOnSubmit: false,
       submitOnClose: false
@@ -43,31 +45,9 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
 
 
   async getData() {
-
     // retrieve categories
-    if(game.moulinette.cache.hasData(MoulinetteTilesFavoritesCategories.KEY_CATEGORY)) {
-      this.categories = game.moulinette.cache.getData(MoulinetteTilesFavoritesCategories.KEY_CATEGORY)
-    } else {
-      const categories = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/categories.json`).catch(function(e) {
-        console.log(`MoulinetteTilesFavoritesCategories | Cannot establish connection to server ${game.moulinette.applications.MoulinetteClient.SERVER_URL}`, e)
-      });
-      if(categories) {
-        this.categories = await categories.json()
-        this.categories.forEach(c => c.name = game.i18n.localize("mtte.filter" + c.id))
-        game.moulinette.cache.setData(MoulinetteTilesFavoritesCategories.KEY_CATEGORY, this.categories)
-      }
-    }
+    this.categories = await MoulinetteSearchUtils.getCategories()
 
-    for(const c of this.categories) {
-      c.options = []
-      for(const v of c.values) {
-        c.options.push({
-          id: v,
-          name: game.i18n.localize("mtte.filterValue" + c.id),
-          selected: false
-        })
-      }
-    }
     return { group: this.groupName, count: this.elements.length, icon: this.group.icon, categories: this.categories }
   }
 
@@ -77,6 +57,9 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
   activateListeners(html) {
     // keep html for later usage
     this.html = html
+
+    html.find('.combo').change(this.toggleCategories.bind(this))
+    this.toggleCategories()
   }
 
   async _updateObject(event) {
@@ -123,5 +106,24 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
       SceneNavigation.displayProgressBar({label: game.i18n.localize("mtte.updating"), pct: 100});
       ui.notifications.info(game.i18n.localize("mtte.categoriesUpdateCompleted"));
     }
+  }
+
+  // automatically show/hide categories based on dependencies
+  toggleCategories() {
+    const parent = this
+    this.html.find(".category").each(function(idx, el) {
+      const id = $(el).data('id')
+      const req = parent.categories.find(c => c.id == id).requires
+      if(req) {
+        for(const k of Object.keys(req)) {
+          if(["category", "creator"].includes(k)) continue
+          const value = parent.html.find(`.combo[data-id='${k}']`).val()
+          if(value != req[k]) {
+            return $(el).hide()
+          }
+        }
+      }
+      $(el).show()
+    })
   }
 }

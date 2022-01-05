@@ -185,7 +185,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
         const pack = this.assetsPacks.find( p => p.publisher == fav.pub && p.name == fav.pack )
         const tile = this.assets.find( a => a.pack = pack.idx && a.filename == fav.asset )
 
-        game.moulinette.forge.find( f => f.id == "tiles" ).instance.toggleFavorite(pack, tile, true)
+        await game.moulinette.forge.find( f => f.id == "tiles" ).instance.toggleFavorite(pack, tile, true)
         $(div).hide()
       }
     }
