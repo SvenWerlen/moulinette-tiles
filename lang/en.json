@@ -15,7 +15,7 @@
   "mtte.availableresult": "Match detail",
   "mtte.cancel": "Cancel",
   "mtte.categories": "Catégories",
-  "mtte.categoriesBatch": "You are about to apply categories on the entire favorite group. Categories that are not set will remain untouched. Categories that are set will overwrite any previous value.",
+  "mtte.categoriesBatch": "You are about to apply categories on the entire favorite group. Categories that are not set will remain untouched. Categories that are set will overwrite any previous value. Categories that are not visible will be CLEARED!",
   "mtte.categoriesUpdateCompleted": "Categories have been applied!",
   "mtte.clearFavorites": "Clear favorites",
   "mtte.clearFavoritesContent": "Are you sure you want to empty this list? Items in other lists (tabs) will NOT be deleted.",

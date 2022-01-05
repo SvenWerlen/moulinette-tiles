@@ -181,7 +181,7 @@ export class MoulinetteTileResult extends FormApplication {
       const categoryId = this.html.find(`[data-id='ImageType']`).val()
       this.html.find('.combo').each(function(idx, sel) {
         const categoryId = $(sel).data('id')
-        const categoryVal = $(sel).find(":selected").val()
+        const categoryVal = $(sel).is(':visible') ? $(sel).find(":selected").val() : "" // invisible means doesn't meet dependencies
         payloads.push({
           packId: parent.pack.packId,
           asset: parent.tile.filename,

@@ -80,14 +80,14 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
         const payloads = []
         this.html.find('.combo').each(function(idx, sel) {
           const categoryId = $(sel).data('id')
-          const categoryVal = $(sel).find(":selected").val()
+          const categoryVal = $(sel).is(':visible') ? $(sel).find(":selected").val() : "-" // invisible means doesn't meet dependencies
 
           if(categoryVal.length > 0) {
             payloads.push({
               packId: fav.packId,
               asset: fav.asset,
               categoryKey: categoryId,
-              categoryVal: categoryVal
+              categoryVal: categoryVal == "-" ? "" : categoryVal
             })
           }
         });

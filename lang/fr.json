@@ -15,7 +15,7 @@
   "mtte.availableresult": "Détails de la correspondance",
   "mtte.cancel": "Annuler",
   "mtte.categories": "Categories",
-  "mtte.categoriesBatch": "Vous êtes sur le point d'appliquer des catégories sur l'ensemble des éléments du groupe. Les catégories non-spécifiées resteront inchangées. Les catégories spécifiées remplaceront toute valeur existante.",
+  "mtte.categoriesBatch": "Vous êtes sur le point d'appliquer des catégories sur l'ensemble des éléments du groupe. Les catégories non-spécifiées resteront inchangées. Les catégories spécifiées remplaceront toute valeur existante. Les catégories non-visibles seront SUPPRIMÉES!",
   "mtte.categoriesUpdateCompleted": "Les catégories ont été appliquées!",
   "mtte.clearFavorites": "Supprimer favoris",
   "mtte.clearFavoritesContent": "Êtes-vous sûr de vouloir vider cette liste? Les éléments des autres listes (onglets) ne seront PAS supprimés.",
