@@ -119,6 +119,10 @@
   width: 220px;
 }
 
+.mtte .categories {
+  padding: 10px;
+}
+
 #moulinette-favorites header {
   display: none;
 }

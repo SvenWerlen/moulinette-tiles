@@ -1,12 +1,10 @@
 import { MoulinetteTileResult } from "./moulinette-tileresult.js"
 import { MoulinetteAvailableAssets } from "./moulinette-available.js"
+import { MoulinetteSearchUtils } from "./moulinette-searchUtils.js"
+
 
 /**
  * Forge Module for tiles
- *
- * Don't remove (used for translations)
- * mtte.filtercategory, mtte.filterpublisher, mtte.filterImageType, mtte.filterTokenType, mtte.filterTokenSex
- * mtte.filtercatimagetype, mtte.filtercattokensex, mtte.filtercattokentype
  *
  */
 export class MoulinetteSearch extends FormApplication {
@@ -39,20 +37,7 @@ export class MoulinetteSearch extends FormApplication {
   }
 
   async getData() {
-    // retrieve categories
-    if(game.moulinette.cache.hasData(MoulinetteTileResult.KEY_CATEGORY)) {
-      this.categories = game.moulinette.cache.getData(MoulinetteTileResult.KEY_CATEGORY)
-    } else {
-      const categories = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/categories.json`).catch(function(e) {
-        console.log(`MoulinetteTileResult | Cannot establish connection to server ${game.moulinette.applications.MoulinetteClient.SERVER_URL}`, e)
-      });
-      if(categories) {
-        this.categories = await categories.json()
-        this.categories.forEach(c => c.name = game.i18n.localize("mtte.filter" + c.id))
-        game.moulinette.cache.setData(MoulinetteTileResult.KEY_CATEGORY, this.categories)
-      }
-    }
-
+    this.categories = await MoulinetteSearchUtils.getCategories()
     this.cache = await game.moulinette.applications.Moulinette.fillMoulinetteCache()
     return {}
   }
@@ -96,6 +81,20 @@ export class MoulinetteSearch extends FormApplication {
       const searchTerms = this.html.find("#search").val().toLowerCase()
       this.search(searchTerms)
     }
+  }
+
+  /**
+   * Utility function which returns true if requirements are met
+   */
+  fullfillsRequirements(req) {
+    if(!req) return true
+    for(const k of Object.keys(req)) {
+      const filterKey = ["category", "publisher"].includes(k) ? k : "cat" + k.toLowerCase()
+      if(!Object.keys(this.filters).includes(filterKey) || this.filters[filterKey] != req[k]) {
+        return false
+      }
+    }
+    return true
   }
 
   /**
@@ -176,10 +175,12 @@ export class MoulinetteSearch extends FormApplication {
           let filters = ""
 
           // add order on facets to be able to sort them
+          // add dependencies on facets to be able to show/hide them
           for(const k of Object.keys(resultList.info.facets)) {
             const match = this.categories.filter(c => `cat${c.id.toLowerCase()}` == k)
             if(match.length > 0) {
               resultList.info.facets[k].order = match[0].order
+              resultList.info.facets[k].requires = match[0].requires
             } else if(k == "category") {
               resultList.info.facets[k].order = 1
             } else {
@@ -190,12 +191,17 @@ export class MoulinetteSearch extends FormApplication {
           const filterKeys = Object.keys(resultList.info.facets).sort((a,b) => resultList.info.facets[a].order - resultList.info.facets[b].order);
           for(const f of filterKeys) {
             const filterName = game.i18n.localize("mtte.filter" + f)
+
             // applied filter
             if(Object.keys(this.filters).includes(f)) {
               applied += `<li><a class="facet" data-facet="${f}">${filterName}: ${this.filters[f]}</a></li>`
               appliedCount++
             }
             else {
+              // check if filter depencencies are met
+              if(!this.fullfillsRequirements(resultList.info.facets[f].requires)) continue;
+
+              // add filter
               const facets = resultList.info.facets[f][0].data
               if(facets.length == 0) continue
               filters += `<h2 data-facet="${f}"><i class="fas fa-minus-square"></i> ${filterName}</i></h2><ul data-filter="${f}">`
@@ -241,6 +247,17 @@ export class MoulinetteSearch extends FormApplication {
         this.filters[filter] = facet
       }
     }
+    // remove all filters which don't met requirements any more
+    for(const c of this.categories) {
+      // check if filter depencencies are met
+      if(!this.fullfillsRequirements(c.requires)) {
+        const filterKey = "cat" + c.id.toLowerCase()
+        if(Object.keys(this.filters).includes(filterKey)) {
+          delete this.filters[filterKey]
+        }
+      }
+    }
+
     // check if all creators is selelected
     const allCreators = this.html.find("#all").is(":checked")
 

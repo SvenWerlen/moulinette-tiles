@@ -15,7 +15,7 @@
     </div>
     <div class="categories">
       {{#each categories as |c|}}
-        <div class="category"><span class="label">{{c.name}}</span>
+        <div class="category" data-id="{{c.id}}"><span class="label">{{c.name}}</span>
         <select class="combo" data-id="{{c.id}}">
         <option value="">---</option>
         {{#each c.options as |o|}}<option value="{{o.id}}" {{#if o.selected}}selected{{/if}}>{{o.id}}</option>{{/each}}
