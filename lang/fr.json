@@ -56,6 +56,8 @@
   "mtte.errorGroupMaximum": "Vous avez atteint le nombre maximum de groupes!",
   "mtte.errorIconInvalid": "Icône invalide! Utilisez le picker pour vous faciliter la saisie!",
   "mtte.errorSearchResult": "Incapable de déposer ceci sur la scène. Vérifiez les journaux de la console.",
+  "mtte.errorSearchUIAccess": "Vous ne pouvez pas utiliser la recherche v2. Vérifiez que votre compte Patreon est lié et que votre engagement (plege) est suffisant.",
+  "mtte.errorUpdateCategories": "Moulinette n'est pas parvenu à mettre à jour les catégories. Consultez les journaux (F12).",
   "mtte.favoriteSettingsDescription": "Ajouter/supprimer des groupes de favoris. Les groupes sont triés par ID (historique toujours en premier).",
   "mtte.favorites": "Favoris",
   "mtte.filter": "Filtre (mots-clés)",
@@ -128,5 +130,6 @@
   "mtte.type": "Type",
   "mtte.typeFree": "Gratuit",
   "mtte.unknownLicense": "Inconnue (local)",
+  "mtte.updateCategoriesSuccess": "Les catégories ont été mises à jour avec succès!",
   "mtte.updating": "Mise à jour..."
 }

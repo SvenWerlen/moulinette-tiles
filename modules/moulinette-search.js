@@ -11,14 +11,8 @@ export class MoulinetteSearch extends FormApplication {
 
   static MAX_ASSETS = 100
 
-  constructor(tab) {
+  constructor() {
     super()
-
-    this.elastic = window.ElasticAppSearch.createClient({
-      endpointBase: "https://moulinette.ent.westus2.azure.elastic-cloud.com",
-      searchKey: "search-inzzcstcgv9giei4gxaubf2n",
-      engineName: "moulinette"
-    })
   }
 
   static get defaultOptions() {
@@ -39,6 +33,33 @@ export class MoulinetteSearch extends FormApplication {
   async getData() {
     this.categories = await MoulinetteSearchUtils.getCategories()
     this.cache = await game.moulinette.applications.Moulinette.fillMoulinetteCache()
+
+    if(game.moulinette.user && game.moulinette.user.id) {
+      let results = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/search/keys/${game.moulinette.user.id}`).catch(function(e) {
+        console.log(`MoulinetteSearch | Something went wrong while fetching search keys from the server`)
+        console.warn(e)
+        return {}
+      })
+
+      if(results) {
+        results = await results.json()
+        if(results.search && results.search.length > 0) {
+          this.elastic = window.ElasticAppSearch.createClient({
+            endpointBase: "https://moulinette.ent.westus2.azure.elastic-cloud.com",
+            searchKey: "search-inzzcstcgv9giei4gxaubf2n",
+            engineName: "moulinette",
+            cacheResponses: false
+          })
+          this.initialized = true
+          return {}
+        }
+      }
+      console.warn(`MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.`)
+
+    } else {
+      ui.notifications.error(game.i18n.localize("mtte.errorSearchUIAccess"))
+    }
+
     return {}
   }
 
@@ -101,6 +122,11 @@ export class MoulinetteSearch extends FormApplication {
    * User interacted with the UI and a search must be triggered
    */
   search(terms, filters = {}, options = {}, page = 1) {
+
+    // check that user can submit
+    if(!this.initialized) {
+      return ui.notifications.error(game.i18n.localize("mtte.errorSearchUIAccess"));
+    }
 
     // store current terms & filters
     this.terms = terms

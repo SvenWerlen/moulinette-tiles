@@ -175,6 +175,7 @@ export class MoulinetteTileResult extends FormApplication {
       }      
     }
     else if(event.submitter.className == "saveCategories") {
+      $(event.submitter).prop('disabled',"disabled")
       const payloads = []
       const parent = this
       const categoryId = this.html.find(`[data-id='ImageType']`).val()
@@ -196,8 +197,11 @@ export class MoulinetteTileResult extends FormApplication {
       }).catch(function(e) {
         console.log(`MoulinetteTileResult | Something went wrong while updating the categories on the server`)
         console.warn(e)
+        ui.notifications.error(game.i18n.localize("mtte.errorUpdateCategories"));
+        return this.render()
       });
 
+      ui.notifications.info(game.i18n.localize("mtte.updateCategoriesSuccess"));
       this.render()
     }
   }
