@@ -20,9 +20,25 @@ export class MoulinetteSearchUtils {
         console.log(`MoulinetteSearchUtils | Cannot establish connection to server ${game.moulinette.applications.MoulinetteClient.SERVER_URL}`, e)
       });
       categories = await categories.json()
-      categories.forEach(c => c.name = game.i18n.localize("mtte.filtercat" + c.id.toLowerCase()))
+      categories.forEach(c => c.name = MoulinetteSearchUtils.getTranslation(c.id))
       game.moulinette.cache.setData(MoulinetteSearchUtils.KEY_CATEGORY, categories)
     }
     return categories;
+  }
+
+  /**
+   * Returns the translation of the category or value (if exists)
+   */
+  static getTranslation(category, value = null) {
+    if(value) {
+      const key = `mtte.filterval${category.toLowerCase()}${value.toLowerCase()}`
+      const translation = game.i18n.localize(key)
+      return translation == key ? value : translation
+    }
+    else {
+      const key = `mtte.filtercat${category.toLowerCase()}`
+      const translation = game.i18n.localize(key)
+      return translation == key ? category : translation
+    }
   }
 }

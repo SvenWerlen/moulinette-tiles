@@ -47,6 +47,16 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
   async getData() {
     // retrieve categories
     this.categories = await MoulinetteSearchUtils.getCategories()
+    for(const c of this.categories) {
+      c.options = []
+      for(const v of c.values) {
+        c.options.push({
+          id: v,
+          name: MoulinetteSearchUtils.getTranslation(c.id, v)
+        })
+      }
+      c.options.sort((a,b) => { return ('' + a.name).localeCompare(b.name) })
+    }
 
     return { group: this.groupName, count: this.elements.length, icon: this.group.icon, categories: this.categories }
   }
@@ -126,8 +136,7 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
       const req = parent.categories.find(c => c.id == id).requires
       if(req) {
         for(const k of Object.keys(req)) {
-          if(["category", "creator"].includes(k)) continue
-          const value = parent.html.find(`.combo[data-id='${k}']`).val()
+          const value = k == "category" ? "image" : parent.html.find(`.combo[data-id='${k}']`).val()
           if(value != req[k]) {
             return $(el).hide()
           }

@@ -13,6 +13,7 @@ export class MoulinetteTileResult extends FormApplication {
     this.tile = duplicate(tile);
     this.tile.pack = pack;
     this.pack = pack
+    this.isCloud = pack.isRemote && !pack.path.startsWith("https://mttecloudstorage.blob.core.windows.net/user")
   }
   
   static get defaultOptions() {
@@ -30,37 +31,49 @@ export class MoulinetteTileResult extends FormApplication {
   }
   
   async getData() {
-    // retrieve categories
-    this.categories = await MoulinetteSearchUtils.getCategories()
-
     // support for webm
     if(this.tile.assetURL.endsWith(".webm")) {
       this.tile.isVideo = true
     }
 
-    // apply categories
-    let categoriesValues = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/search/categories/${game.moulinette.user.id}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          packId: this.pack.packId,
-          asset: this.tile.filename,
-        })
-    }).catch(function(e) {
-      console.log(`MoulinetteTileResult | Something went wrong while fetching categories on the server`)
-      console.warn(e)
-    });
-    categoriesValues = await categoriesValues.json()
-    for(const c of this.categories) {
-      c.options = []
-      for(const v of c.values) {
-        c.options.push({
-          id: v,
-          selected: c.id in categoriesValues && categoriesValues[c.id] == v
-        })
+    // retrieve categories
+    this.categories = null
+    const cloudEnabled = game.settings.get("moulinette-core", "enableMoulinetteCloud")
+    if(this.isCloud && cloudEnabled) {
+      this.categories = await MoulinetteSearchUtils.getCategories()
+
+      // apply categories
+      let categoriesValues = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/search/categories/${game.moulinette.user.id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            packId: this.pack.packId,
+            asset: this.tile.filename,
+          })
+      }).catch(function(e) {
+        console.log(`MoulinetteTileResult | Something went wrong while fetching categories on the server`)
+        console.warn(e)
+      });
+      categoriesValues = await categoriesValues.json()
+      for(const c of this.categories) {
+        c.options = []
+        for(const v of c.values) {
+          c.options.push({
+            id: v,
+            name: MoulinetteSearchUtils.getTranslation(c.id, v),
+            selected: c.id in categoriesValues && categoriesValues[c.id] == v
+          })
+        }
+        c.options.sort((a,b) => { return ('' + a.name).localeCompare(b.name) })
       }
     }
-    return { tile: this.tile, categories: this.categories }
+    return {
+      tile: this.tile,
+      categories: this.categories,
+      cloudEnabled: cloudEnabled,
+      noCategories: !this.categories || this.categories.length == 0,
+      user: game.moulinette.user
+    }
   }
   
   /*
@@ -243,8 +256,7 @@ export class MoulinetteTileResult extends FormApplication {
       const req = parent.categories.find(c => c.id == id).requires
       if(req) {
         for(const k of Object.keys(req)) {
-          if(["category", "creator"].includes(k)) continue
-          const value = parent.html.find(`.combo[data-id='${k}']`).val()
+          const value = k == "category" ? "image" : parent.html.find(`.combo[data-id='${k}']`).val()
           if(value != req[k]) {
             return $(el).hide()
           }

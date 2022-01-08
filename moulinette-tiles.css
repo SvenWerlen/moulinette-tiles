@@ -123,6 +123,12 @@
   padding: 10px;
 }
 
+.mtte .links {
+  margin-top: 15px;
+  width: 100%;
+  text-align: center;
+}
+
 #moulinette-favorites header {
   display: none;
 }
@@ -182,7 +188,7 @@
   bottom: 0px;
   width: 100%;
   border-top: 1px solid white;
-  padding-top: 5px;
+  padding-top: 2px;
   text-align: center;
 }
 
@@ -321,6 +327,10 @@
   padding: 5px;
   min-width: 225px;
   overflow-y: scroll;
+}
+
+#moulinetteSearch .applied {
+  color: darkred;
 }
 
 #moulinetteSearch .filters h2 {

@@ -237,6 +237,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
     }
     else if(source.classList.contains("categories")) {
       (new MoulinetteTilesFavoritesCategories(game.settings.get("moulinette", "currentFav"), this.assetsPacks)).render(true)
+      this.render()
     }
   }
 

@@ -1,5 +1,5 @@
 import { MoulinetteTileResult } from "./moulinette-tileresult.js"
-import { MoulinetteAvailableAssets } from "./moulinette-available.js"
+import { MoulinetteAvailableResult } from "./moulinette-availableresult.js"
 import { MoulinetteSearchUtils } from "./moulinette-searchUtils.js"
 
 
@@ -46,7 +46,7 @@ export class MoulinetteSearch extends FormApplication {
         if(results.search && results.search.length > 0) {
           this.elastic = window.ElasticAppSearch.createClient({
             endpointBase: "https://moulinette.ent.westus2.azure.elastic-cloud.com",
-            searchKey: "search-inzzcstcgv9giei4gxaubf2n",
+            searchKey: results.search,
             engineName: "moulinette",
             cacheResponses: false
           })
@@ -87,6 +87,19 @@ export class MoulinetteSearch extends FormApplication {
     // click on an image => detail
     html.find(".tileres").click(this._onShowTile.bind(this))
 
+    // update facets status
+    const prefs = game.settings.get("moulinette", "searchPrefs")
+    html.find("h2").each(function(idx, el) {
+      const f = $(el).data("facet")
+      if(f) {
+        const collapsed = prefs.facets && prefs.facets[f]
+        if(collapsed) {
+          $(el).find("i").attr("class", "fas fa-plus-square")
+          html.find(`[data-filter='${f}']`).toggle()
+        }
+      }
+    })
+
     this.html = html
   }
 
@@ -97,10 +110,11 @@ export class MoulinetteSearch extends FormApplication {
     event.preventDefault();
 
     const source = event.currentTarget;
+    const prefs = game.settings.get("moulinette", "searchPrefs")
     // search
     if(source.classList.contains("search")) {
       const searchTerms = this.html.find("#search").val().toLowerCase()
-      this.search(searchTerms)
+      this.search(searchTerms, {}, { all: prefs.showAll == true })
     }
   }
 
@@ -132,6 +146,9 @@ export class MoulinetteSearch extends FormApplication {
     this.terms = terms
     this.filters = filters
     this.searchOptions = options
+
+    // force filter category
+    filters.category = "image"
 
     // prepare the request options
     const optionsFilters = { "all" : [] }
@@ -180,7 +197,7 @@ export class MoulinetteSearch extends FormApplication {
         let html = ""
         for(const r of resultList.results) {
           const imageURL = `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/thumbs/${r.getRaw("base")}/${r.getRaw("path")}_thumb.webp`
-          html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}" data-path=""><img width="100" height="100" src="${imageURL}"/></div>`
+          html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}"><img width="100" height="100" src="${imageURL}"/></div>`
         }
 
         const totalResults = resultList.rawInfo.meta.page.total_results
@@ -216,11 +233,13 @@ export class MoulinetteSearch extends FormApplication {
           // filter facets
           const filterKeys = Object.keys(resultList.info.facets).sort((a,b) => resultList.info.facets[a].order - resultList.info.facets[b].order);
           for(const f of filterKeys) {
-            const filterName = game.i18n.localize("mtte.filter" + f)
+            const catId = ["publisher", "category"].includes(f) ? f : f.substr(3)
+            const filterName = MoulinetteSearchUtils.getTranslation(catId)
+            const filterValue = MoulinetteSearchUtils.getTranslation(catId, this.filters[f])
 
             // applied filter
             if(Object.keys(this.filters).includes(f)) {
-              applied += `<li><a class="facet" data-facet="${f}">${filterName}: ${this.filters[f]}</a></li>`
+              applied += `<li><a class="facet applied" data-facet="${f}" title="${filterName}">${filterValue}</a></li>`
               appliedCount++
             }
             else {
@@ -232,13 +251,12 @@ export class MoulinetteSearch extends FormApplication {
               if(facets.length == 0) continue
               filters += `<h2 data-facet="${f}"><i class="fas fa-minus-square"></i> ${filterName}</i></h2><ul data-filter="${f}">`
               for(const facet of facets) {
-                filters += `<li><a class="facet" data-facet="${facet.value}">${facet.value} (${facet.count})</a></li>`
+                const catId = ["publisher", "category"].includes(f) ? f : f.substr(3)
+                const facetValue = MoulinetteSearchUtils.getTranslation(catId, facet.value)
+                filters += `<li><a class="facet" data-facet="${facet.value}">${facetValue} (${facet.count})</a></li>`
               }
               filters += `</ul>`
             }
-          }
-          if(applied.length > 0) {
-            filters = `<h2 data-facet="applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")}</h2><ul data-filter="applied">${applied}</ul>` + filters
           }
 
           // add static filters
@@ -246,7 +264,12 @@ export class MoulinetteSearch extends FormApplication {
             `<ul data-filter="visibility"><li><input type="checkbox" id="all" name="visibility" value="all" ${this.searchOptions.all ? "checked" : ""}>
           <label for="all">${game.i18n.localize("mtte.searchAllCreators")}</label></li></ul>`
 
-          this.html.find('.filters').html(staticFilters + filters)
+          filters = staticFilters + filters
+          if(applied.length > 0) {
+            filters = `<h2 data-facet="applied" class="applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")}</h2><ul data-filter="applied">${applied}</ul>` + filters
+          }
+
+          this.html.find('.filters').html(filters)
           this.html.find('.list').scrollTop(0).html(html)
         }
         this._reEnableListeners()
@@ -286,6 +309,7 @@ export class MoulinetteSearch extends FormApplication {
 
     // check if all creators is selelected
     const allCreators = this.html.find("#all").is(":checked")
+    this.updatePreferencesVisibility(allCreators)
 
     // refresh the search
     this.search(this.terms, this.filters, { all: allCreators })
@@ -315,6 +339,32 @@ export class MoulinetteSearch extends FormApplication {
   }
 
   /**
+   * Updates settings with new facet status
+   */
+  async updatePreferencesFacet(facet, status) {
+    const prefs = game.settings.get("moulinette", "searchPrefs")
+    if(!prefs.facets) {
+      prefs.facets = {}
+    }
+    if(status) {
+      prefs.facets[facet] = status // true means facet is collapsed
+    } else {
+      delete prefs.facets[facet]
+    }
+
+    await game.settings.set("moulinette", "searchPrefs", prefs)
+  }
+
+  /**
+   * Updates settings with new visibility state
+   */
+  async updatePreferencesVisibility(allCreatorsVisible) {
+    const prefs = game.settings.get("moulinette", "searchPrefs")
+    prefs.showAll = allCreatorsVisible
+    await game.settings.set("moulinette", "searchPrefs", prefs)
+  }
+
+  /**
    * Toggle collapse/expand category
    */
   async _onToggleFacet(event) {
@@ -324,7 +374,11 @@ export class MoulinetteSearch extends FormApplication {
     if(facet) {
       this.html.find(`[data-filter='${facet}']`).toggle()
       const icon = $(source).find("i")
-      icon.attr("class", icon.hasClass("fa-plus-square") ? "fas fa-minus-square" : "fas fa-plus-square")
+      const wasCollapsed = icon.hasClass("fa-plus-square")
+      // change icon
+      icon.attr("class", wasCollapsed ? "fas fa-minus-square" : "fas fa-plus-square")
+      // store into settings
+      await this.updatePreferencesFacet(facet, !wasCollapsed)
     }
   }
 
@@ -341,15 +395,20 @@ export class MoulinetteSearch extends FormApplication {
     // retrieve pack from cache
     const packId = entry.getRaw("packid")
     const pack = this.cache.packs.find(p => p.packId == packId)
+    // retrieve pack from available assets
     if(!pack) {
-      console.warn(`Moulinette Search | Not able to find pack with id ${packId}`)
+      const creator = entry.getRaw("publisher")
+      const pack = entry.getRaw("pack")
+      const asset = entry.getRaw("path")
+      const basepath = entry.getRaw("base")
+      new MoulinetteAvailableResult(creator, pack, `${basepath}/${asset}_thumb.webp`).render(true)
       return null;
     }
 
     // retrieve tile from cache
     const tile = this.cache.assets.find(a => a.pack == pack.idx && a.filename.startsWith(entry.getRaw("path")))
     if(!tile) {
-      console.warn(`Moulinette Search | Not able to find tile from pack "${pack.publisher} | ${pack.name}" with path "${match[1]}"`)
+      console.warn(`Moulinette Search | Not able to find tile from pack "${pack.publisher} | ${pack.name}" with path "${entry.getRaw("path")}"`)
       return null;
     }
 
@@ -371,7 +430,7 @@ export class MoulinetteSearch extends FormApplication {
 
     const result = this.getAssetFromSearchResult(id)
     if(!result) {
-      return ui.notifications.error(game.i18n.localize("mtte.errorSearchResult"));
+      return;
     };
 
     let pack = result.pack
@@ -420,7 +479,7 @@ export class MoulinetteSearch extends FormApplication {
     if(!result) return;
 
     // tile or scene?
-    if(result.tile.filename.endsWith(".json")) {
+    if(result.tile && result.tile.filename.endsWith(".json")) {
       const sceneModule = game.moulinette.forge.find( f => f.id == "scenes" )
       if(!sceneModule) {
         console.warn("Moulinette Search | moulinette-scenes (module) is not installed or enabled!")

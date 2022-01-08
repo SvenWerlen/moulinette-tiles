@@ -8,10 +8,13 @@
       <div class="category" data-id="{{c.id}}"><span class="label">{{c.name}}</span>
       <select class="combo" data-id="{{c.id}}">
       <option value="">---</option>
-      {{#each c.values as |o|}}<option value="{{o}}">{{o}}</option>{{/each}}
+      {{#each c.options as |o|}}<option value="{{o.id}}">{{o.name}}</option>{{/each}}
       </select>
       </div>
     {{/each}}
+
+    <p class="error">{{localize "mtte.categoriesBatchWarning"}}</p>
+
     <button class="applyCategories" title="{{localize "mtte.applyCategoriesToolTip"}}"><i class="fas fa-save"></i> {{localize "mtte.applyCategories"}}</button>
   </div>
 </form>

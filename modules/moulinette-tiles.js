@@ -167,6 +167,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
     // when right-click on tile
     this.html.find(".tileres").mousedown(this._onMouseDown.bind(this))
+
+    // when right-click on folder
+    this.html.find(".folder").mousedown(this._onMouseDown.bind(this))
     
     // when choose mode
     this.html.find(".options .dropmode").click(event => {
@@ -382,15 +385,32 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       event.preventDefault();
       const source = event.currentTarget;
       const idx = source.dataset.idx;
+      const path = source.dataset.path;
 
-      if(this.searchResults && idx > 0 && idx <= this.searchResults.length) {
-        const tile = this.searchResults[idx-1]
-        const pack = this.assetsPacks[tile.pack]
-        const icons = await this.toggleFavorite(pack, tile)
+      // click on single asset => toggle favorite
+      if(idx) {
+        if(this.searchResults && idx > 0 && idx <= this.searchResults.length) {
+          const tile = this.searchResults[idx-1]
+          const pack = this.assetsPacks[tile.pack]
+          const icons = await this.toggleFavorite(pack, tile)
 
-        let html = ''
-        icons.forEach( i => html += `<i class="info ${i}"></i>` )
-        $(source).find(".fav").html(html)
+          let html = ''
+          icons.forEach( i => html += `<i class="info ${i}"></i>` )
+          $(source).find(".fav").html(html)
+        }
+      }
+      // click on folder => toggle entire folder
+      else {
+        const selected = this.searchResults.filter(a => a.filename.startsWith(path))
+        for(const s of selected) {
+          const tile = s
+          const pack = this.assetsPacks[s.pack]
+          const icons = await this.toggleFavorite(pack, tile)
+
+          let html = ''
+          icons.forEach( i => html += `<i class="info ${i}"></i>` )
+          this.html.find(`.tileres[data-path='${s.filename}']`).find(".fav").html(html)
+        }
       }
     }
   }
