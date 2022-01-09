@@ -105,6 +105,7 @@
   "mtte.listAvailablePacksToolTip": "Énumère tous les packs disponibles",
   "mtte.listPacks": "Packs disponibles",
   "mtte.macroExample": "macro1,macro2,...",
+  "mtte.moreFacetValues": "Voir plus...",
   "mtte.moulinetteCloudDisabledCategories": "Moulinette Cloud est désactivé dans la configuration. Les catégories font partie de Moulinette Cloud. Veuillez réactiver cette option pour accéder à la catégorisation.",
   "mtte.moulinetteSearch": "Moulinette Search",
   "mtte.noResultsFound": "Aucun résultat trouvé",

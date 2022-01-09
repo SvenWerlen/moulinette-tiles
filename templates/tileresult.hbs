@@ -3,7 +3,7 @@
 
   <div class="image">
     <div class="tileres draggable">
-      {{#unless isVideo}}
+      {{#unless tile.isVideo}}
       <img id="previewImage" width="400" height="400" src="{{tile.assetURL}}{{tile.sas}}" title="{{localize "mtte.dragTile"}}"/>
       {{/unless}}
       {{#if tile.isVideo}}

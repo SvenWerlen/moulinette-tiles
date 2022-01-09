@@ -10,9 +10,16 @@ import { MoulinetteSearchUtils } from "./moulinette-searchUtils.js"
 export class MoulinetteSearch extends FormApplication {
 
   static MAX_ASSETS = 100
+  static DEF_FACET_VALUE = 10
+  static MAX_FACET_VALUE = 100
+  static FIXED_FIELDS = ["publisher", "category", "animated"]
 
   constructor() {
     super()
+
+    // temporay increase the number of facet values listed (10 by default)
+    this.facetValuesSize = {}
+    this.curFilterOrder = 1
   }
 
   static get defaultOptions() {
@@ -125,7 +132,7 @@ export class MoulinetteSearch extends FormApplication {
     if(!req) return true
     for(const k of Object.keys(req)) {
       const filterKey = ["category", "publisher"].includes(k) ? k : "cat" + k.toLowerCase()
-      if(!Object.keys(this.filters).includes(filterKey) || this.filters[filterKey] != req[k]) {
+      if(!Object.keys(this.filters).includes(filterKey) || this.filters[filterKey].id != req[k]) {
         return false
       }
     }
@@ -148,13 +155,13 @@ export class MoulinetteSearch extends FormApplication {
     this.searchOptions = options
 
     // force filter category
-    filters.category = "image"
+    filters.category = { id: "image", order: 0 }
 
     // prepare the request options
     const optionsFilters = { "all" : [] }
     for(const f of Object.keys(filters)) {
       const value = {}
-      value[f] = filters[f]
+      value[f] = filters[f].id
       optionsFilters.all.push(value)
     }
 
@@ -167,18 +174,24 @@ export class MoulinetteSearch extends FormApplication {
       })
     }
 
+    const publisherSize = "publisher" in this.facetValuesSize ? this.facetValuesSize["publisher"] : MoulinetteSearch.DEF_FACET_VALUE
     const facets = {
+
       publisher:[
-        { type: "value", name: "publisher", sort: { count: "desc" } }
+        { type: "value", name: "publisher", sort: { count: "desc" }, size: publisherSize }
       ],
       category:[
         { type: "value", name: "category", sort: { count: "desc" } }
+      ],
+      animated:[
+        { type: "value", name: "animated", sort: { count: "desc" } }
       ]
     }
 
     for(const cat of this.categories) {
       const schemaId = `cat${cat.id.toLowerCase()}`
-      facets[schemaId] = [{ type: "value", name: schemaId, sort: { count: "desc" }}]
+      const facetsSize = schemaId in this.facetValuesSize ? this.facetValuesSize[schemaId] : MoulinetteSearch.DEF_FACET_VALUE
+      facets[schemaId] = [{ type: "value", name: schemaId, sort: { count: "desc" }, size: facetsSize}]
     }
 
     const elasticOptions = {
@@ -191,7 +204,6 @@ export class MoulinetteSearch extends FormApplication {
       .search(terms, elasticOptions)
       .then(resultList => {
         this.searchResults = resultList.rawInfo.meta.page
-        //console.log(resultList)
 
         // build assets
         let html = ""
@@ -213,8 +225,7 @@ export class MoulinetteSearch extends FormApplication {
         // new search => replace the entire list
         else {
           this.results = resultList.results
-          let applied = ""
-          let appliedCount = 0
+          let applied = []
           let filters = ""
 
           // add order on facets to be able to sort them
@@ -226,6 +237,8 @@ export class MoulinetteSearch extends FormApplication {
               resultList.info.facets[k].requires = match[0].requires
             } else if(k == "category") {
               resultList.info.facets[k].order = 1
+            } else if(k == "animated") {
+              resultList.info.facets[k].order = 2
             } else {
               resultList.info.facets[k].order = 0
             }
@@ -233,14 +246,13 @@ export class MoulinetteSearch extends FormApplication {
           // filter facets
           const filterKeys = Object.keys(resultList.info.facets).sort((a,b) => resultList.info.facets[a].order - resultList.info.facets[b].order);
           for(const f of filterKeys) {
-            const catId = ["publisher", "category"].includes(f) ? f : f.substr(3)
+            const catId = MoulinetteSearch.FIXED_FIELDS.includes(f) ? f : f.substr(3)
             const filterName = MoulinetteSearchUtils.getTranslation(catId)
-            const filterValue = MoulinetteSearchUtils.getTranslation(catId, this.filters[f])
+            const filterValue = f in this.filters ? MoulinetteSearchUtils.getTranslation(catId, this.filters[f].id) : catId
 
             // applied filter
             if(Object.keys(this.filters).includes(f)) {
-              applied += `<li><a class="facet applied" data-facet="${f}" title="${filterName}">${filterValue}</a></li>`
-              appliedCount++
+              applied.push({ facet: f, name: filterName, value: filterValue, order: this.filters[f].order })
             }
             else {
               // check if filter depencencies are met
@@ -251,9 +263,12 @@ export class MoulinetteSearch extends FormApplication {
               if(facets.length == 0) continue
               filters += `<h2 data-facet="${f}"><i class="fas fa-minus-square"></i> ${filterName}</i></h2><ul data-filter="${f}">`
               for(const facet of facets) {
-                const catId = ["publisher", "category"].includes(f) ? f : f.substr(3)
+                const catId = MoulinetteSearch.FIXED_FIELDS.includes(f) ? f : f.substr(3)
                 const facetValue = MoulinetteSearchUtils.getTranslation(catId, facet.value)
                 filters += `<li><a class="facet" data-facet="${facet.value}">${facetValue} (${facet.count})</a></li>`
+              }
+              if(facets.length == MoulinetteSearch.DEF_FACET_VALUE) {
+                filters += `<li><a class="facet" data-facet="more">${game.i18n.localize("mtte.moreFacetValues")}</a></li>`
               }
               filters += `</ul>`
             }
@@ -266,7 +281,9 @@ export class MoulinetteSearch extends FormApplication {
 
           filters = staticFilters + filters
           if(applied.length > 0) {
-            filters = `<h2 data-facet="applied" class="applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")}</h2><ul data-filter="applied">${applied}</ul>` + filters
+            let appliedHTML = ""
+            applied.sort((a,b) => a.order - b.order).forEach(a => { appliedHTML += `<li><a class="facet applied" data-facet="${a.facet}" title="${a.name}">${a.value}</a></li>` })
+            filters = `<h2 data-facet="applied" class="applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")}</h2><ul data-filter="applied">${appliedHTML}</ul>` + filters
           }
 
           this.html.find('.filters').html(filters)
@@ -288,12 +305,15 @@ export class MoulinetteSearch extends FormApplication {
     const filter = $(source).closest('ul').data('filter');
     const facet = source.dataset.facet;
     if(filter != "visibility") {
-      if(filter == "applied") {
+      if(facet == "more") {
+        this.facetValuesSize[filter] = MoulinetteSearch.MAX_FACET_VALUE
+      }
+      else if(filter == "applied") {
         if(facet in this.filters) {
           delete(this.filters[facet])
         }
       } else {
-        this.filters[filter] = facet
+        this.filters[filter] = { id: facet, order: this.curFilterOrder++ }
       }
     }
     // remove all filters which don't met requirements any more
