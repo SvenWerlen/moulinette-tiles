@@ -75,7 +75,7 @@ Hooks.once("ready", async function () {
 /**
  * Manage canvas drop
  */
-Hooks.on('dropCanvasData', (canvas, data) => { 
+Hooks.on('dropCanvasData', (canvas, data) => {
   if(data.source == "mtte") {
 
     // push into history
@@ -97,10 +97,11 @@ Hooks.on('dropCanvasData', (canvas, data) => {
       return false;
     }
     else if(data.type == "Actor" && data.prefab) {
+      console.log("Moulinette | The error below 'cannot read properties' is expected. Just ignore it ;-)")
       import("./modules/moulinette-prefabs.js").then( c => {
         c.MoulinettePrefabs.createPrefab(data)
       })
-      return false
+      return true
     }
     else if(data.type == "Tile") {
       import("./modules/moulinette-tiles.js").then( c => {

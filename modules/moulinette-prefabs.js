@@ -177,8 +177,6 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       return ui.notifications.warn(`You do not have permission to create new Tokens!`);
     }
 
-    return ui.notifications.error(`Prefabs NOT yet working on FVTT 9.x!`);
-    
     const prefab = data.prefab
     const pack = data.pack
       
@@ -188,32 +186,39 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       console.log("Moulinette Prefabs | Cannot download json data from prefab", e)
       return;
     }).then( async function(res) {
-            
+
       // download all dependencies
       const paths = await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(prefab, pack, "cloud")
-      
+
       // replace all DEPS
       let jsonAsText = await res.text()
       for(let i = 0; i<paths.length; i++) {
         jsonAsText = jsonAsText.replace(new RegExp(`#DEP${ i == 0 ? "" : i-1 }#`, "g"), paths[i])
       }
-      
+
       // Create actor
       const actorData = JSON.parse(jsonAsText)
       actorData.folder = await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
       const actor = await getDocumentClass("Actor").create(actorData);
-      
+
       // Prepare the Token data
       let tokenData= await actor.getTokenData({x: data.x, y: data.y})
-      
+
       // Adjust token position
       const hg = canvas.dimensions.size / 2;
       tokenData.x -= tokenData.width * hg;
       tokenData.y -= tokenData.height * hg;
       if ( !canvas.grid.hitArea.contains(tokenData.x, tokenData.y) ) return false;
-              
-      Token.create(tokenData)
-      canvas.getLayer("TokenLayer").activate()
+
+      //TokenDocument.create(tokenData)
+      // Submit the Token creation request and activate the Tokens layer (if not already active)
+      let newToken = (await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [tokenData], { parent: canvas.scene }))[0]
+      newToken = newToken._object
+
+      // sometimes throws exceptions
+      try {
+        canvas.tokens.activate()
+      } catch(e) {}
     })
   }
     
