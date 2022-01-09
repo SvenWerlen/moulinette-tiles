@@ -282,7 +282,7 @@ export class MoulinetteSearch extends FormApplication {
           filters = staticFilters + filters
           if(applied.length > 0) {
             let appliedHTML = ""
-            applied.sort((a,b) => a.order - b.order).forEach(a => { appliedHTML += `<li><a class="facet applied" data-facet="${a.facet}" title="${a.name}">${a.value}</a></li>` })
+            applied.sort((a,b) => a.order - b.order).forEach(a => { appliedHTML += `<li><a class="facet applied" data-facet="${a.facet}">${a.name} : ${a.value}</a></li>` })
             filters = `<h2 data-facet="applied" class="applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")}</h2><ul data-filter="applied">${appliedHTML}</ul>` + filters
           }
 
