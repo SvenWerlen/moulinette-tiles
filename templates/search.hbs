@@ -1,5 +1,5 @@
 <form autocomplete="off" onsubmit="event.preventDefault();">
-  <div class="content">
+  <div class="body">
     {{#if error}}
     <div class="error">{{error}}</div>
     {{/if}}
@@ -13,10 +13,15 @@
     </div>
     <div class="main">
       <div class="filters">
+        <div class="content"></div>
+        <div class="toggle"><a><i class="fas fa-caret-left" title="{{ localize "mtte.article" }}"></i></a></div>
       </div>
-      <div class="list">
+      <div class="assets">
+        <div class="content"></div>
+        <div class="toggle"><a><i class="fas fa-filter" title="{{ localize "mtte.article" }}"></i></a></div>
       </div>
     </div>
+
     <div class="footer">
     </div>
     {{/unless}}

@@ -1,11 +1,11 @@
 import { MoulinetteTileResult } from "./moulinette-tileresult.js"
 import { MoulinetteAvailableResult } from "./moulinette-availableresult.js"
 import { MoulinetteSearchUtils } from "./moulinette-searchUtils.js"
+import { MoulinetteOptions } from "./moulinette-options.js"
 
 
 /**
- * Forge Module for tiles
- *
+ * New Search UI
  */
 export class MoulinetteSearch extends FormApplication {
 
@@ -58,10 +58,12 @@ export class MoulinetteSearch extends FormApplication {
             cacheResponses: false
           })
           this.initialized = true
-          return {}
+        } else {
+          console.warn(`MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.`)
         }
+      } else {
+        console.warn(`MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.`)
       }
-      console.warn(`MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.`)
 
     } else {
       ui.notifications.error(game.i18n.localize("mtte.errorSearchUIAccess"))
@@ -70,7 +72,7 @@ export class MoulinetteSearch extends FormApplication {
     return {}
   }
 
-  activateListeners(html) {
+  async activateListeners(html) {
     super.activateListeners(html);
 
     // set focus in the search field
@@ -80,7 +82,7 @@ export class MoulinetteSearch extends FormApplication {
     html.find("button").click(this._onClickButton.bind(this))
 
     // autoload on scroll
-    html.find(".list").on('scroll', this._onScroll.bind(this))
+    html.find(".assets .content").on('scroll', this._onScroll.bind(this))
 
     // click on facets
     html.find(".facet").click(this._onFilter.bind(this))
@@ -93,6 +95,12 @@ export class MoulinetteSearch extends FormApplication {
 
     // click on an image => detail
     html.find(".tileres").click(this._onShowTile.bind(this))
+
+    // toggle filters
+    html.find(".toggle").click(el => {
+      html.find(".filters").toggle()
+      html.find(".assets .toggle").toggle()
+    })
 
     // update facets status
     const prefs = game.settings.get("moulinette", "searchPrefs")
@@ -108,6 +116,57 @@ export class MoulinetteSearch extends FormApplication {
     })
 
     this.html = html
+
+    // insert Footer
+    await this.updateFooter()
+  }
+
+  /**
+   * Updates the footer
+   */
+  async updateFooter() {
+    const mode = game.settings.get("moulinette", "tileMode")
+    const html = await renderTemplate("modules/moulinette-tiles/templates/search-footer.hbs", {
+      tileSize: game.settings.get("moulinette", "tileSize"),
+      dropAsTile: mode == "tile",
+      dropAsArticle: mode == "article",
+      dropAsActor: mode == "actor"
+    })
+    this.html.find(".footer").html(html)
+
+    // dropmode listener
+    this.html.find(".dropMode").click(event => {
+      // callback function for appying the results
+      const parent = this
+      const callback = async function (mode) {
+        mode = ["tile","article","actor"].includes(mode) ? mode : "tile"
+        await game.settings.set("moulinette", "tileMode", mode)
+        await parent.updateFooter()
+      }
+
+      const dialog = new MoulinetteOptions("dropmode", callback)
+      dialog.position.width = 100
+      dialog.position.left = event.pageX - dialog.position.width/2
+      dialog.position.top = event.pageY - 50 // is auto
+      dialog.render(true)
+    })
+
+    // tilesize listener
+    this.html.find(".tileSize").click(event => {
+      // callback function for appying the results
+      const parent = this
+      const callback = async function (size) {
+        console.log(size)
+        await game.settings.set("moulinette", "tileSize", Number(size))
+        await parent.updateFooter()
+      }
+
+      const dialog = new MoulinetteOptions("tilesize", callback)
+      dialog.position.width = 50 * 5
+      dialog.position.left = event.pageX - dialog.position.width/2
+      dialog.position.top = event.pageY - 80 // is auto
+      dialog.render(true)
+    })
   }
 
   /**
@@ -214,12 +273,13 @@ export class MoulinetteSearch extends FormApplication {
 
         const totalResults = resultList.rawInfo.meta.page.total_results
         const totalDisplayed = Math.min(page * MoulinetteSearch.MAX_ASSETS, totalResults)
-        this.html.find('.footer').html(game.i18n.format("mtte.searchResult", {displayed: totalDisplayed, total: totalResults}))
+
+        this.html.find('.footer .results').html(game.i18n.format("mtte.searchResult", {displayed: totalDisplayed, total: totalResults}))
 
         // same search => append a new page of results
         if(page > 1) {
           this.results = this.results.concat(resultList.results)
-          this.html.find('.list').append(html)
+          this.html.find('.assets .content').append(html)
           this.ignoreScroll = false
         }
         // new search => replace the entire list
@@ -283,11 +343,12 @@ export class MoulinetteSearch extends FormApplication {
           if(applied.length > 0) {
             let appliedHTML = ""
             applied.sort((a,b) => a.order - b.order).forEach(a => { appliedHTML += `<li><a class="facet applied" data-facet="${a.facet}">${a.name} : ${a.value}</a></li>` })
-            filters = `<h2 data-facet="applied" class="applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")}</h2><ul data-filter="applied">${appliedHTML}</ul>` + filters
+            filters = `<h2 data-facet="applied" class="first applied"><i class="fas fa-minus-square"></i> ${game.i18n.localize("mtte.filterActive")}</h2><ul data-filter="applied">${appliedHTML}</ul>` + filters
           }
 
-          this.html.find('.filters').html(filters)
-          this.html.find('.list').scrollTop(0).html(html)
+          this.html.find('.filters .content').html(filters)
+          this.html.find('.assets .content').scrollTop(0).html(html)
+          this.html.find('.filters .toggle').show()
         }
         this._reEnableListeners()
       })

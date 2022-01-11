@@ -1,0 +1,22 @@
+<form autocomplete="off" onsubmit="event.preventDefault();">
+
+  {{#if dropmode }}
+  <div class="options">
+    <button class="tile"><i class="fas fa-cubes"></i>     {{ localize "mtte.tile" }}</button>
+    <button class="article"><i class="fas fa-book-open"></i> {{ localize "mtte.article" }}</button>
+    <button class="actor"><i class="fas fa-users"></i>     {{ localize "mtte.actor" }}</button>
+  </div>
+  {{/if}}
+
+  {{#if tilesize }}
+  <div class="options">
+    {{#each sizes as |s|}}
+    <button class="{{s}}"><i class="fas fa-th"></i> {{s}}</button>
+    {{/each}}
+  </div>
+  <div class="options">
+    <input class="custom" type="number" placeholder="{{localize "mtte.customTileSize"}}"></input>
+  </div>
+  {{/if}}
+
+</form>

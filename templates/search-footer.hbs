@@ -1,0 +1,23 @@
+<div class="optionBlock">
+  {{ localize "mtte.dropmode" }} : &nbsp;
+  <a class="dropMode">
+  {{#if dropAsTile }}
+    <i class="fas fa-cubes" title="{{ localize "mtte.tile" }}"></i> {{#unless compact}}{{ localize "mtte.tile" }}{{/unless}}
+  {{/if}}
+
+  {{#if dropAsArticle }}
+    <i class="fas fa-book-open" title="{{ localize "mtte.article" }}"></i> {{#unless compact}}{{ localize "mtte.article" }}{{/unless}}
+  {{/if}}
+
+  {{#if dropAsActor }}
+    <i class="fas fa-users" title="{{ localize "mtte.actor" }}"></i> {{#unless compact}}{{ localize "mtte.actor" }}{{/unless}}
+  {{/if}}
+  </a>
+</div>
+
+<div class="optionBlock">
+  {{ localize "FILES.TileSize" }} : &nbsp;
+  <a class="tileSize"><i class="fas fa-th"/></i> {{tileSize}} {{#unless compact}}{{ localize "SCENES.Pixels" }}{{/unless}}</a>
+</div>
+
+<div class="results"></div>
