@@ -20,6 +20,9 @@ export class MoulinetteSearch extends FormApplication {
     // temporay increase the number of facet values listed (10 by default)
     this.facetValuesSize = {}
     this.curFilterOrder = 1
+
+    this.totalDisplayed = 0
+    this.totalResults = 0
   }
 
   static get defaultOptions() {
@@ -125,12 +128,29 @@ export class MoulinetteSearch extends FormApplication {
    * Updates the footer
    */
   async updateFooter() {
+
+    // prepare the list of macros
     const mode = game.settings.get("moulinette", "tileMode")
+    const macroCfg = game.settings.get("moulinette", "tileMacros")[mode] // should return a list of _ids
+    const compendium = game.settings.get("moulinette-tiles", "macroCompendium")
+    const macroIndex = compendium ? game.packs.get(compendium)?.index.values() : null
+    const macros = macroIndex ? Array.from(macroIndex).filter(m => macroCfg && macroCfg.includes(m._id)) : []
+
+    let macroText = "-"
+    if( macros.length == 1) {
+      macroText = macros[0].name
+    }
+    else if( macros.length > 1) {
+      macroText = game.i18n.format("mtte.multiplesMacros", { count: macros.length})
+    }
+
+
     const html = await renderTemplate("modules/moulinette-tiles/templates/search-footer.hbs", {
       tileSize: game.settings.get("moulinette", "tileSize"),
       dropAsTile: mode == "tile",
       dropAsArticle: mode == "article",
-      dropAsActor: mode == "actor"
+      dropAsActor: mode == "actor",
+      macros: macroText
     })
     this.html.find(".footer").html(html)
 
@@ -147,7 +167,7 @@ export class MoulinetteSearch extends FormApplication {
       const dialog = new MoulinetteOptions("dropmode", callback)
       dialog.position.width = 100
       dialog.position.left = event.pageX - dialog.position.width/2
-      dialog.position.top = event.pageY - 50 // is auto
+      dialog.position.top = event.pageY - 60 // is auto
       dialog.render(true)
     })
 
@@ -156,7 +176,6 @@ export class MoulinetteSearch extends FormApplication {
       // callback function for appying the results
       const parent = this
       const callback = async function (size) {
-        console.log(size)
         await game.settings.set("moulinette", "tileSize", Number(size))
         await parent.updateFooter()
       }
@@ -164,9 +183,34 @@ export class MoulinetteSearch extends FormApplication {
       const dialog = new MoulinetteOptions("tilesize", callback)
       dialog.position.width = 50 * 5
       dialog.position.left = event.pageX - dialog.position.width/2
-      dialog.position.top = event.pageY - 80 // is auto
+      dialog.position.top = event.pageY - 100 // is auto
       dialog.render(true)
     })
+
+    // macros listener
+    this.html.find(".macros").click(event => {
+      // callback function for appying the results
+      const parent = this
+      const callback = async function (macros) {
+        if(macros) {
+          const config = game.settings.get("moulinette", "tileMacros")
+          config[mode] = macros
+          await game.settings.set("moulinette", "tileMacros", config)
+          await parent.updateFooter()
+        }
+      }
+
+      const dialog = new MoulinetteOptions("macros", callback, { macros: macros.map(m => m._id) })
+      dialog.position.width = 440
+      dialog.position.height = 400
+      dialog.position.left = event.pageX - dialog.position.width/2
+      dialog.position.top = event.pageY - 100 // is auto
+      dialog.render(true)
+    })
+
+    // update results
+    const results = this.totalDisplayed > 0 ? game.i18n.format("mtte.searchResult", {displayed: this.totalDisplayed, total: this.totalResults}) : ""
+    this.html.find('.footer .results').html(results)
   }
 
   /**
@@ -271,10 +315,9 @@ export class MoulinetteSearch extends FormApplication {
           html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}"><img width="100" height="100" src="${imageURL}"/></div>`
         }
 
-        const totalResults = resultList.rawInfo.meta.page.total_results
-        const totalDisplayed = Math.min(page * MoulinetteSearch.MAX_ASSETS, totalResults)
-
-        this.html.find('.footer .results').html(game.i18n.format("mtte.searchResult", {displayed: totalDisplayed, total: totalResults}))
+        // update stats
+        this.totalResults = resultList.rawInfo.meta.page.total_results
+        this.totalDisplayed = Math.min(page * MoulinetteSearch.MAX_ASSETS, this.totalResults)
 
         // same search => append a new page of results
         if(page > 1) {

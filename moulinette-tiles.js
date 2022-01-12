@@ -9,7 +9,8 @@ Hooks.once("init", async function () {
   console.log("Moulinette Tiles | Init") 
   game.settings.register("moulinette", "tileMode", { scope: "world", config: false, type: String, default: "tile" })
   game.settings.register("moulinette", "tileSize", { scope: "world", config: false, type: Number, default: 100 })
-  game.settings.register("moulinette", "tileMacro", { scope: "world", config: false, type: Object, default: {} })
+  game.settings.register("moulinette", "tileMacro", { scope: "world", config: false, type: Object, default: {} })  // old implementation
+  game.settings.register("moulinette", "tileMacros", { scope: "world", config: false, type: Object, default: {} }) // new implementation
   game.settings.register("moulinette", "tileActorId", { scope: "world", config: false, type: String })
   game.settings.register("moulinette", "tileActorLink", { scope: "world", config: false, type: Boolean, default: true })
   game.settings.register("moulinette", "tileActorType", { scope: "world", config: false, type: String })
@@ -70,6 +71,22 @@ Hooks.once("ready", async function () {
     game.moulinette.applications["MoulinetteSearch"] = MoulinetteSearch
     console.log("Moulinette Tiles | Module loaded")
   }
+
+  const choices = { "": game.i18n.localize("mtte.configMacroCompendiumNone") }
+  const macroCompendiums = game.packs.filter(p => p.documentName == "Macro")
+  for(const p of macroCompendiums) {
+    choices[`${p.metadata.package}.${p.metadata.name}`] = p.metadata.label
+  }
+
+  game.settings.register("moulinette-tiles", "macroCompendium", {
+    name: game.i18n.localize("mtte.configMacroCompendiumTiles"),
+    hint: game.i18n.localize("mtte.configMacroCompendiumTilesHint"),
+    scope: "world",
+    config: true,
+    default: "default",
+    choices: choices,
+    type: String
+  });
 });
 
 /**

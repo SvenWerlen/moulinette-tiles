@@ -394,7 +394,7 @@
 
 #moulinetteSearch .results {
   position: absolute;
-  right: 5px;
+  right: 20px;
 }
 
 #moulinetteSearch .optionBlock {
@@ -403,8 +403,24 @@
 
 #mtteOptionsDialog .options {
   display: flex;
+  flex-wrap: wrap;
+  overflow-y: scroll;
 }
 
-#mtteOptionsDialog .window-header {
-  display: none;
+#mtteOptionsDialog .options .macro {
+  display: flex;
+  width: 200px;
+  padding-right: 10px;
+  margin: 2px 0px;
+  cursor: pointer;
+  align-items: center;
+}
+
+#mtteOptionsDialog .options .macro.selected img {
+  box-shadow: 0 0 10px var(--color-shadow-highlight) inset;
+}
+
+#mtteOptionsDialog .options .macro img {
+  width: 48px;
+  margin-right: 10px;
 }

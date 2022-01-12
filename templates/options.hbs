@@ -19,4 +19,14 @@
   </div>
   {{/if}}
 
+  {{#if macros }}
+    <em>{{localize "mtte.macroClickToChoose"}}:</em>
+    <div class="options">
+    {{#each macros as |m|}}
+      <div class="macro {{#if m.selected}}selected{{/if}}" data-id="{{m._id}}"><img src="{{m.img}}"/> {{m.name}}</div>
+    {{/each}}
+    </div>
+    <button class="macros"><i class="fas fa-cogs"></i> {{localize "mtte.apply"}}</button>
+  {{/if}}
+
 </form>
