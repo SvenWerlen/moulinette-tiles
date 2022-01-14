@@ -12,7 +12,7 @@ export class MoulinetteSearch extends FormApplication {
   static MAX_ASSETS = 100
   static DEF_FACET_VALUE = 10
   static MAX_FACET_VALUE = 100
-  static FIXED_FIELDS = ["publisher", "category", "animated"]
+  static FIXED_FIELDS = ["publisher", "pack", "category", "animated"]
 
   constructor() {
     super()
@@ -234,8 +234,11 @@ export class MoulinetteSearch extends FormApplication {
   fullfillsRequirements(req) {
     if(!req) return true
     for(const k of Object.keys(req)) {
-      const filterKey = ["category", "publisher"].includes(k) ? k : "cat" + k.toLowerCase()
-      if(!Object.keys(this.filters).includes(filterKey) || this.filters[filterKey].id != req[k]) {
+      const filterKey = MoulinetteSearch.FIXED_FIELDS.includes(k) ? k : "cat" + k.toLowerCase()
+      // conditions
+      // 1) No active filter of the required type OR
+      // 2) Active but non-mathing filter AND requirement is not "*"
+      if(!Object.keys(this.filters).includes(filterKey) || (req[k] != "*" && this.filters[filterKey].id != req[k])) {
         return false
       }
     }
@@ -278,10 +281,14 @@ export class MoulinetteSearch extends FormApplication {
     }
 
     const publisherSize = "publisher" in this.facetValuesSize ? this.facetValuesSize["publisher"] : MoulinetteSearch.DEF_FACET_VALUE
+    const packSize = "pack" in this.facetValuesSize ? this.facetValuesSize["pack"] : MoulinetteSearch.DEF_FACET_VALUE
     const facets = {
 
       publisher:[
-        { type: "value", name: "publisher", sort: { count: "desc" }, size: publisherSize }
+        { type: "value", name: "publisher", sort: { value: "asc" }, size: publisherSize }
+      ],
+      pack:[
+        { type: "value", name: "pack", sort: { value: "asc" }, size: packSize }
       ],
       category:[
         { type: "value", name: "category", sort: { count: "desc" } }
@@ -339,11 +346,16 @@ export class MoulinetteSearch extends FormApplication {
               resultList.info.facets[k].order = match[0].order
               resultList.info.facets[k].requires = match[0].requires
             } else if(k == "category") {
-              resultList.info.facets[k].order = 1
+              resultList.info.facets[k].order = 2
             } else if(k == "animated") {
               resultList.info.facets[k].order = 2
-            } else {
+            } else if(k == "publisher") {
               resultList.info.facets[k].order = 0
+            } else if(k == "pack") {
+              resultList.info.facets[k].order = 1
+              resultList.info.facets[k].requires = { publisher: "*" }
+            } else {
+              console.log("Invalid static field " + k)
             }
           }
           // filter facets
