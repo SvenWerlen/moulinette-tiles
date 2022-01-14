@@ -567,29 +567,16 @@ export class MoulinetteSearch extends FormApplication {
       delete tile.data
     }
 
-    let dragData = {}
+    let dragData = { tile: tile, pack: pack, source: "mtteSearch" }
     if(mode == "tile") {
-      dragData = {
-        type: "Tile",
-        tile: tile,
-        pack: pack,
-        tileSize: size
-      };
+      dragData.type = "Tile"
+      dragData.tileSize = size
     } else if(mode == "article") {
-      dragData = {
-        type: "JournalEntry",
-        tile: tile,
-        pack: pack
-      };
+      dragData.type = "JournalEntry"
     } else if(mode == "actor") {
-      dragData = {
-        type: "Actor",
-        tile: tile,
-        pack: pack
-      };
+      dragData.type = "Actor"
     }
 
-    dragData.source = "mtte"
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
 

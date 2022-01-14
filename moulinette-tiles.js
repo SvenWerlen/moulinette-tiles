@@ -93,7 +93,7 @@ Hooks.once("ready", async function () {
  * Manage canvas drop
  */
 Hooks.on('dropCanvasData', (canvas, data) => {
-  if(data.source == "mtte") {
+  if(data.source == "mtte" || data.source == "mtteSearch") {
 
     // push into history
     if(data.type == "tile") {

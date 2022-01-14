@@ -460,12 +460,43 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     return macros ? macros : ""
   }
   
-  static getMacros(data) {
+
+  /**
+   * Returns the list of macros (based on macro ids)
+   */
+  static async getMacrosV2(data) {
+    const tileMode = game.settings.get("moulinette", "tileMode")
+    let macroCfg = game.settings.get("moulinette", "tileMacros")[tileMode]
+
+    if(macroCfg) {
+      const compendium = game.settings.get("moulinette-tiles", "macroCompendium")
+      const pack = compendium ? game.packs.get(compendium) : null
+      if(pack) {
+        const macros = []
+        for(const id of macroCfg) {
+          const macro = await pack.getDocument(id)
+          if(macro) {
+            macros.push(macro)
+          }
+        }
+        return macros
+      }
+    }
+    return [];
+  }
+
+  /**
+   * Returns the list of macros (based on macro names)
+   */
+  static async getMacros(data) {
+    if(data.source == "mtteSearch") {
+      return await MoulinetteTiles.getMacrosV2(data)
+    }
     const tileMode = game.settings.get("moulinette", "tileMode")
     let macros = game.settings.get("moulinette", "tileMacro")[tileMode]
     const results = []
 
-    // add specific macros
+    // add specific macros (from favorite)
     if(data.macros && data.macros.length > 0) {
       macros = macros ? macros + "," + data.macros : data.macros
     }
@@ -579,7 +610,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     canvas.notes.activate()
     
     // Call macro
-    const macros = MoulinetteTiles.getMacros(data)
+    const macros = await MoulinetteTiles.getMacros(data)
     for(const macro of macros) {
       game.moulinette.param = [entry, note]
       console.log("EXECUTE MACRO")
@@ -634,7 +665,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     } 
     
     // Call macro
-    const macros = MoulinetteTiles.getMacros(data)
+    const macros = await MoulinetteTiles.getMacros(data)
     for(const macro of macros) {
       game.moulinette.param = [tile]
       macro.execute()
