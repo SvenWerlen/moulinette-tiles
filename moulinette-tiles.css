@@ -401,6 +401,10 @@
   margin-right: 20px;
 }
 
+#mtteOptionsDialog {
+  min-height: 250px;
+}
+
 #mtteOptionsDialog .options {
   display: flex;
   flex-wrap: wrap;
@@ -417,7 +421,26 @@
 }
 
 #mtteOptionsDialog .options .macro.selected img {
+  border: 3px solid var(--color-border-highlight-alt);
   box-shadow: 0 0 10px var(--color-shadow-highlight) inset;
+}
+
+#mtteOptionsDialog .options.macros {
+  position: absolute;
+  top: 50px;
+  bottom: 50px;
+}
+
+#mtteOptionsDialog .options.actions {
+  align-content: center;
+  align-items: center;
+  position: absolute;
+  width: 100%;
+  bottom: 0px;
+}
+
+#mtteOptionsDialog .options.actions button {
+  width: 45%;
 }
 
 #mtteOptionsDialog .options .macro img {

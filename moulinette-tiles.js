@@ -24,6 +24,23 @@ Hooks.once("init", async function () {
     default: true,
     type: Boolean
   });
+
+  game.keybindings.register("moulinette-core", "searchKey", {
+    name: game.i18n.localize("mtte.configSearchKey"),
+    hint: game.i18n.localize("mtte.configSearchKeyHint"),
+    editable: [],
+    onDown: () => {
+      if(game.moulinette.applications.MoulinetteSearch) {
+        (new game.moulinette.applications.MoulinetteSearch()).render(true)
+      } else {
+        console.warn("Moulinette Tiles not enabled (or not up-to-date?)")
+      }
+    },
+    onUp: () => {},
+    restricted: true,  // Restrict this Keybinding to gamemaster only?
+    reservedModifiers: [],
+    precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL
+  })
 })
 
 /**

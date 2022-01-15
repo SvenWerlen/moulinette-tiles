@@ -8,12 +8,13 @@ export class MoulinetteTileResult extends FormApplication {
   static KEY_CATEGORY = "imageCategories"
   static DEFAULT_WEBM_PREVIEW = "icons/svg/video.svg" // don't forget to change it also in moulinette-tiles.js
   
-  constructor(tile, pack) {
+  constructor(tile, pack, isV2 = false) {
     super()
     this.tile = duplicate(tile);
     this.tile.pack = pack;
     this.pack = pack
     this.isCloud = pack.isRemote && !pack.path.startsWith("https://mttecloudstorage.blob.core.windows.net/user")
+    this.isV2 = isV2
   }
   
   static get defaultOptions() {
@@ -223,28 +224,16 @@ export class MoulinetteTileResult extends FormApplication {
     const mode = game.settings.get("moulinette", "tileMode")
     const size = game.settings.get("moulinette", "tileSize")
 
-    let dragData = {}
+    let dragData = { tile: this.tile, pack: this.pack, source: this.isV2 ? "mtteSearch" : "mtte" }
     if(mode == "tile") {
-      dragData = {
-        type: "Tile",
-        tile: this.tile,
-        pack: this.pack,
-        tileSize: size
-      };
+      dragData.type = "Tile"
+      dragData.tileSize = size
     } else if(mode == "article") {
-      dragData = {
-        type: "JournalEntry",
-        tile: this.tile,
-        pack: this.pack
-      };
+      dragData.type = "JournalEntry"
     } else if(mode == "actor") {
-      dragData = {
-        type: "Actor",
-        tile: this.tile,
-        pack: this.pack
-      };
-    }    
-    dragData.source = "mtte"
+      dragData.type = "Actor"
+    }
+
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
 

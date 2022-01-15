@@ -13,6 +13,9 @@ export class MoulinetteSearch extends FormApplication {
   static DEF_FACET_VALUE = 10
   static MAX_FACET_VALUE = 100
   static FIXED_FIELDS = ["publisher", "pack", "category", "animated"]
+  static THUMB_BASEURL = "https://thumbs.moulinette.cloud"
+  static ELASTIC_ENDPOINT = "https://moulinette.ent.westus2.azure.elastic-cloud.com"
+  static ELASTIC_ENGINE = "moulinette"
 
   constructor() {
     super()
@@ -55,12 +58,14 @@ export class MoulinetteSearch extends FormApplication {
         results = await results.json()
         if(results.search && results.search.length > 0) {
           this.elastic = window.ElasticAppSearch.createClient({
-            endpointBase: "https://moulinette.ent.westus2.azure.elastic-cloud.com",
+            endpointBase: MoulinetteSearch.ELASTIC_ENDPOINT,
             searchKey: results.search,
-            engineName: "moulinette",
+            engineName: MoulinetteSearch.ELASTIC_ENGINE,
             cacheResponses: false
           })
           this.initialized = true
+          const prefs = game.settings.get("moulinette", "searchPrefs")
+          this.search("", {}, { all: prefs && prefs.showAll == true })
         } else {
           console.warn(`MoulinetteSearch | You are not authorized to use this function. Make sure your Patreon account is linked to Moulinette.`)
         }
@@ -164,8 +169,7 @@ export class MoulinetteSearch extends FormApplication {
         await parent.updateFooter()
       }
 
-      const dialog = new MoulinetteOptions("dropmode", callback)
-      dialog.position.width = 100
+      const dialog = new MoulinetteOptions("dropmode", callback, { width: 100, height: "auto" })
       dialog.position.left = event.pageX - dialog.position.width/2
       dialog.position.top = event.pageY - 60 // is auto
       dialog.render(true)
@@ -180,8 +184,7 @@ export class MoulinetteSearch extends FormApplication {
         await parent.updateFooter()
       }
 
-      const dialog = new MoulinetteOptions("tilesize", callback)
-      dialog.position.width = 50 * 5
+      const dialog = new MoulinetteOptions("tilesize", callback, { width: 250, height: "auto" })
       dialog.position.left = event.pageX - dialog.position.width/2
       dialog.position.top = event.pageY - 100 // is auto
       dialog.render(true)
@@ -200,9 +203,7 @@ export class MoulinetteSearch extends FormApplication {
         }
       }
 
-      const dialog = new MoulinetteOptions("macros", callback, { macros: macros.map(m => m._id) })
-      dialog.position.width = 440
-      dialog.position.height = 400
+      const dialog = new MoulinetteOptions("macros", callback, { width: 450, height: 400, macros: macros.map(m => m._id) })
       dialog.position.left = event.pageX - dialog.position.width/2
       dialog.position.top = event.pageY - 100 // is auto
       dialog.render(true)
@@ -224,7 +225,7 @@ export class MoulinetteSearch extends FormApplication {
     // search
     if(source.classList.contains("search")) {
       const searchTerms = this.html.find("#search").val().toLowerCase()
-      this.search(searchTerms, {}, { all: prefs.showAll == true })
+      this.search(searchTerms, this.filters, { all: prefs.showAll == true })
     }
   }
 
@@ -318,7 +319,7 @@ export class MoulinetteSearch extends FormApplication {
         // build assets
         let html = ""
         for(const r of resultList.results) {
-          const imageURL = `${game.moulinette.applications.MoulinetteClient.SERVER_URL}/static/thumbs/${r.getRaw("base")}/${r.getRaw("path")}_thumb.webp`
+          const imageURL = `${MoulinetteSearch.THUMB_BASEURL}/${r.getRaw("base")}/${r.getRaw("path")}_thumb.webp`
           html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}"><img width="100" height="100" src="${imageURL}"/></div>`
         }
 
@@ -610,7 +611,7 @@ export class MoulinetteSearch extends FormApplication {
         sceneModule.instance.previewScene(result.tile, result.pack)
       }
     } else {
-      new MoulinetteTileResult(duplicate(result.tile), duplicate(result.pack)).render(true)
+      new MoulinetteTileResult(duplicate(result.tile), duplicate(result.pack), true).render(true)
     }
   }
 }

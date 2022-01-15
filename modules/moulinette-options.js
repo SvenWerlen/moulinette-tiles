@@ -1,7 +1,7 @@
 export class MoulinetteOptions extends FormApplication {
 
   constructor(dialog, callback, options = {}) {
-    super()
+    super(null, { width: options.width, height: options.height })
     this.dialog = dialog
     this.callback = callback
     this.mtteOptions = options
@@ -13,9 +13,9 @@ export class MoulinetteOptions extends FormApplication {
       classes: ["mtte", "options"],
       title: "",
       template: "modules/moulinette-tiles/templates/options.hbs",
-      width: 100,
+      width: 600,
       height: "auto",
-      closeOnSubmit: true,
+      closeOnSubmit: false,
       submitOnClose: false,
     });
   }
@@ -45,13 +45,19 @@ export class MoulinetteOptions extends FormApplication {
       dropmode: this.dialog == "dropmode",
       tilesize: this.dialog == "tilesize",
       macros: this.dialog == "macros" ? macros : false,
-      sizes: [50, 100, 150, 200, 300]
+      sizes: [50, 100, 150, 200, 300, 400, 500, 700, 1000]
     }
   }
 
   async _updateObject(event) {
     event.preventDefault();
 
+    // don't close on reset
+    if(event.submitter.className == "reset") {
+      return;
+    }
+
+    this.close()
     if(this.dialog == "macros") {
       const ids = []
       this.html.find(".macro.selected").each(function(idx, el) {
@@ -74,7 +80,14 @@ export class MoulinetteOptions extends FormApplication {
     super.activateListeners(html);
 
     html.find(".macro").click(event => {
+      event.preventDefault();
       $(event.currentTarget).toggleClass("selected");
+    })
+
+    html.find(".reset").click(event => {
+      this.html.find(".macro.selected").each(function(idx, el) {
+        $(el).toggleClass("selected")
+      })
     })
 
     this.html = html

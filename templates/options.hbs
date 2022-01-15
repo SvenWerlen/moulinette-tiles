@@ -21,12 +21,15 @@
 
   {{#if macros }}
     <em>{{localize "mtte.macroClickToChoose"}}:</em>
-    <div class="options">
+    <div class="options macros">
     {{#each macros as |m|}}
       <div class="macro {{#if m.selected}}selected{{/if}}" data-id="{{m._id}}"><img src="{{m.img}}"/> {{m.name}}</div>
     {{/each}}
     </div>
-    <button class="macros"><i class="fas fa-cogs"></i> {{localize "mtte.apply"}}</button>
+    <div class="options actions">
+      <button class="reset"><i class="far fa-square"></i> {{localize "mtte.clearAction"}}</button>
+      <button class="macros"><i class="fas fa-cogs"></i> {{localize "mtte.apply"}}</button>
+    </div>
   {{/if}}
 
 </form>
