@@ -50,6 +50,7 @@ Hooks.once("setup", async function () {
   const moduleClassTiles = (await import("./modules/moulinette-tiles.js")).MoulinetteTiles
   game.moulinette.forge.push({
     id: "tiles",
+    layer: "tiles",
     icon: "fas fa-puzzle-piece",
     name: game.i18n.localize("mtte.tiles"),
     description: game.i18n.localize("mtte.tilesDescription"),
@@ -59,12 +60,22 @@ Hooks.once("setup", async function () {
       {id: "listPacks", icon: "fas fa-info-circle" ,name: game.i18n.localize("mtte.listAvailablePacks"), help: game.i18n.localize("mtte.listAvailablePacksToolTip") },
       {id: "customReferences", icon: "fas fa-plus-square" ,name: game.i18n.localize("mtte.customReferences"), help: game.i18n.localize("mtte.customReferencesToolTip") },
       {id: "howto", icon: "fas fa-question-circle" ,name: game.i18n.localize("mtte.howto"), help: game.i18n.localize("mtte.howtoToolTip") }
-    ]
+    ],
+    shortcuts: [{
+      id: "favorites",
+      name: game.i18n.localize("mtte.favorites"),
+      icon: "fas fa-heart"
+    }, {
+      id: "search",
+      name: game.i18n.localize("mtte.moulinetteSearch"),
+      icon: "fas fa-search-plus"
+    }]
   })
   
   const moduleClassPrefabs = (await import("./modules/moulinette-prefabs.js")).MoulinettePrefabs
   game.moulinette.forge.push({
     id: "prefabs",
+    layer: "token",
     icon: "fab fa-buffer",
     name: game.i18n.localize("mtte.prefabs"),
     description: game.i18n.localize("mtte.prefabsDescription"),

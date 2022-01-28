@@ -672,5 +672,15 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       delete game.moulinette.param
     }
   }    
-  
+
+
+  async onShortcut(type) {
+    if(type == "favorites") {
+      (new game.moulinette.applications.MoulinetteTilesFavorites()).render(true)
+    } else if(type == "search") {
+      (new game.moulinette.applications.MoulinetteSearch()).render(true)
+    }
+
+  }
+
 }
