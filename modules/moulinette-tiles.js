@@ -72,7 +72,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       sasThumb = r.sas
     }
     let html = ""
-    r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${r.filename}`
+    r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${game.moulinette.applications.MoulinetteFileUtil.encodeURL(r.filename)}`
     if(r.filename.endsWith(".webm")) {
       const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp" + r.sas : ""
       html = `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}">` +
@@ -504,10 +504,12 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * - data.img will be set with local path
    */
   static async downloadAsset(data) {
+    const FILEUTIL = game.moulinette.applications.MoulinetteFileUtil
+    // new faceted search?
     if(data.tile.search) {
       const today = new Date()
       const imageFileName = data.tile.filename
-      const publisher = game.moulinette.applications.MoulinetteFileUtil.generatePathFromName(data.tile.search.src)
+      const publisher = FILEUTIL.generatePathFromName(data.tile.search.src)
       const pack = `${today.getFullYear()}-${(today.getMonth() < 9 ? "0" : "") + (today.getMonth() + 1)}-${(today.getDate() < 10 ? "0" : "" ) + today.getDate()}`
       const path = `moulinette/images/${publisher}/${pack}`
       
@@ -515,16 +517,18 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       const headers = { method: "POST", headers: { 'Content-Type': 'application/json'}, body: JSON.stringify({ url: data.tile.search.url }) }
       const res = await fetch(game.moulinette.applications.MoulinetteClient.SERVER_URL + "/search/download", headers)
       const blob = await res.blob()
-      await game.moulinette.applications.MoulinetteFileUtil.uploadFile(new File([blob], imageFileName, { type: blob.type, lastModified: today }), imageFileName, path, false)
-      data.img = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + `${path}/${imageFileName}`
+      await FILEUTIL.uploadFile(new File([blob], imageFileName, { type: blob.type, lastModified: today }), imageFileName, path, false)
+      data.img = FILEUTIL.getBaseURL() + `${path}/${imageFileName}`
     }
+    // local assets
     else if(!data.pack.isRemote) {
-      const baseURL = data.pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
-      data.img =  data.tile.filename.match(/^https?:\/\//) ? data.tile.filename : baseURL + `${data.pack.path}/${data.tile.filename}`
+      const baseURL = data.pack.isLocal ? "" : FILEUTIL.getBaseURL()
+      data.img =  data.tile.filename.match(/^https?:\/\//) ? data.tile.filename : baseURL + `${data.pack.path}/${FILEUTIL.encodeURL(data.tile.filename)}`
     }
+    // moulinette cloud assets
     else {
-      await game.moulinette.applications.MoulinetteFileUtil.downloadAssetDependencies(data.tile, data.pack, "tiles")
-      data.img = game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + game.moulinette.applications.MoulinetteFileUtil.getMoulinetteBasePath("tiles", data.pack.publisher, data.pack.name) + data.tile.filename      
+      await FILEUTIL.downloadAssetDependencies(data.tile, data.pack, "tiles")
+      data.img = FILEUTIL.getBaseURL() + FILEUTIL.getMoulinetteBasePath("tiles", data.pack.publisher, data.pack.name) + data.tile.filename
     }
 
     // Clear useless info
