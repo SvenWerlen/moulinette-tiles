@@ -264,7 +264,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Implements actions
    * - indexImages: scan folders and index found files
-   * - listPacks: list available packs
    * - customReferences: list of downloadable content
    * - howto: help on how to use the module
    */
@@ -292,27 +291,11 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       this.clearCache()
       return true
     }
-    else if(classList.contains("listPacks")) {
-      // sort
-      let list = duplicate(this.assetsPacks)
-      list.sort((a, b) => (a.publisher == b.publisher) ? (a.name > b.name ? 1 : -1) : (a.publisher > b.publisher ? 1 : -1))
-      
-      let html = `<table class="mttedialog listPacks"><tr><th>${game.i18n.localize("mtte.publisher")}</th><th>${game.i18n.localize("mtte.pack")}</th><th class="num">#</th><th>${game.i18n.localize("mtte.license")}</th></tr>`
-      list.forEach( t => {
-        if(t.isRemote) {
-          html += `<tr><td><a href="${t.pubWebsite}" target="_blank">${t.publisher}</a></td><td><a href="${t.url}" target="_blank">${t.name}</a></td><td class="num">${t.count}</td><td><a href="${t.licenseUrl}" target="_blank">${t.license}</a></td></tr>`
-        } else {
-          html += `<tr><td>${t.publisher}</td><td>${t.name}</td><td class="num">${t.count}</td><td>${game.i18n.localize("mtte.unknownLicense")}</td></tr>`
-        }
-      })
-      html += "</table>"
-      new Dialog({title: game.i18n.localize("mtte.listPacks"), content: html, buttons: {}}, { width: 650, height: "auto" }).render(true)
-    }
     else if(classList.contains("customReferences")) {
       new Dialog({title: game.i18n.localize("mtte.customReferencesPacks"), buttons: {}}, { id: "moulinette-info", classes: ["info"], template: "modules/moulinette-tiles/templates/custom-references.hbs", width: 650, height: "auto" }).render(true)
     }
     else if(classList.contains("howto")) {
-      new Dialog({title: game.i18n.localize("mtte.howto"), buttons: {}}, { id: "moulinette-help", classes: ["howto"], template: `modules/moulinette-tiles/templates/help.hbs`, width: 650, height: 700, resizable: true }).render(true)
+      new game.moulinette.applications.MoulinetteHelp("tiles").render(true)
     }
   }
   
