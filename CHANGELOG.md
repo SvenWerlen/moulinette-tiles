@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [4.3.1] - 2021-01-30
 ### Fixed
 - 4.3.1 : not working when special characters like # in filename
+- 4.3.2 : typo in jp translations
 ### Added
 - Japanese translations
 ### Changed
