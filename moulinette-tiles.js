@@ -75,7 +75,7 @@ Hooks.once("setup", async function () {
   game.moulinette.forge.push({
     id: "prefabs",
     layer: "token",
-    icon: "fab fa-buffer",
+    icon: "fas fa-users",
     name: game.i18n.localize("mtte.prefabs"),
     description: game.i18n.localize("mtte.prefabsDescription"),
     instance: new moduleClassPrefabs(),

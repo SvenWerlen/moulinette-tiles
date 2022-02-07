@@ -127,6 +127,38 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     const prefab = this.searchResults[idx-1]
     const pack = this.assetsPacks[prefab.pack]
 
+    // special case to delegate to Scene Packer
+    if(prefab.data.img.startsWith("mtte/")) {
+      if(typeof ScenePacker === 'object' && typeof ScenePacker.MoulinetteImporter === 'function') {
+        const baseURL = `/assets/${game.moulinette.user.id}/${pack.packId}`
+        const client = new game.moulinette.applications.MoulinetteClient()
+        client.get(baseURL).then(packInfo => {
+          console.log(`Moulinette Prefabs | API for ScenePacker : ${baseURL}`)
+          console.log(`Moulinette Prefabs | Asset for ScenePacker`, prefab)
+          console.log("Moulinette Prefabs | Result", packInfo)
+          if (packInfo.status === 200) {
+            try {
+              let actorID = prefab.id
+              const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, actorID: actorID})
+              if (moulinetteImporter) {
+                return moulinetteImporter.render(true)
+              }
+            } catch(e) {
+              console.log(`Moulinette Prefabs | Unhandled exception`, e)
+              ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
+            }
+          }
+        })
+      } else {
+        console.log("Moulinette Prefabs | Scene Packer required to import this actor!")
+      }
+
+      return false
+      /*
+
+      */
+    }
+
     let dragData = {
       type: "Actor",
       prefab: prefab,

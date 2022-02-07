@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2021-02-06
+### Added
+- Support for ScenePacker (actors/prefabs)
+### Changed
+- Icon changed to "users" (less confusing)
+
 ## [4.3.1] - 2021-01-30
 ### Fixed
 - 4.3.1 : not working when special characters like # in filename
