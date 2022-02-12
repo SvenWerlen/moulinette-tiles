@@ -33,8 +33,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
+      game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoi/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
-      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"])
+      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"
+    ])
     
     // remove thumbnails and non-images from assets
     const webmList = index.assets.filter(i => i.filename.endsWith(".webm"))
@@ -79,8 +81,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
         `<img width="100" class="cc_image" height="100" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
         `<video width="100" height="100" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video>`
     } else {
+      const assetName = r.data && r.data.name ? r.data.name : r.filename
       const thumbnailURL = pack.isRemote ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + sasThumb : r.assetURL + r.sas
-      html = `<div class="tileres draggable" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}"><img width="100" height="100" src="${thumbnailURL}"/>`
+      html = `<div class="tileres draggable" title="${assetName}" data-idx="${idx}" data-path="${r.filename}"><img width="100" height="100" src="${thumbnailURL}"/>`
     }
     const favs = this.isFavorite(pack, r)
     html += `<div class="fav">`

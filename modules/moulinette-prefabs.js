@@ -138,7 +138,8 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
           console.log("Moulinette Prefabs | Result", packInfo)
           if (packInfo.status === 200) {
             try {
-              let actorID = prefab.id
+              // id is parth of the thumb URL (ex: "mtte/WLZnhQll0b7lhD8K_thumb.webp")
+              let actorID = prefab.data.img.split("_")[0].substring(5)
               const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data, actorID: actorID})
               if (moulinetteImporter) {
                 return moulinetteImporter.render(true)
