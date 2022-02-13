@@ -15,6 +15,9 @@
     </div>
 
     <footer>
+      {{#if showRandom}}
+        <a class="action random" title="{{localize "mtte.randomTooltip"}}"><i class="fas fa-dice"></i> </a>
+      {{/if}}
       {{#if showCategories}}
         <a class="action categories"><i class="fas fa-id-card"></i> </a>
       {{/if}}

@@ -56,7 +56,7 @@ export class MoulinetteDropAsActor extends FormApplication {
     this.close()
   }
   
-  async createToken(actor, linked) {
+  async createToken(actor, linked, activateLayer = true) {
     // Download asset
     const cTiles = await import("./moulinette-tiles.js")
     await cTiles.MoulinetteTiles.downloadAsset(this.data)
@@ -90,10 +90,10 @@ export class MoulinetteDropAsActor extends FormApplication {
     }
 
     // Adjust token position
-    const hg = canvas.dimensions.size / 2;
-    td.x -= td.width * hg;
-    td.y -= td.height * hg;
-    mergeObject(td, canvas.grid.getSnappedPosition(td.x, td.y)); // snap to grid
+    const hw = canvas.grid.w/2;
+    const hh = canvas.grid.h/2;
+    td.update(canvas.grid.getSnappedPosition(td.x - (td.width*hw), td.y - (td.height*hh)));
+
     if ( !canvas.grid.hitArea.contains(td.x, td.y) ) return false;
 
     // Submit the Token creation request and activate the Tokens layer (if not already active)
@@ -102,7 +102,9 @@ export class MoulinetteDropAsActor extends FormApplication {
 
     // sometimes throws exceptions
     try {
-      canvas.tokens.activate()
+      if(activateLayer) {
+        canvas.tokens.activate()
+      }
     } catch(e) {}
     
     // Call macro

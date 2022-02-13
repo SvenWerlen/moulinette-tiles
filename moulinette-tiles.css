@@ -129,8 +129,8 @@
   text-align: center;
 }
 
-#moulinette-favorites header {
-  display: none;
+.mtte .folder.selected {
+  color: darkred;
 }
 
 #moulinette-favorites .window-content {

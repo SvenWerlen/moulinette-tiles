@@ -119,6 +119,8 @@
   "mtte.prefabs": "Prefabs",
   "mtte.prefabsDescription": "Prefabs (requiert le module Token Attacher). Éléments de Moulinette Cloud seulement.",
   "mtte.publisher": "Créateur",
+  "mtte.randomNotification": "{count} images ont été sélectionnées pour être utilisées sur la scène. Cliquer pour déposer aléatoirement 1 d'entre elles. Clic droit pour basculer sur le 'layer' correspondant.",
+  "mtte.randomTooltip": "Selectionne toutes les images de ce répertoire. Ensuite faire un clic dans la zone pour déposer aléatoirement l'une des images.",
   "mtte.requiredTiers": "Abonnement requis",
   "mtte.runMacro": "Macros",
   "mtte.runMacroToolTip": "Exécute des macros (par nom, séparées par des virgules) après avoir créé une tuile/article/jeton. La macro peut accéder à l'objet créé en utilisant 'game.moulinette.param'.",

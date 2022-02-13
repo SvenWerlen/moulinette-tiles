@@ -12,6 +12,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
     super()
 
     this.tab = game.settings.get("moulinette", "currentFav")
+    this.assetInc = 0
   }
   
   static get defaultOptions() {
@@ -82,7 +83,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
 
 
   async getData() {
-    let assets = []
+    this.curAssets = []
     await this.getPackList()
 
     let notFound = []
@@ -93,7 +94,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
         idx++
         const html = this.generateAsset(fav, idx)
         if(html) {
-          assets.push(html)
+          this.curAssets.push(html)
         } else {
           notFound.push(fav)
         }
@@ -121,18 +122,19 @@ export class MoulinetteTilesFavorites extends FormApplication {
     });
 
     const categories = this.tab != "history"
+    const random = this.tab != "history"
 
-    return { assets: assets.slice(0, MoulinetteTilesFavorites.MAX_ASSETS), favorites: favorites, showCategories: categories };
+    return { assets: this.curAssets.slice(0, MoulinetteTilesFavorites.MAX_ASSETS), favorites: favorites, showCategories: categories, showRandom: random };
   }
   
   /**
    * Implements listeners
    */
   activateListeners(html) {
-    $("#controls").hide()
-    $("#logo").hide()
-    $("#navigation").hide()
-    $("#players").hide()
+    //$("#controls").hide()
+    //$("#logo").hide()
+    //$("#navigation").hide()
+    //$("#players").hide()
 
     // keep html for later usage
     this.html = html
@@ -161,10 +163,10 @@ export class MoulinetteTilesFavorites extends FormApplication {
 
   close() {
     super.close()
-    $("#controls").show()
-    $("#logo").show()
-    $("#navigation").show()
-    $("#players").show()
+    //$("#controls").show()
+    //$("#logo").show()
+    //$("#navigation").show()
+    //$("#players").show()
   }
 
   async _removeFav(event) {
@@ -239,6 +241,23 @@ export class MoulinetteTilesFavorites extends FormApplication {
       (new MoulinetteTilesFavoritesCategories(game.settings.get("moulinette", "currentFav"), this.assetsPacks)).render(true)
       this.render()
     }
+    else if(source.classList.contains("random")) {
+      const favs = game.settings.get("moulinette", "favorites")
+      if(this.tab in favs) {
+        const randomList = favs[this.tab].list.map(fav => {
+          // find matching pack
+          const pack = this.assetsPacks.find( p => p.publisher == fav.pub && p.name == fav.pack )
+          const tile = duplicate(this.assets.find( a => a.pack == pack.idx && a.filename == fav.asset ))
+          tile.sas = "?" + pack.sas
+          return tile
+        })
+        if(randomList && randomList.length > 0) {
+          game.moulinette.cache.setData("selAssets", randomList)
+          ui.notifications.info(game.i18n.format("mtte.randomNotification", {count: randomList.length}));
+          canvas.moulinette.activate()
+        }
+      }
+    }
   }
 
   _onDragStart(event) {
@@ -297,12 +316,12 @@ export class MoulinetteTilesFavorites extends FormApplication {
     if(this.ignoreScroll) return;
     const bottom = $(event.currentTarget).prop("scrollHeight") - $(event.currentTarget).scrollTop()
     const height = $(event.currentTarget).height();
-    if(!this.assets) return;
+    if(!this.curAssets) return;
     if(bottom - 20 < height) {
       this.ignoreScroll = true // avoid multiple events to occur while scrolling
-      if(this.assetInc * MoulinetteAvailableAssets.MAX_ASSETS < this.assets.length) {
+      if(this.assetInc * MoulinetteTilesFavorites.MAX_ASSETS < this.curAssets.length) {
         this.assetInc++
-        this.html.find('.tiles').append(this.assets.slice(this.assetInc * MoulinetteAvailableAssets.MAX_ASSETS, (this.assetInc+1) * MoulinetteAvailableAssets.MAX_ASSETS))
+        this.html.find('.tiles').append(this.curAssets.slice(this.assetInc * MoulinetteTilesFavorites.MAX_ASSETS, (this.assetInc+1) * MoulinetteTilesFavorites.MAX_ASSETS))
         this._reEnableListeners()
       }
       this.ignoreScroll = false

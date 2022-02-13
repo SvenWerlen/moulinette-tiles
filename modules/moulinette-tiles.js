@@ -1,5 +1,6 @@
 import { MoulinetteTileResult } from "./moulinette-tileresult.js"
 import { MoulinetteAvailableAssets } from "./moulinette-available.js"
+import { MoulinetteDropAsActor } from "./moulinette-dropas-actor.js"
 
 /**
  * Forge Module for tiles
@@ -104,6 +105,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     if((!pack || pack < 0) && (!publisher || publisher.length == 0) && (!searchTerms || searchTerms.length == 0)) {
       return []
     }
+
+    // clear folder selection (if any)
+    game.moulinette.cache.setData("selAssets", null)
+
     
     const searchTermsList = searchTerms.split(" ")
     // filter list according to search terms and selected pack or publisher
@@ -137,9 +142,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       const keys = Object.keys(folders).sort()
       for(const k of keys) {
         if(viewMode == "browse") {
-          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand">${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand"><a class="random draggable"><i class="fas fa-dice"></i></a> ${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
-          assets.push(`<div class="folder" data-path="${k}"><h2>${k} (${folders[k].length})</div>`)
+          assets.push(`<div class="folder" data-path="${k}"><h2> <a class="random draggable"><i class="fas fa-dice"></i></a> ${k} (${folders[k].length}) </h2></div>`)
         }
         for(const a of folders[k]) {
           assets.push(this.generateAsset(a, a.idx))
@@ -226,6 +231,18 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       showCase.removeClass("clickable")
       showCase.hide()
     }
+
+    this.html.find(".random").click(event => {
+      event.preventDefault();
+      event.stopPropagation();
+      const path = $(event.currentTarget).closest('.folder').data('path')
+      const assets = this.searchResults.filter(a => a.filename.startsWith(path) && a.filename.indexOf("/", path.length) < 0)
+      game.moulinette.cache.setData("selAssets", assets)
+      this.html.find(".folder").removeClass("selected")
+      this.html.find(`[data-path='${path}']`).addClass("selected")
+      ui.notifications.info(game.i18n.format("mtte.randomNotification", {count: assets.length}));
+      canvas.moulinette.activate()
+    })
     
     // display hide video
     this.html.find(".tileres.video").mouseover(this._toggleOnVideo.bind(this))
@@ -307,12 +324,24 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const idx = div.dataset.idx;
     const mode = game.settings.get("moulinette", "tileMode")
     const size = game.settings.get("moulinette", "tileSize")
-    
+
     // invalid action
     if(!this.searchResults || idx < 0 || idx > this.searchResults.length) return
     
-    const tile = this.searchResults[idx-1]
-    const pack = this.assetsPacks[tile.pack]
+    let tile, pack
+
+    // random asset
+    if(!idx) {
+      const path = $(div).closest('.folder').data('path');
+      const assets = this.searchResults.filter(a => a.filename.startsWith(path) && a.filename.indexOf("/", path.length) < 0)
+      if(assets.length == 0) return;
+      // pick 1 asset (randomly)
+      tile = assets[Math.floor((Math.random() * assets.length))]
+    }
+    else {
+      tile = this.searchResults[idx-1]
+    }
+    pack = this.assetsPacks[tile.pack]
 
     let dragData = {}
     if(mode == "tile") {
@@ -395,7 +424,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
           let html = ''
           icons.forEach( i => html += `<i class="info ${i}"></i>` )
-          this.html.find(`.tileres[data-path='${s.filename}']`).find(".fav").html(html)
+          this.html.find(`.tileres[data-path='${s.filename.replace("'", "\\'")}']`).find(".fav").html(html)
         }
       }
     }
@@ -571,7 +600,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Generates an article from the dragged image
    */
-  static async createArticle(data) {
+  static async createArticle(data, activateLayer = true) {
     if ( !data.tile || !data.pack ) return;
     
     const folder = await MoulinetteTiles.getOrCreateArticleFolder(data.pack.publisher, data.pack.name)
@@ -597,13 +626,14 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // Create a NoteConfig sheet instance to finalize the creation
     let note = (await canvas.scene.createEmbeddedDocuments(Note.embeddedName, [noteData], { parent: canvas.scene }))[0]
     note = note._object
-    canvas.notes.activate()
+    if(activateLayer) {
+      canvas.notes.activate()
+    }
     
     // Call macro
     const macros = await MoulinetteTiles.getMacros(data)
     for(const macro of macros) {
       game.moulinette.param = [entry, note]
-      console.log("EXECUTE MACRO")
       macro.execute()
       delete game.moulinette.param
     }
@@ -616,7 +646,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Generate a tile from the dragged image
    */
-  static async createTile(data) {
+  static async createTile(data, activateLayer = true) {
     if ( !data.tile || !data.pack ) return;
     await MoulinetteTiles.downloadAsset(data)
     
@@ -650,7 +680,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     tile = (await canvas.scene.createEmbeddedDocuments(Tile.embeddedName, [data], { parent: canvas.scene }))[0]
     tile = tile._object
 
-    if(canvas.activeLayer != layer) {
+    if(activateLayer && canvas.activeLayer != layer) {
       layer.activate()
     } 
     
@@ -671,6 +701,63 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       (new game.moulinette.applications.MoulinetteSearch()).render(true)
     }
 
+  }
+
+
+  async onLeftClickGrid(eventData) {
+    const assets = game.moulinette.cache.getData("selAssets")
+    if(!assets || assets.length == 0) {
+      return console.log("Moulinette Tiles | Click on a folder (dice icon) then click on the scene to randomly drop assets from that folder")
+    }
+    if(!this.assetsPacks) {
+      await this.getPackList()
+    }
+
+    const mode = game.settings.get("moulinette", "tileMode")
+    const size = game.settings.get("moulinette", "tileSize")
+
+    // random pick tile
+    const tile = assets[Math.floor((Math.random() * assets.length))]
+    const pack = this.assetsPacks[tile.pack]
+
+    const data = {
+      x: eventData.x,
+      y: eventData.y,
+      tile: tile,
+      pack: pack
+    }
+    if(mode == "tile") {
+      data.tileSize = size
+    }
+
+    if(mode == "article") {
+      MoulinetteTiles.createArticle(data, false)
+    }
+    else if(mode == "actor") {
+      const actorId = game.settings.get("moulinette", "tileActorId");
+      const actorLink = game.settings.get("moulinette", "tileActorLink");
+      const actor = game.actors.find( a => a.id == actorId)
+      const dropAsActor = new MoulinetteDropAsActor(data)
+      if(eventData.shift && actor) {
+        dropAsActor.createToken(actor, actorLink, false)
+      } else {
+        dropAsActor.render(true)
+      }
+    }
+    else if(mode == "tile") {
+      MoulinetteTiles.createTile(data, false)
+    }
+  }
+
+  onRightClickGrid(eventData) {
+    const mode = game.settings.get("moulinette", "tileMode")
+    if(mode == "tile") {
+      canvas.background.activate()
+    } else if(mode == "actor") {
+      canvas.tokens.activate()
+    } else if(mode == "article") {
+      canvas.notes.activate()
+    }
   }
 
 }

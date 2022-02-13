@@ -305,6 +305,8 @@
   "mtte.prefabs": "Prefabs",
   "mtte.prefabsDescription": "Prefabs (requires Token Attacher module). Assets available on Moulinette Cloud only.",
   "mtte.publisher": "Creator",
+  "mtte.randomNotification": "{count} assets have been selected and are ready to be used on the scene. Click to randomly drop 1 of them. Right click to switch to token/tiles/journal layer",
+  "mtte.randomTooltip": "Selects all the assets from that folder. Then click on the moulinette layer to randomly drop one of them",
   "mtte.requiredTiers": "Required tier",
   "mtte.runMacro": "Macros",
   "mtte.runMacroToolTip": "Executes macros (by name, comma-separated) after creating the tile/article/token. Macros can use 'game.moulinette.param' to access created asset.",
