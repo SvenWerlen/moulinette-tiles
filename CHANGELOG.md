@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.6.0] - 2021-02-
+### Fixed
+- Moulinette Favorites only shows 100 first assets
+### Added
+- Randomly drops a image as tile/article/token on the scene
+
 ## [4.5.0] - 2021-02-12
 ### Fixed
 - ScenePacker prefabs/actors cannot import selected
