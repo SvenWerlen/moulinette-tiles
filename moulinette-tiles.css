@@ -133,6 +133,49 @@
   color: darkred;
 }
 
+#moulinette-preview .body {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+#moulinette-preview h3 {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 30px;
+  overflow: hidden;
+  width: 100%;
+}
+
+#moulinette-preview .scene {
+  display: flex;
+  height: auto;
+  position: absolute;
+  top: 30px;
+  bottom: 90px;
+  left: 0px;
+  width: 100%;
+}
+
+#moulinette-preview .infos {
+  position: absolute;
+  bottom: 40px;
+  left: 0px;
+  height: 50px;
+  overflow: hidden;
+  width: 100%;
+}
+
+#moulinette-preview footer {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  height: 35px;
+  overflow: hidden;
+  width: 100%;
+}
+
 #moulinette-favorites .window-content {
   background: none;
 }
@@ -281,7 +324,7 @@
 
 #moulinetteSearch {
   min-height: 300px;
-  min-width: 500px;
+  min-width: 750px;
 }
 
 #moulinetteSearch .body {
@@ -446,4 +489,14 @@
 #mtteOptionsDialog .options .macro img {
   width: 48px;
   margin-right: 10px;
+}
+
+#mtteZoom, #mtteZoomVid {
+  display: none;
+  object-fit: contain;
+  position: absolute;
+  border: 1px solid #000;
+  background: url(../../ui/parchment.jpg) repeat;
+  z-index: 100;
+  box-shadow: 0px 0px 2px 2px #666;
 }

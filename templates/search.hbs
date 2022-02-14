@@ -5,6 +5,11 @@
     {{/if}}
     {{#unless error}}
 
+    <img id="mtteZoom"/>
+    <video id="mtteZoomVid" width="300" height="300" autoplay loop muted>
+      <source src="" type="video/webm"> Your browser does not support the video tag.
+    </video>
+
     <div class="header">
       <div class="form-group search">
         <input id="search" type="text" placeholder="{{localize "mtte.search"}}"></input>

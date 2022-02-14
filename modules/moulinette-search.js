@@ -104,6 +104,12 @@ export class MoulinetteSearch extends FormApplication {
     // click on an image => detail
     html.find(".tileres").click(this._onShowTile.bind(this))
 
+    // click on an image => detail
+    this.zoom = html.find("#mtteZoom")
+    this.zoomVid = html.find("#mtteZoomVid")
+    html.find(".tileres").mouseover(this._onZoom.bind(this))
+    html.find(".tileres").mouseout(ev => { this.zoom.hide(); this.zoomVid.hide(); })
+
     // toggle filters
     html.find(".toggle").click(el => {
       html.find(".filters").toggle()
@@ -262,7 +268,9 @@ export class MoulinetteSearch extends FormApplication {
     this.searchOptions = options
 
     // force filter category
-    filters.category = { id: "image", order: 0 }
+    if(!game.moulinette.user.hasEarlyAccess()) {
+      filters.category = { id: "image", order: 0 }
+    }
 
     // prepare the request options
     const optionsFilters = { "all" : [] }
@@ -319,8 +327,17 @@ export class MoulinetteSearch extends FormApplication {
         // build assets
         let html = ""
         for(const r of resultList.results) {
-          const imageURL = `${MoulinetteSearch.THUMB_BASEURL}/${r.getRaw("base")}/${r.getRaw("path")}_thumb.webp`
-          html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}"><img width="100" height="100" src="${imageURL}"/></div>`
+          const categ = r.getRaw("category")
+          let imageURL = `${MoulinetteSearch.THUMB_BASEURL}/${r.getRaw("base")}/${r.getRaw("path")}_thumb.webp`
+
+          if(categ == "scene") {
+            html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}"><img width="200" height="200" src="${imageURL}"/></div>`
+          }
+          else {
+            html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}"><img width="100" height="100" src="${imageURL}"/></div>`
+          }
+
+
         }
 
         // update stats
@@ -523,7 +540,7 @@ export class MoulinetteSearch extends FormApplication {
    * Retrieves the pack and tile from cache
    * Based on the provided search result ID
    */
-  getAssetFromSearchResult(id) {
+  getAssetFromSearchResult(id, openAvailableResult = true) {
     const entry = this.results.find(r => r.getRaw("id") == id)
     if(!entry || !this.cache) {
       return console.warn("Moulinette Search | Not able find selected image from cache")
@@ -534,16 +551,18 @@ export class MoulinetteSearch extends FormApplication {
     const pack = this.cache.packs.find(p => p.packId == packId)
     // retrieve pack from available assets
     if(!pack) {
-      const creator = entry.getRaw("publisher")
-      const pack = entry.getRaw("pack")
-      const asset = entry.getRaw("path")
-      const basepath = entry.getRaw("base")
-      new MoulinetteAvailableResult(creator, pack, `${basepath}/${asset}_thumb.webp`).render(true)
+      if(openAvailableResult) {
+        const creator = entry.getRaw("publisher")
+        const pack = entry.getRaw("pack")
+        const asset = entry.getRaw("path")
+        const basepath = entry.getRaw("base")
+        new MoulinetteAvailableResult(creator, pack, `${basepath}/${asset}_thumb.webp`).render(true)
+      }
       return null;
     }
 
     // retrieve tile from cache
-    const tile = this.cache.assets.find(a => a.pack == pack.idx && a.filename.startsWith(entry.getRaw("path")))
+    const tile = this.cache.assets.find(a => a.pack == pack.idx && a.filename.substring(0, a.filename.lastIndexOf('.')) == entry.getRaw("path"))
     if(!tile) {
       console.warn(`Moulinette Search | Not able to find tile from pack "${pack.publisher} | ${pack.name}" with path "${entry.getRaw("path")}"`)
       return null;
@@ -556,7 +575,7 @@ export class MoulinetteSearch extends FormApplication {
     }
     tile.sas = "?" + pack.sas
 
-    return { pack: pack, tile: tile }
+    return { pack: pack, tile: tile, doc: entry }
   }
 
   _onDragStart(event) {
@@ -612,6 +631,52 @@ export class MoulinetteSearch extends FormApplication {
       }
     } else {
       new MoulinetteTileResult(duplicate(result.tile), duplicate(result.pack), true).render(true)
+    }
+  }
+
+  _onZoom(event) {
+    const docId = $(event.currentTarget).data("id")
+    const result = this.getAssetFromSearchResult(docId, false)
+    const el = $(event.currentTarget)
+
+    // user not supporting creator (=> show watermarked version +50% size)
+    const img = el.find("img")
+
+    if(!result) {
+      const showLeft = el.offset().left - this.zoom.parent().offset().left > 1.5 * img.attr("width")
+      this.zoom.attr("src", img.attr("src"));
+      this.zoom.attr("width", img.attr("width")*1.5);
+      this.zoom.attr("height", img.attr("height")*1.5);
+      this.zoom.css("left", showLeft ? 0 : "auto")
+      this.zoom.css("right", showLeft ? "auto" : 0)
+      this.zoom.show()
+    } else {
+      const SCALES = { image: 3, scene: 1.5 }
+      const scale = SCALES[result.doc.getRaw("category")]
+      const showLeft = el.offset().left - this.zoom.parent().offset().left > scale * img.attr("width")
+      let url = result.tile.assetURL
+      if(result.doc.getRaw("category") == "scene") {
+        if(result.doc.getRaw("animated") != "true") {
+          url = url.substring(0, result.tile.assetURL.length-5) + "_thumb.webp"
+        } else {
+          url = result.pack.path + "/" + result.tile.data.img
+        }
+      }
+
+      if(result.doc.getRaw("animated") != "true" && !url.endsWith(".webm")) {
+        this.zoom.attr("src", url + result.tile.sas);
+        this.zoom.attr("width", img.attr("width") * scale);
+        this.zoom.attr("height", img.attr("height") * scale);
+        this.zoom.css("left", showLeft ? 0 : "auto")
+        this.zoom.css("right", showLeft ? "auto" : 0)
+        this.zoom.show()
+      } else {
+        this.zoomVid.find("source").attr('src', url + result.tile.sas)
+        this.zoomVid.css("left", showLeft ? 0 : "auto")
+        this.zoomVid.css("right", showLeft ? "auto" : 0)
+        $(this.zoomVid)[0].load();
+        this.zoomVid.show()
+      }
     }
   }
 }
