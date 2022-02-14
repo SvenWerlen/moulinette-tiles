@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moulinette Favorites only shows 100 first assets
 ### Added
 - Randomly drops a image as tile/article/token on the scene
+- Moulinette faceted search : zoom / preview on mouse over
 
 ## [4.5.0] - 2021-02-12
 ### Fixed
