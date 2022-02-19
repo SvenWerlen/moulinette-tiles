@@ -133,49 +133,6 @@
   color: darkred;
 }
 
-#moulinette-preview .body {
-  position: relative;
-  height: 100%;
-  overflow: hidden;
-}
-
-#moulinette-preview h3 {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  height: 30px;
-  overflow: hidden;
-  width: 100%;
-}
-
-#moulinette-preview .scene {
-  display: flex;
-  height: auto;
-  position: absolute;
-  top: 30px;
-  bottom: 90px;
-  left: 0px;
-  width: 100%;
-}
-
-#moulinette-preview .infos {
-  position: absolute;
-  bottom: 40px;
-  left: 0px;
-  height: 50px;
-  overflow: hidden;
-  width: 100%;
-}
-
-#moulinette-preview footer {
-  position: absolute;
-  bottom: 0px;
-  left: 0px;
-  height: 35px;
-  overflow: hidden;
-  width: 100%;
-}
-
 #moulinette-favorites .window-content {
   background: none;
 }
