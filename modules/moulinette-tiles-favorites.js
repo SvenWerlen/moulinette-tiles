@@ -122,7 +122,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
     });
 
     const categories = this.tab != "history"
-    const random = this.tab != "history"
+    const random = this.tab != "history" && game.moulinette.user.hasEarlyAccess()
 
     return { assets: this.curAssets.slice(0, MoulinetteTilesFavorites.MAX_ASSETS), favorites: favorites, showCategories: categories, showRandom: random };
   }
@@ -247,10 +247,11 @@ export class MoulinetteTilesFavorites extends FormApplication {
         const randomList = favs[this.tab].list.map(fav => {
           // find matching pack
           const pack = this.assetsPacks.find( p => p.publisher == fav.pub && p.name == fav.pack )
+          if(!pack) return null
           const tile = duplicate(this.assets.find( a => a.pack == pack.idx && a.filename == fav.asset ))
           tile.sas = "?" + pack.sas
           return tile
-        })
+        }).filter(e => e != null)
         if(randomList && randomList.length > 0) {
           game.moulinette.cache.setData("selAssets", randomList)
           ui.notifications.info(game.i18n.format("mtte.randomNotification", {count: randomList.length}));

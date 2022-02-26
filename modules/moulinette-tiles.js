@@ -141,10 +141,11 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults, this.assetsPacks);
       const keys = Object.keys(folders).sort()
       for(const k of keys) {
+        const random = game.moulinette.user.hasEarlyAccess() ? `<a class="random draggable"><i class="fas fa-dice"></i></a>` : ""
         if(viewMode == "browse") {
-          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand"><a class="random draggable"><i class="fas fa-dice"></i></a> ${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand">${random} ${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
-          assets.push(`<div class="folder" data-path="${k}"><h2> <a class="random draggable"><i class="fas fa-dice"></i></a> ${k} (${folders[k].length}) </h2></div>`)
+          assets.push(`<div class="folder" data-path="${k}"><h2>${random} ${k} (${folders[k].length}) </h2></div>`)
         }
         for(const a of folders[k]) {
           assets.push(this.generateAsset(a, a.idx))
