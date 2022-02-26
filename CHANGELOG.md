@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Randomly drops a image as tile/article/token on the scene
 - Moulinette faceted search : zoom / preview on mouse over
+- Integration with The Token Vault
 
 ## [4.5.0] - 2021-02-12
 ### Fixed
