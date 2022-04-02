@@ -129,6 +129,16 @@ export class MoulinetteSearch extends FormApplication {
       }
     })
 
+    // mouse over adventures
+    html.find(".tileres.adventure").mouseover(function(el) {
+      $(el.currentTarget).find("img").css("opacity", "20%")
+      $(el.currentTarget).find(".name").show()
+    });
+    html.find(".tileres.adventure").mouseout(function(el) {
+      $(el.currentTarget).find("img").css("opacity", "100%")
+      $(el.currentTarget).find(".name").hide()
+    });
+
     this.html = html
 
     // insert Footer
@@ -267,11 +277,6 @@ export class MoulinetteSearch extends FormApplication {
     this.filters = filters
     this.searchOptions = options
 
-    // force filter category
-    if(!game.moulinette.user.hasEarlyAccess()) {
-      filters.category = { id: "image", order: 0 }
-    }
-
     // prepare the request options
     const optionsFilters = { "all" : [] }
     for(const f of Object.keys(filters)) {
@@ -333,8 +338,27 @@ export class MoulinetteSearch extends FormApplication {
           if(categ == "scene") {
             html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}"><img width="200" height="200" src="${imageURL}"/></div>`
           }
-          else {
+          else if(categ == "adventure") {
+            const playersData = r.getRaw("catadv_players")
+            const players = playersData.length == 1 ? playersData[0] : playersData[0] + "-" + playersData[playersData.length-1]
+            const playTime = r.getRaw("catadv_playhours")
+            const levelsData = r.getRaw("catadv_levels")
+            const levels = levelsData.length == 1 ? levelsData[0] : levelsData[0] + "-" + levelsData[levelsData.length-1]
+
+            html += `<div class="tileres adventure draggable" data-id="${r.getRaw("id")}"><img width="200" height="200" src="${imageURL}"/>`
+            html += `<div class="name">${r.getRaw("name")}</div>`
+            html += `<div class="details">`
+            html += `<div class="info"><i class="fas fa-users"></i><div class="stats ${players.length > 3 ? 'small' : ''}" title="${game.i18n.localize("mtte.adventurePlayers")}">${players}</div></div>`
+            html += `<div class="info"><i class="fas fa-hourglass-half"></i><div class="stats ${playTime.length > 3 ? 'small' : ''}" title="${game.i18n.localize("mtte.adventurePlayhours")}">${playTime}</div></div>`
+            html += `<div class="info"><i class="fas fa-star"></i><div class="stats ${levels.length > 3 ? 'small' : ''}" title="${game.i18n.localize("mtte.adventureLevels")}">${levels}</div></div>`
+            html += `</div></div>`
+
+          }
+          else if(categ == "image") {
             html += `<div class="tileres draggable" title="${r.getRaw("name")}" data-id="${r.getRaw("id")}"><img width="100" height="100" src="${imageURL}"/></div>`
+          }
+          else {
+            console.warn("Moulinette Search | Unsupported asset", r)
           }
 
 
@@ -544,6 +568,37 @@ export class MoulinetteSearch extends FormApplication {
     const entry = this.results.find(r => r.getRaw("id") == id)
     if(!entry || !this.cache) {
       return console.warn("Moulinette Search | Not able find selected image from cache")
+    }
+
+    // adventures ? Open Scene packer
+    if(entry.getRaw("category") == "adventure") {
+      if(openAvailableResult) {
+        if(typeof ScenePacker === 'object' && typeof ScenePacker.MoulinetteImporter === 'function') {
+          const packId = entry.getRaw("packid")
+          const baseURL = `/assets/${game.moulinette.user.id}/${packId}`
+          const client = new game.moulinette.applications.MoulinetteClient()
+          client.get(baseURL).then(packInfo => {
+            console.log(`Moulinette Search | API for ScenePacker : ${baseURL}`)
+            console.log(`Moulinette Search | Asset for ScenePacker`, this.asset)
+            console.log("Moulinette Search | Result", packInfo)
+            if (packInfo.status === 200) {
+              try {
+                const moulinetteImporter = new ScenePacker.MoulinetteImporter({packInfo: packInfo.data})
+                if (moulinetteImporter) {
+                  return moulinetteImporter.render(true)
+                }
+              } catch(e) {
+                console.log(`Moulinette | Unhandled exception`, e)
+                ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
+              }
+            }
+          })
+        } else {
+          console.error(`Moulinette | ${game.i18n.localize("mtte.errorScenepackerRequired")}. See: https://foundryvtt.com/packages/scene-packer`)
+          return ui.notifications.error(game.i18n.localize("mtte.errorScenepackerRequired"))
+        }
+      }
+      return null;
     }
 
     // retrieve pack from cache

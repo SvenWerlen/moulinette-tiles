@@ -122,7 +122,9 @@ export class MoulinetteTilesFavorites extends FormApplication {
     });
 
     const categories = this.tab != "history"
-    const random = this.tab != "history" && game.moulinette.user.hasEarlyAccess()
+    const random = this.tab != "history"
+
+    console.log(favorites)
 
     return { assets: this.curAssets.slice(0, MoulinetteTilesFavorites.MAX_ASSETS), favorites: favorites, showCategories: categories, showRandom: random };
   }

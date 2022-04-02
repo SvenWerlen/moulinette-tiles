@@ -4,11 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.7.0] - 2021-04-01
+### Fixed
+- Tiles not listed into history
+### Added
+- Randomly drops a image as tile/article/token on the scene (for all)
+- Support for ScenePacker Adventures
+
 ## [4.6.0] - 2021-02-26
 ### Fixed
 - Moulinette Favorites only shows 100 first assets
 ### Added
-- Randomly drops a image as tile/article/token on the scene
+- Randomly drops a image as tile/article/token on the scene (early release)
 - Moulinette faceted search : zoom / preview on mouse over
 - Integration with The Token Vault
 

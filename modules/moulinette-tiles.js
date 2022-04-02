@@ -38,7 +38,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
       game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"
     ])
-    
+
     // remove thumbnails and non-images from assets
     const webmList = index.assets.filter(i => i.filename.endsWith(".webm"))
     const thumbList = webmList.map(i => i.filename.substr(0, i.filename.lastIndexOf('.') + 1) + "webp")
@@ -141,7 +141,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults, this.assetsPacks);
       const keys = Object.keys(folders).sort()
       for(const k of keys) {
-        const random = game.moulinette.user.hasEarlyAccess() ? `<a class="random draggable"><i class="fas fa-dice"></i></a>` : ""
+        const random = `<a class="random draggable"><i class="fas fa-dice"></i></a>`
         if(viewMode == "browse") {
           assets.push(`<div class="folder" data-path="${k}"><h2 class="expand">${random} ${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
