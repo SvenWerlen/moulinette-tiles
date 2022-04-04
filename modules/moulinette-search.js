@@ -340,10 +340,16 @@ export class MoulinetteSearch extends FormApplication {
           }
           else if(categ == "adventure") {
             const playersData = r.getRaw("catadv_players")
-            const players = playersData.length == 1 ? playersData[0] : playersData[0] + "-" + playersData[playersData.length-1]
-            const playTime = r.getRaw("catadv_playhours")
+            let players = "?"
+            if(playersData) {
+              players = playersData.length == 1 ? playersData[0] : playersData[0] + "-" + playersData[playersData.length-1]
+            }
+            const playTime = r.getRaw("catadv_playhours") ? r.getRaw("catadv_playhours") : "?"
             const levelsData = r.getRaw("catadv_levels")
-            const levels = levelsData.length == 1 ? levelsData[0] : levelsData[0] + "-" + levelsData[levelsData.length-1]
+            let levels = "?"
+            if(levelsData) {
+              levels = levelsData.length == 1 ? levelsData[0] : levelsData[0] + "-" + levelsData[levelsData.length-1]
+            }
 
             html += `<div class="tileres adventure draggable" data-id="${r.getRaw("id")}"><img width="200" height="200" src="${imageURL}"/>`
             html += `<div class="name">${r.getRaw("name")}</div>`
