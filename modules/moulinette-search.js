@@ -13,7 +13,7 @@ export class MoulinetteSearch extends FormApplication {
   static DEF_FACET_VALUE = 10
   static MAX_FACET_VALUE = 100
   static FIXED_FIELDS = ["publisher", "pack", "category", "animated"]
-  static THUMB_BASEURL = "https://thumbs.moulinette.cloud"
+  static THUMB_BASEURL = "https://mttethumbs.nyc3.digitaloceanspaces.com"  //"https://thumbs.moulinette.cloud"
   static ELASTIC_ENDPOINT = "https://moulinette.ent.westus2.azure.elastic-cloud.com"
   static ELASTIC_ENGINE = "moulinette"
 
