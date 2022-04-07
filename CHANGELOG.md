@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [4.7.0] - 2021-04-01
+## [4.7.2] - 2021-04-07
 ### Fixed
 - Tiles not listed into history
+- 4.7.1 : fix faceted search for specific ScenePacker packs
+- 4.7.2 : remove useless CDN for thumbs
 ### Added
 - Randomly drops a image as tile/article/token on the scene (for all)
 - Support for ScenePacker Adventures
