@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tiles not listed into history
 - 4.7.1 : fix faceted search for specific ScenePacker packs
 - 4.7.2 : remove useless CDN for thumbs
+- 4.7.3 : prefabs not importing in PF2 system
 ### Added
 - Randomly drops a image as tile/article/token on the scene (for all)
 - Support for ScenePacker Adventures

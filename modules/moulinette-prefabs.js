@@ -230,8 +230,17 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       }
 
       // Create actor
-      const actorData = JSON.parse(jsonAsText)
-      actorData.folder = await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
+      let actorData = JSON.parse(jsonAsText)
+
+      // Clean-up prefab
+      actorData = {
+        type: game.system.documentTypes.Actor[0],
+        img: actorData.img,
+        name: actorData.name,
+        token: actorData.token,
+        flags: actorData.flags,
+        folder: await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
+      }
       const actor = await getDocumentClass("Actor").create(actorData);
 
       // Prepare the Token data
