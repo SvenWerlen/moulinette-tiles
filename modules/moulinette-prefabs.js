@@ -43,9 +43,9 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
   /**
    * Generate a new asset (HTML) for the given result and idx
    */
-  generateAsset(r, idx) {
+  async generateAsset(r, idx) {
     const pack = this.assetsPacks[r.pack]
-    const URL = pack.isLocal || pack.isRemote ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const URL = pack.isLocal || pack.isRemote ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     // sas (Shared access signature) for accessing remote files (Azure)
     r.sas = pack.sas ? "?" + pack.sas : ""
     r.baseURL = `${URL}${pack.path}/`
@@ -86,7 +86,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       let idx = 0
       for(const r of this.searchResults) {
         idx++
-        assets.push(this.generateAsset(r, idx))
+        assets.push(await this.generateAsset(r, idx))
       }
     }
     // view #2 (by folder)
@@ -100,7 +100,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
           assets.push(`<div class="folder" data-path="${k}"><h2>${k} (${folders[k].length})</div>`)
         }
         for(const a of folders[k]) {
-          assets.push(this.generateAsset(a, a.idx))
+          assets.push(await this.generateAsset(a, a.idx))
         }
       }
     }

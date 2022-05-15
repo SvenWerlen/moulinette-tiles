@@ -44,6 +44,7 @@ export class MoulinetteSearch extends FormApplication {
   }
 
   async getData() {
+    this.baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     this.categories = await MoulinetteSearchUtils.getCategories()
     this.cache = await game.moulinette.applications.Moulinette.fillMoulinetteCache()
 
@@ -630,9 +631,9 @@ export class MoulinetteSearch extends FormApplication {
     }
 
     // prepare URL & SAS
-    tile.assetURL = `${game.moulinette.applications.MoulinetteFileUtil.getBaseURL()}${pack.path}/${tile.filename}`
+    tile.assetURL = `${this.baseURL}${pack.path}/${tile.filename}`
     if(tile.data && tile.data.img) {
-      tile.baseURL = `${game.moulinette.applications.MoulinetteFileUtil.getBaseURL()}${pack.path}/${tile.data.img.substring(0, tile.data.img.lastIndexOf('.'))}`
+      tile.baseURL = `${this.baseURL}${pack.path}/${tile.data.img.substring(0, tile.data.img.lastIndexOf('.'))}`
     }
     tile.sas = "?" + pack.sas
 

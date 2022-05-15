@@ -31,12 +31,13 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
       
     const user = await game.moulinette.applications.Moulinette.getUser()
+    const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoi/assets/" + game.moulinette.user.id,
-      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
-      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"
+      baseURL + "moulinette/images/custom/index.json",
+      baseURL + "moulinette/tiles/custom/index.json"
     ])
 
     // remove thumbnails and non-images from assets
@@ -58,9 +59,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Generate a new asset (HTML) for the given result and idx
    */
-  generateAsset(r, idx) {
+  async generateAsset(r, idx) {
     const pack = this.assetsPacks[r.pack]
-    const URL = pack.isRemote || pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const URL = pack.isRemote || pack.isLocal ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     const showThumbs = game.settings.get("moulinette-tiles", "tileShowVideoThumb");
     let sasThumb = null
     
@@ -133,7 +134,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       let idx = 0
       for(const r of this.searchResults) {
         idx++
-        assets.push(this.generateAsset(r, idx))
+        assets.push(await this.generateAsset(r, idx))
       }
     }
     // view #2 (by folder)
@@ -148,7 +149,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
           assets.push(`<div class="folder" data-path="${k}"><h2>${random} ${k} (${folders[k].length}) </h2></div>`)
         }
         for(const a of folders[k]) {
-          assets.push(this.generateAsset(a, a.idx))
+          assets.push(await this.generateAsset(a, a.idx))
         }
       }
     }
@@ -542,6 +543,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    */
   static async downloadAsset(data) {
     const FILEUTIL = game.moulinette.applications.MoulinetteFileUtil
+    const baseURL = await FILEUTIL.getBaseURL()
     // new faceted search?
     if(data.tile.search) {
       const today = new Date()
@@ -555,17 +557,17 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       const res = await fetch(game.moulinette.applications.MoulinetteClient.SERVER_URL + "/search/download", headers)
       const blob = await res.blob()
       await FILEUTIL.uploadFile(new File([blob], imageFileName, { type: blob.type, lastModified: today }), imageFileName, path, false)
-      data.img = FILEUTIL.getBaseURL() + `${path}/${imageFileName}`
+      data.img = baseURL + `${path}/${imageFileName}`
     }
     // local assets
     else if(!data.pack.isRemote) {
-      const baseURL = data.pack.isLocal ? "" : FILEUTIL.getBaseURL()
-      data.img =  data.tile.filename.match(/^https?:\/\//) ? data.tile.filename : baseURL + `${data.pack.path}/${FILEUTIL.encodeURL(data.tile.filename)}`
+      const localBaseURL = data.pack.isLocal ? "" : baseURL
+      data.img =  data.tile.filename.match(/^https?:\/\//) ? data.tile.filename : localBaseURL + `${data.pack.path}/${FILEUTIL.encodeURL(data.tile.filename)}`
     }
     // moulinette cloud assets
     else {
       await FILEUTIL.downloadAssetDependencies(data.tile, data.pack, "tiles")
-      data.img = FILEUTIL.getBaseURL() + FILEUTIL.getMoulinetteBasePath("tiles", data.pack.publisher, data.pack.name) + data.tile.filename
+      data.img = baseURL + FILEUTIL.getMoulinetteBasePath("tiles", data.pack.publisher, data.pack.name) + data.tile.filename
     }
 
     // Clear useless info

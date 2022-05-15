@@ -41,11 +41,12 @@ export class MoulinetteTilesFavorites extends FormApplication {
     }
 
     const user = await game.moulinette.applications.Moulinette.getUser()
+    const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
-      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/images/custom/index.json",
-      game.moulinette.applications.MoulinetteFileUtil.getBaseURL() + "moulinette/tiles/custom/index.json"])
+      baseURL + "moulinette/images/custom/index.json",
+      baseURL + "moulinette/tiles/custom/index.json"])
 
     // remove thumbnails and non-images from assets
     const webmList = index.assets.filter(i => i.filename.endsWith(".webm"))
@@ -66,14 +67,14 @@ export class MoulinetteTilesFavorites extends FormApplication {
   /**
    * Generate a new asset (HTML) for the given result and idx
    */
-  generateAsset(r, idx) {
+  async generateAsset(r, idx) {
     const pack = this.assetsPacks.find(p => p.publisher == r.pub && p.name == r.pack)
 
     if(!pack) {
       return null
     }
 
-    const URL = pack.isRemote || pack.isLocal ? "" : game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const URL = pack.isRemote || pack.isLocal ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
 
     r.sas = pack.sas ? "?" + pack.sas : "" // sas (Shared access signature) for accessing remote files (Azure)
     r.assetURL = r.asset.match(/^https?:\/\//) ? r.asset : `${URL}${pack.path}/${r.asset}`
@@ -92,7 +93,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
     if(this.tab in favs) {
       for(const fav of favs[this.tab].list.reverse()) {
         idx++
-        const html = this.generateAsset(fav, idx)
+        const html = await this.generateAsset(fav, idx)
         if(html) {
           this.curAssets.push(html)
         } else {
