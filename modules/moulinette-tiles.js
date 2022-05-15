@@ -285,6 +285,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Implements actions
    * - indexImages: scan folders and index found files
+   * - configureSources: manage sources for indexing process
    * - customReferences: list of downloadable content
    * - howto: help on how to use the module
    */
@@ -311,6 +312,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       game.moulinette.cache.clear()
       this.clearCache()
       return true
+    }
+    else if(classList.contains("configureSources")) {
+      (new game.moulinette.applications.MoulinetteSources()).render(true)
     }
     else if(classList.contains("customReferences")) {
       new Dialog({title: game.i18n.localize("mtte.customReferencesPacks"), buttons: {}}, { id: "moulinette-info", classes: ["info"], template: "modules/moulinette-tiles/templates/custom-references.hbs", width: 650, height: "auto" }).render(true)
