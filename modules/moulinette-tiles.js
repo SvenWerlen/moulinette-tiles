@@ -588,14 +588,14 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       moulinetteFolder = moulinetteFolder[0]
     }
     // publisher level
-    let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
+    let publisherFolder = moulinetteFolder.children ? moulinetteFolder.children.filter( c => c.name == publisher ) : []
     if( publisherFolder.length == 0 ) {
       publisherFolder = await Folder.create({name: publisher, type: "JournalEntry", parent: moulinetteFolder.id })
     } else {
       publisherFolder = publisherFolder[0]
     }
     // pack level
-    let packFolder = publisherFolder.children.filter( c => c.name == pack )
+    let packFolder = publisherFolder.children ? publisherFolder.children.filter( c => c.name == pack ) : []
     if( packFolder.length == 0 ) {
       packFolder = await Folder.create({name: pack, type: "JournalEntry", parent: publisherFolder.id })
     } else {
