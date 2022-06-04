@@ -664,32 +664,30 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     data.height = tex.baseTexture.height * ratio;
 
     // Validate that the drop position is in-bounds and snap to grid
-    if ( !canvas.grid.hitArea.contains(data.x, data.y) ) return false;
+    if ( !canvas.dimensions.rect.contains(data.x, data.y) ) return false;
     data.x = data.x - (data.width / 2);
     data.y = data.y - (data.height / 2);
     //if ( !event.shiftKey ) mergeObject(data, canvas.grid.getSnappedPosition(data.x, data.y));
 
     // Create the tile as hidden if the ALT key is pressed
     //if ( event.altKey ) data.hidden = true;
-    const canvasClass = canvas.background
-    const layer = canvas.activeLayer && canvas.activeLayer.name == "ForegroundLayer" ? canvas.foreground : canvas.background
     
     // make sure to always put tiles on top
     let maxZ = 0
-    canvasClass.placeables.forEach( t => { 
+    canvas.activeLayer.placeables.forEach( t => {
       if(t.zIndex > maxZ) maxZ = t.zIndex
     })
     data.z = maxZ
     
     // Create the Tile
     let tile;
-    data.overhead = layer.name == "ForegroundLayer"
+    data.overhead = ui.controls.controls.find(c => c.layer === "tiles").foreground ?? false;
     tile = (await canvas.scene.createEmbeddedDocuments(Tile.embeddedName, [data], { parent: canvas.scene }))[0]
     tile = tile._object
 
-    if(activateLayer && canvas.activeLayer != layer) {
-      layer.activate()
-    } 
+    if(!canvas.tiles.active && canvas.activeLayer.name != "MoulinetteLayer") {
+      canvas.tiles.activate()
+    }
     
     // Call macro
     const macros = await MoulinetteTiles.getMacros(data)
@@ -759,7 +757,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   onRightClickGrid(eventData) {
     const mode = game.settings.get("moulinette", "tileMode")
     if(mode == "tile") {
-      canvas.background.activate()
+      canvas.tiles.activate()
     } else if(mode == "actor") {
       canvas.tokens.activate()
     } else if(mode == "article") {
