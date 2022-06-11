@@ -31,8 +31,8 @@
 }
 
 .mtte.forge .cc_image {
-    min-width: 100px;
-    min-height: 100px;
+    /*min-width: 100px;
+    min-height: 100px;*/
     background-position: 100%;
     background-size: cover;
     background-repeat: no-repeat;
