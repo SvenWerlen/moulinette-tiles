@@ -680,10 +680,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
     // make sure to always put tiles on top
     let maxZ = 0
-    canvas.foreground.placeables.forEach( t => {
-      if(t.zIndex > maxZ) maxZ = t.zIndex
-    })
-    canvas.background.placeables.forEach( t => {
+    canvas.activeLayer.placeables.forEach( t => {
       if(t.zIndex > maxZ) maxZ = t.zIndex
     })
     data.z = maxZ

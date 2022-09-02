@@ -11,9 +11,9 @@ Hooks.once("init", async function () {
   game.settings.register("moulinette", "tileSize", { scope: "world", config: false, type: Number, default: 100 })
   game.settings.register("moulinette", "tileMacro", { scope: "world", config: false, type: Object, default: {} })  // old implementation
   game.settings.register("moulinette", "tileMacros", { scope: "world", config: false, type: Object, default: {} }) // new implementation
-  game.settings.register("moulinette", "tileActorId", { scope: "world", config: false, type: String })
+  game.settings.register("moulinette", "tileActorId", { scope: "world", config: false, type: String, default: 0 })
   game.settings.register("moulinette", "tileActorLink", { scope: "world", config: false, type: Boolean, default: true })
-  game.settings.register("moulinette", "tileActorType", { scope: "world", config: false, type: String })
+  game.settings.register("moulinette", "tileActorType", { scope: "world", config: false, type: String, default: null })
   game.settings.register("moulinette", "searchPrefs", { scope: "world", config: false, type: Object, default: {} })
   
   game.settings.register("moulinette-tiles", "tileShowVideoThumb", {

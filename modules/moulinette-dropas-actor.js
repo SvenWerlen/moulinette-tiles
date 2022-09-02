@@ -65,7 +65,7 @@ export class MoulinetteDropAsActor extends FormApplication {
 
     // Reusing existing actor
     if(actor) {
-      td = await actor.getTokenData({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+      td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
     }
     // Creating new actor
     else {
@@ -83,7 +83,7 @@ export class MoulinetteDropAsActor extends FormApplication {
         type: actorType,
         img: this.data.img
       });
-      td = await actor.getTokenData({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+      td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
 
       game.settings.set("moulinette", "tileActorId", actor.id);
       game.settings.set("moulinette", "tileActorLink", linked);
@@ -94,7 +94,7 @@ export class MoulinetteDropAsActor extends FormApplication {
     const hh = canvas.grid.h/2;
     td.update(canvas.grid.getSnappedPosition(td.x - (td.width*hw), td.y - (td.height*hh)));
 
-    if ( !canvas.grid.hitArea.contains(td.x, td.y) ) return false;
+    if ( !canvas.dimensions.rect.contains(td.x, td.y) ) return false;
 
     // Submit the Token creation request and activate the Tokens layer (if not already active)
     let newToken = (await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [td], { parent: canvas.scene }))[0]
