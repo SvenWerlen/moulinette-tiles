@@ -9,10 +9,14 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
   static FOLDER_CUSTOM_IMAGES = "moulinette/images/custom"
   static FOLDER_CUSTOM_TILES  = "moulinette/tiles/custom"
+  static THUMBSIZES = [25, 50, 75, 100, 125]
   
   constructor() {
     super()
+    this.thumbsize = 3
   }
+
+  supportsThumbSizes() { return true }
   
   clearCache() {
     this.assets = null
@@ -60,6 +64,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * Generate a new asset (HTML) for the given result and idx
    */
   async generateAsset(r, idx) {
+    const thumbSize = MoulinetteTiles.THUMBSIZES[this.thumbsize]
     const pack = this.assetsPacks[r.pack]
     const URL = pack.isRemote || pack.isLocal ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     const showThumbs = game.settings.get("moulinette-tiles", "tileShowVideoThumb");
@@ -80,12 +85,12 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     if(r.filename.endsWith(".webm")) {
       const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp" + r.sas : ""
       html = `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}">` +
-        `<img width="100" class="cc_image" height="100" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
-        `<video width="100" height="100" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video>`
+        `<img width="${thumbSize}" class="cc_image" height="${thumbSize}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
+        `<video width="${thumbSize}" height="${thumbSize}" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video>`
     } else {
       const assetName = r.data && r.data.name ? r.data.name : r.filename
       const thumbnailURL = pack.isRemote ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + sasThumb : r.assetURL + r.sas
-      html = `<div class="tileres draggable" title="${assetName}" data-idx="${idx}" data-path="${r.filename}"><img width="100" height="100" src="${thumbnailURL}"/>`
+      html = `<div class="tileres draggable" title="${assetName}" data-idx="${idx}" data-path="${r.filename}"><img width="${thumbSize}" height="${thumbSize}" src="${thumbnailURL}"/>`
     }
     const favs = this.isFavorite(pack, r)
     html += `<div class="fav">`
@@ -249,6 +254,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // display hide video
     this.html.find(".tileres.video").mouseover(this._toggleOnVideo.bind(this))
     this.html.find(".tileres.video").mouseout(this._toggleOffVideo.bind(this))
+
+    // adapt fallback size to current size
+    const size = MoulinetteTiles.THUMBSIZES[this.thumbsize]
+    this.html.find(".fallback").css("min-width", size).css("min-height", size)
   }
   
   
@@ -669,15 +678,19 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     data.y = data.y - (data.height / 2);
     //if ( !event.shiftKey ) mergeObject(data, canvas.grid.getSnappedPosition(data.x, data.y));
 
-    // Create the tile as hidden if the ALT key is pressed
-    //if ( event.altKey ) data.hidden = true;
-    
     // make sure to always put tiles on top
     let maxZ = 0
-    canvas.activeLayer.placeables.forEach( t => {
+    canvas.foreground.placeables.forEach( t => {
+      if(t.zIndex > maxZ) maxZ = t.zIndex
+    })
+    canvas.background.placeables.forEach( t => {
       if(t.zIndex > maxZ) maxZ = t.zIndex
     })
     data.z = maxZ
+
+    // Create the tile as hidden if the ALT key is pressed
+    //if ( event.altKey ) data.hidden = true;
+    const layer = canvas.activeLayer && canvas.activeLayer.name == "ForegroundLayer" ? canvas.foreground : canvas.background
     
     // Create the Tile
     let tile;
@@ -763,6 +776,15 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     } else if(mode == "article") {
       canvas.notes.activate()
     }
+  }
+
+  async onChangeThumbsSize(increase) {
+    // change thumbsize (and check that it's within range of available sizes)
+    this.thumbsize = Math.max(0, Math.min(MoulinetteTiles.THUMBSIZES.length-1, increase ? this.thumbsize + 1 : this.thumbsize -1))
+    const size = MoulinetteTiles.THUMBSIZES[this.thumbsize]
+    this.html.find(".tileres img").css("width", size).css("height", size)
+    this.html.find(".tileres video").css("width", size).css("height", size)
+    this.html.find(".fallback").css("min-width", size).css("min-height", size)
   }
 
 }
