@@ -63,7 +63,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Generate a new asset (HTML) for the given result and idx
    */
-  async generateAsset(r, idx) {
+  async generateAsset(r, idx, folderIdx = null) {
     const thumbSize = MoulinetteTiles.THUMBSIZES[this.thumbsize]
     const pack = this.assetsPacks[r.pack]
     const URL = pack.isRemote || pack.isLocal ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
@@ -80,17 +80,21 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       r.sas = pack.sas ? "?" + pack.sas : ""
       sasThumb = r.sas
     }
+
+    // add folder index if browsing by folder
+    const folderHTML = folderIdx ? `data-folder="${folderIdx}"` : ""
+
     let html = ""
     r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${game.moulinette.applications.MoulinetteFileUtil.encodeURL(r.filename)}`
     if(r.filename.endsWith(".webm")) {
       const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp" + r.sas : ""
-      html = `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}">` +
+      html = `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}>` +
         `<img width="${thumbSize}" class="cc_image" height="${thumbSize}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
         `<video width="${thumbSize}" height="${thumbSize}" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video>`
     } else {
       const assetName = r.data && r.data.name ? r.data.name : r.filename
       const thumbnailURL = pack.isRemote ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + sasThumb : r.assetURL + r.sas
-      html = `<div class="tileres draggable" title="${assetName}" data-idx="${idx}" data-path="${r.filename}"><img width="${thumbSize}" height="${thumbSize}" src="${thumbnailURL}"/>`
+      html = `<div class="tileres draggable" title="${assetName}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img width="${thumbSize}" height="${thumbSize}" src="${thumbnailURL}"/>`
     }
     const favs = this.isFavorite(pack, r)
     html += `<div class="fav">`
@@ -144,17 +148,21 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
     // view #2 (by folder)
     else if(viewMode == "list" || viewMode == "browse") {
-      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults, this.assetsPacks);
+      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndexImproved(this.searchResults, this.assetsPacks);
       const keys = Object.keys(folders).sort()
+      let folderIdx = 0
       for(const k of keys) {
+        folderIdx++;
         const random = `<a class="random draggable"><i class="fas fa-dice"></i></a>`
         if(viewMode == "browse") {
-          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand">${random} ${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2 class="expand">${random} ${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
-          assets.push(`<div class="folder" data-path="${k}"><h2>${random} ${k} (${folders[k].length}) </h2></div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2>${random} ${k} (${folders[k].length}) </h2></div>`)
         }
         for(const a of folders[k]) {
-          assets.push(await this.generateAsset(a, a.idx))
+          // update search results with folder information
+          a.fIdx = folderIdx
+          assets.push(await this.generateAsset(a, a.idx, folderIdx))
         }
       }
     }
@@ -242,11 +250,12 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     this.html.find(".random").click(event => {
       event.preventDefault();
       event.stopPropagation();
-      const path = $(event.currentTarget).closest('.folder').data('path')
-      const assets = this.searchResults.filter(a => a.filename.startsWith(path) && a.filename.indexOf("/", path.length) < 0)
+      const folderId = $(event.currentTarget).closest('.folder').data('idx')
+      const assets = this.searchResults.filter(a => a.fIdx == folderId)
+      //const assets = this.searchResults.filter(a => a.filename.startsWith(path) && a.filename.indexOf("/", path.length) < 0)
       game.moulinette.cache.setData("selAssets", assets)
       this.html.find(".folder").removeClass("selected")
-      this.html.find(`[data-path='${path}']`).addClass("selected")
+      this.html.find(`[data-idx='${folderId}']`).addClass("selected")
       ui.notifications.info(game.i18n.format("mtte.randomNotification", {count: assets.length}));
       canvas.moulinette.activate()
     })
@@ -347,8 +356,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
     // random asset
     if(!idx) {
-      const path = $(div).closest('.folder').data('path');
-      const assets = this.searchResults.filter(a => a.filename.startsWith(path) && a.filename.indexOf("/", path.length) < 0)
+      const folderIdx = $(div).closest('.folder').data('idx');
+      const assets = this.searchResults.filter(a => a.fIdx == folderIdx)
+      //const assets = this.searchResults.filter(a => a.filename.startsWith(path) && a.filename.indexOf("/", path.length) < 0)
       if(assets.length == 0) return;
       // pick 1 asset (randomly)
       tile = assets[Math.floor((Math.random() * assets.length))]
