@@ -631,9 +631,9 @@ export class MoulinetteSearch extends FormApplication {
     }
 
     // prepare URL & SAS
-    tile.assetURL = `${this.baseURL}${pack.path}/${tile.filename}`
+    tile.assetURL = `${pack.path}/${tile.filename}`
     if(tile.data && tile.data.img) {
-      tile.baseURL = `${this.baseURL}${pack.path}/${tile.data.img.substring(0, tile.data.img.lastIndexOf('.'))}`
+      tile.baseURL = `${pack.path}/${tile.data.img.substring(0, tile.data.img.lastIndexOf('.'))}`
     }
     tile.sas = "?" + pack.sas
 
