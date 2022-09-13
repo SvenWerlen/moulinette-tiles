@@ -184,18 +184,18 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       moulinetteFolder = moulinetteFolder[0]
     }
     // publisher level
-    let publisherFolder = moulinetteFolder.children.filter( c => c.name == publisher )
+    let publisherFolder = moulinetteFolder.children ? moulinetteFolder.children.filter( c => c.folder.name == publisher ) : []
     if( publisherFolder.length == 0 ) {
       publisherFolder = await Folder.create({name: publisher, type: "Actor", parent: moulinetteFolder.id })
     } else {
-      publisherFolder = publisherFolder[0]
+      publisherFolder = publisherFolder[0].folder
     }
     // pack level
-    let packFolder = publisherFolder.children.filter( c => c.name == pack )
+    let packFolder = publisherFolder.children ? publisherFolder.children.filter( c => c.folder.name == pack ) : []
     if( packFolder.length == 0 ) {
       packFolder = await Folder.create({name: pack, type: "Actor", parent: publisherFolder.id })
     } else {
-      packFolder = packFolder[0]
+      packFolder = packFolder[0].folder
     }
     return packFolder
   }
@@ -244,7 +244,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       const actor = await getDocumentClass("Actor").create(actorData);
 
       // Prepare the Token data
-      let tokenData= await actor.getTokenData({x: data.x, y: data.y})
+      let tokenData= await actor.getTokenDocument({x: data.x, y: data.y})
 
       // Adjust token position
       const hg = canvas.dimensions.size / 2;
