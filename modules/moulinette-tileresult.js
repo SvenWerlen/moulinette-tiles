@@ -124,6 +124,7 @@ export class MoulinetteTileResult extends FormApplication {
             console.warn("Moulinette TileResult | Not able to copy path into clipboard")
           });
           ui.notifications.info(game.i18n.localize("mtte.clipboardImageSuccess"));
+          this.close()
         } else {
           ui.notifications.warn(game.i18n.localize("mtte.clipboardUnsupported"));
         }
