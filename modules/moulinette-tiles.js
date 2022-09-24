@@ -398,10 +398,37 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     event.preventDefault();
     const source = event.currentTarget;
     const idx = source.dataset.idx;
-    
+
     if(this.searchResults && idx > 0 && idx <= this.searchResults.length) {
       const result = this.searchResults[idx-1]
       new MoulinetteTileResult(duplicate(result), duplicate(this.assetsPacks[result.pack]), this.tab).render(true)
+    }
+  }
+
+  /**
+   * Copies tile path to clipboard on middle click
+   */
+  async _onClipboard(event) {
+    event.preventDefault();
+    const source = event.currentTarget;
+    const idx = source.dataset.idx;
+
+    if(this.searchResults && idx > 0 && idx <= this.searchResults.length) {
+      const result = this.searchResults[idx-1]
+      const data = { tile: duplicate(result), pack: duplicate(this.assetsPacks[result.pack]) }
+      const cTiles = await import("../../moulinette-tiles/modules/moulinette-tiles.js")
+      await MoulinetteTiles.downloadAsset(data)
+
+      // put path into clipboard
+      if(navigator.clipboard) {
+        navigator.clipboard.writeText(data.img)
+        .catch(err => {
+          console.warn("Moulinette TileResult | Not able to copy path into clipboard")
+        });
+        ui.notifications.info(game.i18n.localize("mtte.clipboardImageSuccess"));
+      } else {
+        ui.notifications.warn(game.i18n.localize("mtte.clipboardUnsupported"));
+      }
     }
   }
   
@@ -420,6 +447,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   }
 
   async _onMouseDown(event) {
+    // middle click
+    if(event.which == 2) {
+      return this._onClipboard(event)
+    }
     // right click
     if(event.which == 3) {
       event.preventDefault();
