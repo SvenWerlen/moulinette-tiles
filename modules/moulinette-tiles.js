@@ -333,7 +333,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       return true
     }
     else if(classList.contains("configureSources")) {
-      (new game.moulinette.applications.MoulinetteSources()).render(true)
+      (new game.moulinette.applications.MoulinetteSources(["images","tiles"])).render(true)
     }
     else if(classList.contains("customReferences")) {
       new Dialog({title: game.i18n.localize("mtte.customReferencesPacks"), buttons: {}}, { id: "moulinette-info", classes: ["info"], template: "modules/moulinette-tiles/templates/custom-references.hbs", width: 650, height: "auto" }).render(true)
