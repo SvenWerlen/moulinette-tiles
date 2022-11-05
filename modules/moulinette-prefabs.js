@@ -250,12 +250,11 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       const hg = canvas.dimensions.size / 2;
       tokenData.x -= tokenData.width * hg;
       tokenData.y -= tokenData.height * hg;
-      if ( !canvas.grid.hitArea.contains(tokenData.x, tokenData.y) ) return false;
+      if ( !canvas.dimensions.rect.contains(tokenData.x, tokenData.y) ) return false;
 
       //TokenDocument.create(tokenData)
       // Submit the Token creation request and activate the Tokens layer (if not already active)
-      let newToken = (await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [tokenData], { parent: canvas.scene }))[0]
-      newToken = newToken._object
+      await canvas.scene.createEmbeddedDocuments(Token.embeddedName, [tokenData])
 
       // sometimes throws exceptions
       try {

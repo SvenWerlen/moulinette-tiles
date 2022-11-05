@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [10.2.1] - 2022-10-30
+## [10.2.2] - 2022-10-30
 ### Fixed
 - 10.2.1: fix V10 compatibility
+- 10.2.2: fix Prefabs not showing up on scene on drag & drop
 ### Changed
 - Sources filtered for tiles/images only
 

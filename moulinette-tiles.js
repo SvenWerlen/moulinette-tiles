@@ -142,7 +142,7 @@ Hooks.on('dropCanvasData', (canvas, data) => {
       return false;
     }
     else if(data.type == "Actor" && data.prefab) {
-      console.log("Moulinette | The error below 'cannot read properties' is expected. Just ignore it ;-)")
+      console.log("Moulinette | The error below 'Failed to resolve Document' is expected. Just ignore it ;-)")
       import("./modules/moulinette-prefabs.js").then( c => {
         c.MoulinettePrefabs.createPrefab(data)
       })
