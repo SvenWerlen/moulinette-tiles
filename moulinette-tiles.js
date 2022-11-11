@@ -25,6 +25,15 @@ Hooks.once("init", async function () {
     type: Boolean
   });
 
+  game.settings.register("moulinette-tiles", "prefabsCleanup", {
+    name: game.i18n.localize("mtte.configPrefabsCleanup"),
+    hint: game.i18n.localize("mtte.configPrefabsCleanupHint"),
+    scope: "world",
+    config: true,
+    default: false,
+    type: Boolean
+  });
+
   game.keybindings.register("moulinette-core", "searchKey", {
     name: game.i18n.localize("mtte.configSearchKey"),
     hint: game.i18n.localize("mtte.configSearchKeyHint"),

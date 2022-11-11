@@ -34,6 +34,8 @@
   "mtte.configMacroCompendiumNone": "None",
   "mtte.configMacroCompendiumTiles": "Macros for Tiles",
   "mtte.configMacroCompendiumTilesHint": "Compendium with all the macros you'd like to potentially use on tiles.",
+  "mtte.configPrefabsCleanup": "Clean Prefabs data",
+  "mtte.configPrefabsCleanupHint": "Removes stats blocks and other data from prefabs before importing. This is required for prefabs created for another system (typically DnD5e) and which fail to import.",
   "mtte.configSearchKey": "Keybind for Faceted Search",
   "mtte.configSearchKeyHint": "Keybind for opening Moulinette Faceted Search (for Moulinette Cloud)",
   "mtte.configShowVideoThumb": "Show video thumbnail",

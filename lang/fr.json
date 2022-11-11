@@ -34,6 +34,8 @@
   "mtte.configMacroCompendiumNone": "Aucun",
   "mtte.configMacroCompendiumTiles": "Macros pour tuiles",
   "mtte.configMacroCompendiumTilesHint": "Compendium avec toutes les macros que vous souhaitez potentiellement appliquer sur les tuiles.",
+  "mtte.configPrefabsCleanup": "Nettoyer Prefabs",
+  "mtte.configPrefabsCleanupHint": "Supprime certaines données des prefabs avant de les importer. Ceci est requis lorsque les prefabs ont été créé pour un autre système (typiquement DnD5e) et qui échouent à l'import.",
   "mtte.configSearchKey": "Raccourci pour recherche par facettes",
   "mtte.configSearchKeyHint": "Raccourci clavier pour ouvrir l'interface de la recherche par facettes (pour Moulinette Cloud)",
   "mtte.configShowVideoThumb": "Afficher vignette pour vidéos",

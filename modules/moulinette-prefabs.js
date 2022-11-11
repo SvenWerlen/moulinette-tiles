@@ -232,15 +232,20 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       // Create actor
       let actorData = JSON.parse(jsonAsText)
 
-      // Clean-up prefab
-      actorData = {
-        type: game.system.documentTypes.Actor[0],
-        img: actorData.img,
-        name: actorData.name,
-        token: actorData.token,
-        flags: actorData.flags,
-        folder: await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
+      // Clean-up prefab if not DnD5e (or import could fail)
+      if(game.settings.get("moulinette-tiles", "prefabsCleanup")) {
+        actorData = {
+          img: actorData.img,
+          name: actorData.name,
+          token: actorData.token,
+          flags: actorData.flags,
+          type: game.system.documentTypes.Actor[0]
+        }
       }
+
+      // force folder
+      actorData.folder = await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
+
       const actor = await getDocumentClass("Actor").create(actorData);
 
       // Prepare the Token data
