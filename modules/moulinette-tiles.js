@@ -312,7 +312,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const FileUtil = game.moulinette.applications.MoulinetteFileUtil
     if(classList.contains("indexImages")) {
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
-      this.html.find(".indexImages").prop("disabled", true);
+      game.moulinette.applications.Moulinette.inprogress(this.html.find(".indexImages"))
       const EXT = ["gif","jpg","jpeg","png","webp","svg", "webm"]
       // scan tiles
       let publishers = await FileUtil.scanAssets(MoulinetteTiles.FOLDER_CUSTOM_TILES, EXT)
