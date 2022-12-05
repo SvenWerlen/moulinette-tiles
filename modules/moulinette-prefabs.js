@@ -237,7 +237,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
         actorData = {
           img: actorData.img,
           name: actorData.name,
-          token: actorData.token,
+          prototypeToken: actorData.prototypeToken ?? actorData.token,
           flags: actorData.flags,
           type: game.system.documentTypes.Actor[0]
         }

@@ -2,7 +2,7 @@
   "title": "Moulinette Tiles (module)",
   "description": "This module for Moulinette adds capabilities for downloading tiles and adding them to your scenes.",
   "url": "https://github.com/SvenWerlen/moulinette-tiles",
-  "version": "10.3.0",
+  "version": "10.3.1",
   "scripts": [
     "elastic/elastic_app_search.umd.js"
   ],
@@ -33,7 +33,7 @@
     }
   ],
   "manifest": "https://raw.githubusercontent.com/SvenWerlen/moulinette-tiles/main/module.json",
-  "download": "https://github.com/SvenWerlen/moulinette-tiles/archive/v-10.3.0.zip",
+  "download": "https://github.com/SvenWerlen/moulinette-tiles/archive/v-10.3.1.zip",
   "id": "moulinette-tiles",
   "relationships": {
     "requires": [
