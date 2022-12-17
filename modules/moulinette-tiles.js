@@ -722,15 +722,15 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
     // make sure to always put tiles on top
     let maxZ = 0
-    canvas.activeLayer.placeables.forEach( t => {
-      if(t.zIndex > maxZ) maxZ = t.zIndex
+    canvas.tiles.placeables.forEach( t => {
+      // bug : https://github.com/foundryvtt/foundryvtt/issues/8656
+      if(t.data.z > maxZ) maxZ = t.data.z /*t.zIndex*/
     })
     data.z = maxZ
 
     // Create the tile as hidden if the ALT key is pressed
     //if ( event.altKey ) data.hidden = true;
-    const layer = canvas.activeLayer && canvas.activeLayer.name == "ForegroundLayer" ? canvas.foreground : canvas.background
-    
+
     // Create the Tile
     let tile;
     data.overhead = ui.controls.controls.find(c => c.layer === "tiles").foreground ?? false;
