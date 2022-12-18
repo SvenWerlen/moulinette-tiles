@@ -724,7 +724,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     let maxZ = 0
     canvas.tiles.placeables.forEach( t => {
       // bug : https://github.com/foundryvtt/foundryvtt/issues/8656
-      if(t.data.z > maxZ) maxZ = t.data.z /*t.zIndex*/
+      if(t.document.sort > maxZ) maxZ = t.document.sort /*t.zIndex*/
     })
     data.z = maxZ
 

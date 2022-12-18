@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - 10.3.1: fix (tentative) for prefabs and PF2 system
 - 10.3.2: fix tiles not showing on top of others (due to FoundryVTT bug: https://github.com/foundryvtt/foundryvtt/issues/8656)
+- 10.3.3: fix backward-compatible fix (10.3.2) for V10 (using document.sort rather than data.z)
 ### Added
 - Improved UI for "in progress" indexing
 
