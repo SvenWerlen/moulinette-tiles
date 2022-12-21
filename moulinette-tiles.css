@@ -68,17 +68,6 @@
   width: 100px
 }
 
-.showcase {
-  font-style: italic;
-  font-size: small;
-  padding: 5px;
-  border: 2px solid darkgray;
-}
-
-.showcase.clickable {
-  cursor: pointer;
-}
-
 .mtte .fav {
   position: absolute;
   top: 10px;
@@ -311,7 +300,7 @@
   margin-bottom: 0px;
 }
 
-#moulinetteSearch .footer, #footerTiles {
+#moulinetteSearch .footer {
   position: absolute;
   bottom: 0px;
   height: 25px;
@@ -320,13 +309,13 @@
   overflow: hidden;
   padding: 5px;
   text-align: right;
-  padding-right: 25px;
+  padding: 5px 65px 0px 5px;
   display: flex;
   border-top: 1px solid var(--color-border-light-tertiary)
 }
 
 #footerTiles {
-  bottom: 120px;
+  display: flex;
 }
 
 #moulinetteSearch .assets {

@@ -45,14 +45,17 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
   /**
    * Generate a new asset (HTML) for the given result and idx
    */
-  async generateAsset(r, idx) {
+  async generateAsset(r, idx, folderIdx = null) {
     const pack = this.assetsPacks[r.pack]
     const URL = pack.isLocal || pack.isRemote ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     // sas (Shared access signature) for accessing remote files (Azure)
     r.sas = pack.sas ? "?" + pack.sas : ""
     r.baseURL = `${URL}${pack.path}/`
     
-    return `<div class="tileres draggable" title="${r.data.name}" data-idx="${idx}" data-path="${r.filename}"><img width="100" height="100" src="${r.baseURL + r.data.img + r.sas}"/></div>`
+    // add folder index if browsing by folder
+    const folderHTML = folderIdx ? `data-folder="${folderIdx}"` : ""
+
+    return `<div class="tileres draggable" title="${r.data.name}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img width="100" height="100" src="${r.baseURL + r.data.img + r.sas}"/></div>`
   }
   
   /**
@@ -100,15 +103,18 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     else if(viewMode == "list" || viewMode == "browse") {
       const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndexImproved(this.searchResults, this.assetsPacks);
       const keys = Object.keys(folders).sort()
+      let folderIdx = 0
       for(const k of keys) {
+        folderIdx++;
         const breadcrumb = game.moulinette.applications.Moulinette.prettyBreadcrumb(k)
         if(viewMode == "browse") {
-          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand">${breadcrumb} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2 class="expand">${breadcrumb} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
-          assets.push(`<div class="folder" data-path="${k}"><h2>${breadcrumb} (${folders[k].length})</div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2>${breadcrumb} (${folders[k].length})</div>`)
         }
         for(const a of folders[k]) {
-          assets.push(await this.generateAsset(a, a.idx))
+          a.fIdx = folderIdx
+          assets.push(await this.generateAsset(a, a.idx, folderIdx))
         }
       }
     }

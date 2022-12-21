@@ -3,7 +3,7 @@ import { MoulinetteDropAsActor } from "./modules/moulinette-dropas-actor.js"
 import { MoulinetteMacros } from "./modules/moulinette-macros.js"
 import { MoulinetteTilesFavorites } from "./modules/moulinette-tiles-favorites.js"
 import { MoulinetteSearch } from "./modules/moulinette-search.js"
-
+import { MoulinetteOptions } from "./modules/moulinette-options.js"
 
 Hooks.once("init", async function () {
   console.log("Moulinette Tiles | Init") 
@@ -92,6 +92,7 @@ Hooks.once("setup", async function () {
     actions: []
   })
   
+  game.moulinette.applications["MoulinetteOptions"] = MoulinetteOptions
   game.moulinette.applications["MoulinetteDropAsActor"] = MoulinetteDropAsActor
   Array.prototype.push.apply(game.moulinette.macros, MoulinetteMacros.macros)
 });

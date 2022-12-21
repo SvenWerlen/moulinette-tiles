@@ -359,10 +359,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       dialog.position.top = event.pageY - 100 // is auto
       dialog.render(true)
     })
-
-    // update results
-    const results = this.totalDisplayed > 0 ? game.i18n.format("mtte.searchResult", {displayed: this.totalDisplayed, total: this.totalResults}) : ""
-    this.html.find('#footerTiles .results').html(results)
   }
 
   
