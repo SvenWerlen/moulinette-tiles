@@ -188,6 +188,22 @@ export class MoulinetteTileResult extends FormApplication {
         console.log(`Moulinette | Unhandled exception`, e)
         ui.notifications.error(game.i18n.localize("mtte.forgingFailure"), 'error')
       }      
+    } else if(event.submitter.className == "createArticle") {
+      const img = document.getElementById("previewImage")
+      // download if remote
+      const cTiles = await import("../../moulinette-tiles/modules/moulinette-tiles.js")
+      const data = { tile: this.tile, pack: this.pack }
+      if(this.pack.isRemote) {
+        await cTiles.MoulinetteTiles.downloadAsset(data)
+      } else {
+        data.img = this.tile.assetURL
+      }
+      // create folder (where to store the journal article)
+      const folder = await cTiles.MoulinetteTiles.getOrCreateArticleFolder(this.pack.publisher, this.pack.name)
+      // generate journal
+      const name = data.img.split('/').pop()
+      const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder.id} )
+      return entry.sheet.render(true)
     }
     else if(event.submitter.className == "saveCategories") {
       $(event.submitter).prop('disabled',"disabled")
