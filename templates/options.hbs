@@ -19,6 +19,10 @@
   </div>
   {{/if}}
 
+  {{#if macroError }}
+    <div class="error">{{macroError}}</div>
+  {{/if }}
+
   {{#if macros }}
     <em>{{localize "mtte.macroClickToChoose"}}:</em>
     <div class="options macros">

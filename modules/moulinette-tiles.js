@@ -1,6 +1,7 @@
 import { MoulinetteTileResult } from "./moulinette-tileresult.js"
 import { MoulinetteAvailableAssets } from "./moulinette-available.js"
 import { MoulinetteDropAsActor } from "./moulinette-dropas-actor.js"
+import { MoulinetteOptions } from "./moulinette-options.js"
 
 /**
  * Forge Module for tiles
@@ -267,6 +268,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // adapt fallback size to current size
     const size = MoulinetteTiles.THUMBSIZES[this.thumbsize]
     this.html.find(".fallback").css("min-width", size).css("min-height", size)
+
+    // insert Footer
+    this.updateFooter()
   }
   
   
@@ -274,32 +278,93 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * Footer: Dropmode
    */
   async getFooter() {
-    const mode = game.settings.get("moulinette", "tileMode")
-    const size = game.settings.get("moulinette", "tileSize")
-    const compact = game.settings.get("moulinette-core", "uiMode") == "compact"
-    const macro = MoulinetteTiles.getMacroNames()
-
-    const tileMode = compact ? `<i class="fas fa-cubes" title="${game.i18n.localize("mtte.tile")}"></i>` : game.i18n.localize("mtte.tile")
-    const articleMode = compact ? `<i class="fas fa-book-open" title="${game.i18n.localize("mtte.article")}"></i>` : game.i18n.localize("mtte.article")
-    const tokenMode = compact ? `<i class="fas fa-users" title="${game.i18n.localize("mtte.actor")}"></i>` : game.i18n.localize("mtte.actor")
-
-    return `<div class="showcase"></div>
-      <div class="options"><div class="option">` +
-      (compact ? "" : `${game.i18n.localize("mtte.dropmode")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.dropmodeToolTip")}"></i>`) +
-      `<input class="dropmode" type="radio" name="mode" value="tile" ${mode == "tile" ? "checked" : ""}> ${tileMode}
-        <input class="dropmode" type="radio" name="mode" value="article" ${mode == "article" ? "checked" : ""}> ${articleMode}
-        <input class="dropmode" type="radio" name="mode" value="actor" ${mode == "actor" ? "checked" : ""}> ${tokenMode}
-      </div>
-      <div class="option">` +
-      (compact ? "" : `${game.i18n.localize("FILES.TileSize")} <i class="fas fa-question-circle" title="${game.i18n.localize("FILES.TileSizeHint")}"></i>`) +
-      `<input class="tilesize" type="text" name="tilesize" value="${size}" maxlength="4">
-      </div>
-      <div class="option">` +
-      (compact ? "" : `${game.i18n.localize("mtte.runMacro")} <i class="fas fa-question-circle" title="${game.i18n.localize("mtte.runMacroToolTip")}"></i>`) + 
-      `<input class="macro" type="text" name="macro" value="${macro}" placeholder="${game.i18n.localize("mtte.macroExample")}">
-      </div>
-    </div>`
+    return `<div id="footerTiles"></div>`
   }
+
+  /**
+   * Updates the footer
+   */
+  async updateFooter() {
+
+    // prepare the list of macros
+    const mode = game.settings.get("moulinette", "tileMode")
+    const macroCfg = game.settings.get("moulinette", "tileMacros")[mode] // should return a list of _ids
+    const compendium = game.settings.get("moulinette-tiles", "macroCompendium")
+    const macroIndex = compendium ? game.packs.get(compendium)?.index.values() : null
+    const macros = macroIndex ? Array.from(macroIndex).filter(m => macroCfg && macroCfg.includes(m._id)) : []
+
+    let macroText = "-"
+    if( macros.length == 1) {
+      macroText = macros[0].name
+    }
+    else if( macros.length > 1) {
+      macroText = game.i18n.format("mtte.multiplesMacros", { count: macros.length})
+    }
+
+    const html = await renderTemplate("modules/moulinette-tiles/templates/search-footer.hbs", {
+      tileSize: game.settings.get("moulinette", "tileSize"),
+      dropAsTile: mode == "tile",
+      dropAsArticle: mode == "article",
+      dropAsActor: mode == "actor",
+      macros: macroText
+    })
+    this.html.find("#footerTiles").html(html)
+
+    // dropmode listener
+    this.html.find(".dropMode").click(event => {
+      // callback function for appying the results
+      const parent = this
+      const callback = async function (mode) {
+        mode = ["tile","article","actor"].includes(mode) ? mode : "tile"
+        await game.settings.set("moulinette", "tileMode", mode)
+        await parent.updateFooter()
+      }
+
+      const dialog = new MoulinetteOptions("dropmode", callback, { width: 100, height: "auto" })
+      dialog.position.left = event.pageX - dialog.position.width/2
+      dialog.position.top = event.pageY - 60 // is auto
+      dialog.render(true)
+    })
+
+    // tilesize listener
+    this.html.find(".tileSize").click(event => {
+      // callback function for appying the results
+      const parent = this
+      const callback = async function (size) {
+        await game.settings.set("moulinette", "tileSize", Number(size))
+        await parent.updateFooter()
+      }
+
+      const dialog = new MoulinetteOptions("tilesize", callback, { width: 250, height: "auto" })
+      dialog.position.left = event.pageX - dialog.position.width/2
+      dialog.position.top = event.pageY - 100 // is auto
+      dialog.render(true)
+    })
+
+    // macros listener
+    this.html.find(".macros").click(event => {
+      // callback function for appying the results
+      const parent = this
+      const callback = async function (macros) {
+        if(macros) {
+          const config = game.settings.get("moulinette", "tileMacros")
+          config[mode] = macros
+          await game.settings.set("moulinette", "tileMacros", config)
+          await parent.updateFooter()
+        }
+      }
+
+      const dialog = new MoulinetteOptions("macros", callback, { width: 450, height: 400, macros: macros.map(m => m._id) })
+      dialog.position.left = event.pageX - dialog.position.width/2
+      dialog.position.top = event.pageY - 100 // is auto
+      dialog.render(true)
+    })
+
+    // update results
+    const results = this.totalDisplayed > 0 ? game.i18n.format("mtte.searchResult", {displayed: this.totalDisplayed, total: this.totalResults}) : ""
+    this.html.find('#footerTiles .results').html(results)
+  }
+
   
   /**
    * Implements actions
@@ -560,32 +625,8 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * Returns the list of macros (based on macro names)
    */
   static async getMacros(data) {
-    if(data.source == "mtteSearch") {
-      return await MoulinetteTiles.getMacrosV2(data)
-    }
-    const tileMode = game.settings.get("moulinette", "tileMode")
-    let macros = game.settings.get("moulinette", "tileMacro")[tileMode]
-    const results = []
-
-    // add specific macros (from favorite)
-    if(data.macros && data.macros.length > 0) {
-      macros = macros ? macros + "," + data.macros : data.macros
-    }
-
-    if(macros) {
-      const list = macros.split(",")
-      for( const macroName of list ) {
-        const macro = game.macros.find(o => o.name === macroName.trim())
-        if(macro) {
-          results.push(macro)
-        } else {
-          console.warn(`Moulinette Tiles | Macro ${macroName} couldn't be found!`)
-        }
-      }
-    }
-    return results;
+    return await MoulinetteTiles.getMacrosV2(data)
   }
-
   
   /**
    * Download the asset received from event

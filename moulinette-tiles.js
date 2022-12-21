@@ -111,8 +111,9 @@ Hooks.once("ready", async function () {
 
   const choices = { "": game.i18n.localize("mtte.configMacroCompendiumNone") }
   const macroCompendiums = game.packs.filter(p => p.documentName == "Macro")
+
   for(const p of macroCompendiums) {
-    choices[`${p.metadata.package}.${p.metadata.name}`] = p.metadata.label
+    choices[`${p.metadata.packageType}.${p.metadata.name}`] = p.metadata.label
   }
 
   game.settings.register("moulinette-tiles", "macroCompendium", {

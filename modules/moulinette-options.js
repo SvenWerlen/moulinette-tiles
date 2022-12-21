@@ -22,6 +22,7 @@ export class MoulinetteOptions extends FormApplication {
 
   async getData() {
     const macros = []
+    let macroError = null
     if(this.dialog == "macros") {
       const config = game.settings.get("moulinette-tiles", "macroCompendium")
       const selMacros = this.mtteOptions.macros
@@ -29,6 +30,7 @@ export class MoulinetteOptions extends FormApplication {
         const compendium = game.packs.get(config)
         if(!compendium) {
           console.error(`MoulinetteOptions | Couldn't find compendium '${config}' configured`)
+          macroError = game.i18n.localize("mtte.errorMissingMacroCompendium")
         } else {
           const index = await compendium.getIndex()
           for(const m of index.values()) {
@@ -37,14 +39,21 @@ export class MoulinetteOptions extends FormApplication {
             macros.push(macro)
           }
           macros.sort((a,b) => '' + (a.name.toLowerCase()).localeCompare(b.name.toLowerCase()))
+
+          if(macros.length == 0) {
+            macroError = game.i18n.localize("mtte.errorEmptyMacroCompendium")
+          }
         }
+      } else {
+        macroError = game.i18n.localize("mtte.errorMissingMacroCompendium")
       }
     }
 
     return {
       dropmode: this.dialog == "dropmode",
       tilesize: this.dialog == "tilesize",
-      macros: this.dialog == "macros" ? macros : false,
+      macros: this.dialog == "macros" && macros.length > 0 ? macros : false,
+      macroError: macroError,
       sizes: [50, 100, 150, 200, 300, 400, 500, 700, 1000]
     }
   }
