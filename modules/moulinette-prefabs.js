@@ -65,7 +65,8 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       return []
     }
     
-    searchTerms = searchTerms.split(" ")
+    const wholeWord = game.settings.get("moulinette", "wholeWordSearch")
+    const searchTermsList = searchTerms.split(" ")
     // filter list according to search terms and selected pack
     this.searchResults = this.assets.filter( pf => {
       // pack doesn't match selection
@@ -73,8 +74,12 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       // publisher doesn't match selection
       if( publisher && publisher != this.assetsPacks[pf.pack].publisher ) return false
       // check if text match
-      for( const f of searchTerms ) {
-        if( pf.data.name.toLowerCase().indexOf(f) < 0 ) return false
+      for( const f of searchTermsList ) {
+        const textToSearch = game.moulinette.applications.Moulinette.cleanForSearch(pf.data.name)
+        const regex = wholeWord ? new RegExp("\\b"+ f.toLowerCase() +"\\b") : new RegExp(f.toLowerCase())
+        if(!regex.test(textToSearch)) {
+          return false;
+        }
       }
       return true;
     })
@@ -91,13 +96,14 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     }
     // view #2 (by folder)
     else if(viewMode == "list" || viewMode == "browse") {
-      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndex(this.searchResults, this.assetsPacks);
+      const folders = game.moulinette.applications.MoulinetteFileUtil.foldersFromIndexImproved(this.searchResults, this.assetsPacks);
       const keys = Object.keys(folders).sort()
       for(const k of keys) {
+        const breadcrumb = game.moulinette.applications.Moulinette.prettyBreadcrumb(k)
         if(viewMode == "browse") {
-          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand">${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+          assets.push(`<div class="folder" data-path="${k}"><h2 class="expand">${breadcrumb} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
-          assets.push(`<div class="folder" data-path="${k}"><h2>${k} (${folders[k].length})</div>`)
+          assets.push(`<div class="folder" data-path="${k}"><h2>${breadcrumb} (${folders[k].length})</div>`)
         }
         for(const a of folders[k]) {
           assets.push(await this.generateAsset(a, a.idx))

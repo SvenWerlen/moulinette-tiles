@@ -107,31 +107,36 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Implements getAssetList
    */
-  async getAssetList(searchTerms, pack, publisher, type) {
+  async getAssetList(searchTerms, packs, publisher, type) {
     let assets = []
-    this.pack = pack
-    
+    const packList = packs == "-1" ? null : ('' + packs).split(",").map(Number);
+
     // pack must be selected or terms provided
-    if((!pack || pack < 0) && (!publisher || publisher.length == 0) && (!searchTerms || searchTerms.length == 0)) {
+    if(!packList && (!publisher || publisher.length == 0) && (!searchTerms || searchTerms.length == 0)) {
       return []
     }
 
     // clear folder selection (if any)
     game.moulinette.cache.setData("selAssets", null)
 
-    
+    const wholeWord = game.settings.get("moulinette", "wholeWordSearch")
     const searchTermsList = searchTerms.split(" ")
     // filter list according to search terms and selected pack or publisher
     this.searchResults = this.assets.filter( t => {
       // pack doesn't match selection
-      if( pack >= 0 && t.pack != pack ) return false
+      if( packList && !packList.includes(t.pack) ) return false
       // publisher doesn't match selection
       if( publisher && publisher != this.assetsPacks[t.pack].publisher ) return false
       // remove webm if type specified
       if( type && type != "imagevideo" && t.filename.endsWith(".webm") ) return false
       // check if text match
+      // check if text match
       for( const f of searchTermsList ) {
-        if( t.filename.toLowerCase().indexOf(f) < 0 ) return false
+        const textToSearch = game.moulinette.applications.Moulinette.cleanForSearch(t.filename)
+        const regex = wholeWord ? new RegExp("\\b"+ f.toLowerCase() +"\\b") : new RegExp(f.toLowerCase())
+        if(!regex.test(textToSearch)) {
+          return false;
+        }
       }
       return true;
     })
@@ -154,10 +159,11 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       for(const k of keys) {
         folderIdx++;
         const random = `<a class="random draggable"><i class="fas fa-dice"></i></a>`
+        const breadcrumb = game.moulinette.applications.Moulinette.prettyBreadcrumb(k)
         if(viewMode == "browse") {
-          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2 class="expand">${random} ${k} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2 class="expand">${random} ${breadcrumb} (${folders[k].length}) <i class="fas fa-angle-double-down"></i></h2></div>`)
         } else {
-          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2>${random} ${k} (${folders[k].length}) </h2></div>`)
+          assets.push(`<div class="folder" data-idx="${folderIdx}"><h2>${random} ${breadcrumb} (${folders[k].length}) </h2></div>`)
         }
         for(const a of folders[k]) {
           // update search results with folder information
@@ -223,15 +229,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     // display/hide showCase
     const showCase = this.html.find(".showcase")
-    if(this.pack >= 0 && this.assetsPacks[this.pack] && this.assetsPacks[this.pack].isShowCase) {
-      const pack = this.assetsPacks[this.pack]
-      showCase.html(game.i18n.localize("mtte.showCase"))
-      showCase.find(".link").text(pack.publisher)
-      showCase.find(".link").attr('href', pack.pubWebsite)
-      showCase.removeClass("clickable")
-      showCase.show()
-    } 
-    else if(this.matchesCloud && this.matchesCloud.length > 0) {
+    if(this.matchesCloud && this.matchesCloud.length > 0) {
       // display/hide additional content
       let count = 0
       this.matchesCloud.forEach( m => count += m.matches.length )
