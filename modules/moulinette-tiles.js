@@ -17,6 +17,8 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   }
 
   supportsThumbSizes() { return true }
+
+  supportsWholeWordSearch() { return true }
   
   clearCache() {
     this.assets = null

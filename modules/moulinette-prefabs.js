@@ -15,6 +15,8 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     this.searchResults = null
     this.pack = null
   }
+
+  supportsWholeWordSearch() { return true }
   
   /**
    * Returns the list of available packs
