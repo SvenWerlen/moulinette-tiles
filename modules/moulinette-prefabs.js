@@ -5,8 +5,11 @@ import { MoulinetteTileResult } from "./moulinette-tileresult.js"
  */
 export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteForgeModule {
 
+  static THUMBSIZES = [25, 50, 75, 100, 125, 150]
+
   constructor() {
     super()
+    this.thumbsize = 3
   }
   
   clearCache() {
@@ -15,6 +18,8 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     this.searchResults = null
     this.pack = null
   }
+
+  supportsThumbSizes() { return true }
 
   supportsWholeWordSearch() { return true }
   
@@ -46,6 +51,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
    * Generate a new asset (HTML) for the given result and idx
    */
   async generateAsset(r, idx, folderIdx = null) {
+    const thumbSize = MoulinettePrefabs.THUMBSIZES[this.thumbsize]
     const pack = this.assetsPacks[r.pack]
     const URL = pack.isLocal || pack.isRemote ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
     // sas (Shared access signature) for accessing remote files (Azure)
@@ -55,7 +61,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     // add folder index if browsing by folder
     const folderHTML = folderIdx ? `data-folder="${folderIdx}"` : ""
 
-    return `<div class="tileres draggable" title="${r.data.name}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img width="100" height="100" src="${r.baseURL + r.data.img + r.sas}"/></div>`
+    return `<div class="tileres draggable" title="${r.data.name}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}><img width="${thumbSize}" height="${thumbSize}" src="${r.baseURL + r.data.img + r.sas}"/></div>`
   }
   
   /**
@@ -129,6 +135,10 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
   activateListeners(html) {
     // keep html for later usage
     this.html = html
+
+    // adapt fallback size to current size
+    const size = MoulinettePrefabs.THUMBSIZES[this.thumbsize]
+    this.html.find(".fallback").css("min-width", size).css("min-height", size)
   }
   
   onDragStart(event) {
@@ -288,5 +298,11 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     game.settings.set("moulinette", "tileMode", mode)
   }
   
+  async onChangeThumbsSize(increase) {
+    // change thumbsize (and check that it's within range of available sizes)
+    this.thumbsize = Math.max(0, Math.min(MoulinettePrefabs.THUMBSIZES.length-1, increase ? this.thumbsize + 1 : this.thumbsize -1))
+    const size = MoulinettePrefabs.THUMBSIZES[this.thumbsize]
+    this.html.find(".tileres img").css("width", size).css("height", size)
+  }
   
 }

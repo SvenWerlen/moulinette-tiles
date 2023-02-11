@@ -10,7 +10,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
   static FOLDER_CUSTOM_IMAGES = "moulinette/images/custom"
   static FOLDER_CUSTOM_TILES  = "moulinette/tiles/custom"
-  static THUMBSIZES = [25, 50, 75, 100, 125]
+  static THUMBSIZES = [25, 50, 75, 100, 125, 150]
   
   constructor() {
     super()
