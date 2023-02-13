@@ -1,5 +1,4 @@
 import { MoulinetteTileResult } from "./moulinette-tileresult.js"
-import { MoulinetteAvailableAssets } from "./moulinette-available.js"
 import { MoulinetteDropAsActor } from "./moulinette-dropas-actor.js"
 import { MoulinetteOptions } from "./moulinette-options.js"
 
@@ -74,9 +73,8 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     let sasThumb = null
     
     // pre-signed url for accessing Digital Ocean Bucket
-    if(Array.isArray(pack.sas)) {
-      r.sas = pack.sas[2*idx-2]
-      sasThumb = pack.sas[2*idx-1]
+    if(r.sasTh) {
+      sasThumb = r.sasTh
     }
     // sas (Shared access signature) for accessing remote files (Azure)
     else {
@@ -177,8 +175,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
     
     // retrieve available assets that the user doesn't have access to
-    this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, "tiles", this.assetsPacks)
-    
+    //this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, "tiles", this.assetsPacks)
+    this.matchesCloudTerms = searchTerms
+    this.matchesCloudCount = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatchesMoulinetteCloud(searchTerms, "tiles", true)
+
     return assets
   }
   
@@ -232,14 +232,11 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     // display/hide showCase
     const showCase = this.html.find(".showcase")
-    if(this.matchesCloud && this.matchesCloud.length > 0) {
+    if(this.matchesCloudCount && this.matchesCloudCount["count"] > 0) {
       // display/hide additional content
-      let count = 0
-      this.matchesCloud.forEach( m => count += m.matches.length )
-      showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: count}))
+      showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: this.matchesCloudCount["count"]}))
       showCase.addClass("clickable")
-      const matches = this.matchesCloud
-      showCase.click(ev => new MoulinetteAvailableAssets(duplicate(matches)).render(true))
+      showCase.click(ev => new game.moulinette.applications.MoulinetteAvailableAssets(this.matchesCloudTerms, "tiles", 100).render(true))
       showCase.show()
     }
     else {

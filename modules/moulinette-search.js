@@ -1,5 +1,4 @@
 import { MoulinetteTileResult } from "./moulinette-tileresult.js"
-import { MoulinetteAvailableResult } from "./moulinette-availableresult.js"
 import { MoulinetteSearchUtils } from "./moulinette-searchUtils.js"
 import { MoulinetteOptions } from "./moulinette-options.js"
 
@@ -614,11 +613,11 @@ export class MoulinetteSearch extends FormApplication {
     // retrieve pack from available assets
     if(!pack) {
       if(openAvailableResult) {
-        const creator = entry.getRaw("publisher")
-        const pack = entry.getRaw("pack")
         const asset = entry.getRaw("path")
+        const pack = { id: packId }
         const basepath = entry.getRaw("base")
-        new MoulinetteAvailableResult(creator, pack, `${basepath}/${asset}_thumb.webp`).render(true)
+        const size = entry.getRaw("category") == "scene" ? 200 : 100
+        new game.moulinette.applications.MoulinetteAvailableResult(pack, `${MoulinetteSearch.THUMB_BASEURL}/${basepath}/${asset}_thumb.webp`, size).render(true)
       }
       return null;
     }
