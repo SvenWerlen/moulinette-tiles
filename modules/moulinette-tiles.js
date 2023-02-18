@@ -88,7 +88,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     let html = ""
     r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${game.moulinette.applications.MoulinetteFileUtil.encodeURL(r.filename)}`
     if(r.filename.endsWith(".webm")) {
-      const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.') + 1) + "webp" + r.sas : ""
+      const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + sasThumb : ""
       html = `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}>` +
         `<img width="${thumbSize}" class="cc_image" height="${thumbSize}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL})"/>` +
         `<video width="${thumbSize}" height="${thumbSize}" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video>`
