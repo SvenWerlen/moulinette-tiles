@@ -61,6 +61,29 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     return duplicate(this.assetsPacks)
   }
+
+  /**
+   * Returns the URL of the specified asset
+   * 
+   * @param {*} packIdx pack Index
+   * @param {*} path relative path
+   */
+    async getAssetURL(packIdx, path) {
+      // make sure that data is loaded in cache
+      await this.getPackList()
+      // search pack
+      const pack = this.assetsPacks.find(p => p.idx == packIdx)
+      if(pack) {
+        // search asset in path
+        const asset = this.assets.find(a => a.pack == pack.idx && a.filename == path)
+        if(asset) {
+          const data = {pack: pack, tile: asset}
+          await MoulinetteTiles.downloadAsset(data)
+          return data.img
+        }
+      }
+      return null
+    }
   
   /**
    * Generate a new asset (HTML) for the given result and idx
@@ -130,8 +153,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       if( publisher && publisher != this.assetsPacks[t.pack].publisher ) return false
       // remove webm if type specified
       if( type && type != "imagevideo" && t.filename.endsWith(".webm") ) return false
-      // check if text match
-      // check if text match
+      // check if text matches
       for( const f of searchTermsList ) {
         const textToSearch = game.moulinette.applications.Moulinette.cleanForSearch(t.filename)
         const regex = wholeWord ? new RegExp("\\b"+ f.toLowerCase() +"\\b") : new RegExp(f.toLowerCase())
