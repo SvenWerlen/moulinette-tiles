@@ -38,12 +38,13 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       
     const user = await game.moulinette.applications.Moulinette.getUser()
     const baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const worldId = game.world.id
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoi/assets/" + game.moulinette.user.id,
-      baseURL + "moulinette/images/custom/index.json",
-      baseURL + "moulinette/tiles/custom/index.json"
+      baseURL + `moulinette/tiles/custom/index-${worldId}.json`,
+      baseURL + `moulinette/images/custom/index-${worldId}.json`
     ])
 
     // remove thumbnails and non-images from assets
@@ -389,23 +390,31 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * - howto: help on how to use the module
    */
   async onAction(classList) {
+    const indexFileJSON = `index-${game.world.id}.json`
     const FileUtil = game.moulinette.applications.MoulinetteFileUtil
+    /**
+     * Indexing :
+     *  - 2x Predefined tiles/images folders : /moulinette/images/custom/...
+     *  - 2x Configured tiles/images folders (prefs)
+     *  - 1x Global folder (if defined in config)
+     */
     if(classList.contains("indexImages")) {
       ui.notifications.info(game.i18n.localize("mtte.indexingInProgress"));
       game.moulinette.applications.Moulinette.inprogress(this.html.find(".indexImages"))
       const EXT = ["gif","jpg","jpeg","png","webp","svg", "webm"]
       // scan tiles
       let publishers = await FileUtil.scanAssets(MoulinetteTiles.FOLDER_CUSTOM_TILES, EXT)
-      const customPath = game.settings.get("moulinette-core", "customPath")
       publishers.push(...await FileUtil.scanSourceAssets("tiles", EXT))
-      await FileUtil.uploadFile(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", MoulinetteTiles.FOLDER_CUSTOM_TILES, true)
+      await FileUtil.uploadFile(new File([JSON.stringify(publishers)], indexFileJSON, { type: "application/json", lastModified: new Date() }), indexFileJSON, MoulinetteTiles.FOLDER_CUSTOM_TILES, true)
       // scan images
       publishers = await FileUtil.scanAssets(MoulinetteTiles.FOLDER_CUSTOM_IMAGES, EXT)
+      publishers.push(...await FileUtil.scanSourceAssets("images", EXT))
+      // scan global custom path (legacy)
+      const customPath = game.settings.get("moulinette-core", "customPath")
       if(customPath) {
         publishers.push(...await FileUtil.scanAssetsInCustomFolders(customPath, EXT))
       }
-      publishers.push(...await FileUtil.scanSourceAssets("images", EXT))
-      await FileUtil.uploadFile(new File([JSON.stringify(publishers)], "index.json", { type: "application/json", lastModified: new Date() }), "index.json", MoulinetteTiles.FOLDER_CUSTOM_IMAGES, true)
+      await FileUtil.uploadFile(new File([JSON.stringify(publishers)], indexFileJSON, { type: "application/json", lastModified: new Date() }), indexFileJSON, MoulinetteTiles.FOLDER_CUSTOM_IMAGES, true)
       ui.notifications.info(game.i18n.localize("mtte.indexingDone"));
       // clear cache
       game.moulinette.cache.clear()
