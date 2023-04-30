@@ -115,7 +115,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       r.assetURL = r.filename
     } 
     // pack has full URL
-    else if () {
+    else {
       r.assetURL = (pack.path.match(/^https?:\/\//) ? "" : URL) + `${pack.path}/${game.moulinette.applications.MoulinetteFileUtil.encodeURL(r.filename)}`
     }
 
