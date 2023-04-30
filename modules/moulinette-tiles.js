@@ -109,7 +109,16 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const folderHTML = folderIdx ? `data-folder="${folderIdx}"` : ""
 
     let html = ""
-    r.assetURL = r.filename.match(/^https?:\/\//) ? r.filename : `${URL}${pack.path}/${game.moulinette.applications.MoulinetteFileUtil.encodeURL(r.filename)}`
+    
+    // full URLs
+    if(r.filename.match(/^https?:\/\//)) {
+      r.assetURL = r.filename
+    } 
+    // pack has full URL
+    else if () {
+      r.assetURL = (pack.path.match(/^https?:\/\//) ? "" : URL) + `${pack.path}/${game.moulinette.applications.MoulinetteFileUtil.encodeURL(r.filename)}`
+    }
+
     if(r.filename.endsWith(".webm")) {
       const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + sasThumb : ""
       html = `<div class="tileres video draggable fallback" title="${r.filename}" data-idx="${idx}" data-path="${r.filename}" ${folderHTML}>` +
@@ -644,7 +653,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     }
     // local assets
     else if(!data.pack.isRemote) {
-      const localBaseURL = data.pack.isLocal ? "" : baseURL
+      const localBaseURL = data.pack.isLocal || data.pack.path.match(/^https?:\/\//) ? "" : baseURL
       data.img =  data.tile.filename.match(/^https?:\/\//) ? data.tile.filename : localBaseURL + `${data.pack.path}/${FILEUTIL.encodeURL(data.tile.filename)}`
     }
     // moulinette cloud assets
