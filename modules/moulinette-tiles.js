@@ -140,7 +140,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   /**
    * Implements getAssetList
    */
-  async getAssetList(searchTerms, packs, publisher, type) {
+  async getAssetList(searchTerms, packs, publisher) {
     let assets = []
     const packList = packs == "-1" ? null : ('' + packs).split(",").map(Number);
 
@@ -161,7 +161,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       // publisher doesn't match selection
       if( publisher && publisher != this.assetsPacks[t.pack].publisher ) return false
       // remove webm if type specified
-      if( type && type != "imagevideo" && t.filename.endsWith(".webm") ) return false
+      //if( type && type != "imagevideo" && t.filename.endsWith(".webm") ) return false
       // check if text matches
       for( const f of searchTermsList ) {
         const textToSearch = game.moulinette.applications.Moulinette.cleanForSearch(t.filename)
