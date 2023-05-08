@@ -202,7 +202,7 @@ export class MoulinetteTileResult extends FormApplication {
       const folder = await cTiles.MoulinetteTiles.getOrCreateArticleFolder(this.pack.publisher, this.pack.name)
       // generate journal
       const name = data.img.split('/').pop()
-      const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder.id} )
+      const entry = await game.moulinette.applications.Moulinette.generateArticle(name, data.img, folder.id)
       return entry.sheet.render(true)
     }
     else if(event.submitter.className == "saveCategories") {

@@ -208,7 +208,25 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // retrieve available assets that the user doesn't have access to
     //this.matchesCloud = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatches(searchTerms, "tiles", this.assetsPacks)
     this.matchesCloudTerms = searchTerms
-    this.matchesCloudCount = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatchesMoulinetteCloud(searchTerms, "tiles", true)
+    const parent = this
+    this.matchesCloudCount = await game.moulinette.applications.MoulinetteFileUtil.getAvailableMatchesMoulinetteCloud(searchTerms, "tiles", true).then(results => {
+      // not yet ready?
+      if(!parent.html) return;
+      // display/hide showCase
+      const showCase = parent.html.find(".showcase")
+      if(results && results.count > 0) {
+        // display/hide additional content
+        showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: results.count}))
+        showCase.addClass("clickable")
+        showCase.show()
+      }
+      else {
+        showCase.html("")
+        showCase.removeClass("clickable")
+        showCase.hide()
+      }
+    })
+    
 
     return assets
   }
@@ -261,21 +279,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       game.settings.set("moulinette", "tileMacro", macroPrefs)
     })
     
-    // display/hide showCase
-    const showCase = this.html.find(".showcase")
-    if(this.matchesCloudCount && this.matchesCloudCount["count"] > 0) {
-      // display/hide additional content
-      showCase.html('<i class="fas fa-exclamation-circle"></i> ' + game.i18n.format("mtte.showCaseAssets", {count: this.matchesCloudCount["count"]}))
-      showCase.addClass("clickable")
-      showCase.click(ev => new game.moulinette.applications.MoulinetteAvailableAssets(this.matchesCloudTerms, "tiles", 100).render(true))
-      showCase.show()
-    }
-    else {
-      showCase.html("")
-      showCase.removeClass("clickable")
-      showCase.hide()
-    }
-
     this.html.find(".random").click(event => {
       event.preventDefault();
       event.stopPropagation();
@@ -296,6 +299,9 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // adapt fallback size to current size
     const size = MoulinetteTiles.THUMBSIZES[this.thumbsize]
     this.html.find(".fallback").css("min-width", size).css("min-height", size)
+
+    // click on showcase
+    this.html.find(".showcase").click(ev => new game.moulinette.applications.MoulinetteAvailableAssets(this.matchesCloudTerms, "tiles", 100).render(true))
 
     // insert Footer
     this.updateFooter()
@@ -708,7 +714,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     
     // generate journal
     const name = data.img.split('/').pop()
-    const entry = await JournalEntry.create( {name: name, img: data.img, folder: folder.id} )
+    const entry = await game.moulinette.applications.Moulinette.generateArticle(name, data.img, folder.id)
     const coord = canvas.grid.getSnappedPosition(data.x - canvas.grid.w/2, data.y - canvas.grid.h/2)
     
     // Default Note data
