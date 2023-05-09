@@ -784,6 +784,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     data.overhead = ui.controls.controls.find(c => c.layer === "tiles").foreground ?? false;
     tile = (await canvas.scene.createEmbeddedDocuments(Tile.embeddedName, [data], { parent: canvas.scene }))[0]
     tile = tile._object
+    tile.control() // automatically select dropped tile
 
     if(!canvas.tiles.active && canvas.activeLayer.name != "MoulinetteLayer") {
       canvas.tiles.activate()
