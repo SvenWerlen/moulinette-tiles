@@ -45,8 +45,8 @@ export class MoulinetteTilesFavorites extends FormApplication {
     const index = await game.moulinette.applications.MoulinetteFileUtil.buildAssetIndex([
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/assets/" + game.moulinette.user.id,
       game.moulinette.applications.MoulinetteClient.SERVER_URL + "/byoa/assets/" + game.moulinette.user.id,
-      baseURL + "moulinette/images/custom/index.json",
-      baseURL + "moulinette/tiles/custom/index.json"])
+      baseURL + "moulinette/images/custom/index-mtte.json",
+      baseURL + "moulinette/tiles/custom/index-mtte.json"])
 
     // remove thumbnails and non-images from assets
     const webmList = index.assets.filter(i => i.filename.endsWith(".webm"))
@@ -124,8 +124,6 @@ export class MoulinetteTilesFavorites extends FormApplication {
 
     const categories = this.tab != "history"
     const random = this.tab != "history"
-
-    console.log(favorites)
 
     return { assets: this.curAssets.slice(0, MoulinetteTilesFavorites.MAX_ASSETS), favorites: favorites, showCategories: categories, showRandom: random };
   }
