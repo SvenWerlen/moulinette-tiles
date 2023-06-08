@@ -116,7 +116,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     } 
     // pack has full URL
     else {
-      r.assetURL = (pack.path.match(/^https?:\/\//) ? "" : URL) + `${pack.path}/${game.moulinette.applications.MoulinetteFileUtil.encodeURL(r.filename)}`
+      r.assetURL = (pack.path.match(/^https?:\/\//) ? "" : URL) + `${pack.path}/${r.filename}`
     }
 
     if(r.filename.endsWith(".webm")) {
@@ -660,7 +660,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     // local assets
     else if(!data.pack.isRemote) {
       const localBaseURL = data.pack.isLocal || data.pack.path.match(/^https?:\/\//) ? "" : baseURL
-      data.img =  data.tile.filename.match(/^https?:\/\//) ? data.tile.filename : localBaseURL + `${data.pack.path}/${FILEUTIL.encodeURL(data.tile.filename)}`
+      data.img =  data.tile.filename.match(/^https?:\/\//) ? data.tile.filename : localBaseURL + `${data.pack.path}/${data.tile.filename}`
     }
     // moulinette cloud assets
     else {
