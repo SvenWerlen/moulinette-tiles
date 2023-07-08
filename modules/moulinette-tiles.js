@@ -7,7 +7,7 @@ import { MoulinetteOptions } from "./moulinette-options.js"
  */
 export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForgeModule {
 
-  static IMAGE_EXT = ["gif","jpg","jpeg","png","webp","svg", "webm"]
+  static IMAGE_EXT = ["gif","jpg","jpeg","png","webp","svg","webm","avif"]
   static THUMBSIZES = [25, 50, 75, 100, 125, 150]
   
   constructor() {
