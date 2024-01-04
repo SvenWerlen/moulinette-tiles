@@ -9,7 +9,7 @@
 }
 
 .mtte.forge .tileres img {
-  object-fit: contain;
+  object-fit: scale-down;
   border: none;
   margin: 2px;
 }
