@@ -21,13 +21,18 @@
 }
 
 .mtte.forge .fallback {
-    background-image: url(../../icons/svg/video.svg);
-    display: inline-block;
-    min-width: 100px; 
-    min-height: 100px;
-    background-position: center center;
-    background-size: cover;
-    background-repeat: no-repeat;
+  background-image: url(../../icons/svg/video.svg);
+  display: inline-block;
+  min-width: 100px; 
+  min-height: 100px;
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.mtte.forge .fallback.favorite {
+  min-width: 50px; 
+  min-height: 50px;
 }
 
 .mtte.forge .cc_image {

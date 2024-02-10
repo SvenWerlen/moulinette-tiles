@@ -79,7 +79,15 @@ export class MoulinetteTilesFavorites extends FormApplication {
     r.sas = pack.sas ? "?" + pack.sas : "" // sas (Shared access signature) for accessing remote files (Azure)
     r.assetURL = r.asset.match(/^https?:\/\//) ? encodeURIComponent(r.asset) : `${URL}${pack.path}/${encodeURIComponent(r.asset)}`
     const thumbnailURL = pack.isRemote ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + r.sas : r.assetURL + r.sas
-    return `<div class="tileres draggable" title="${r.asset}" data-idx="${idx}" data-path="${r.asset}"><img width="50" height="50" src="${thumbnailURL}"/></div>`
+    if(r.asset.endsWith(".webm")) {
+      const showThumbs = game.settings.get("moulinette-tiles", "tileShowVideoThumb");
+      const thumbnailURL = showThumbs ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + r.sas : ""
+      return `<div class="tileres video draggable fallback favorite" title="${r.asset}" data-idx="${idx}" data-path="${r.asset}">` +
+        `<img width="50" height="50" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-image: url(${thumbnailURL}); background-size: 50px;"/>` +
+        `<video width="50" height="50" autoplay loop muted><source src="" data-src="${r.assetURL}${r.sas}" type="video/webm"></video></div>`
+    } else {
+      return `<div class="tileres draggable" title="${r.asset}" data-idx="${idx}" data-path="${r.asset}"><img width="50" height="50" src="${thumbnailURL}"/></div>`
+    }
   }
 
 
@@ -155,6 +163,11 @@ export class MoulinetteTilesFavorites extends FormApplication {
 
     // close on right click
     html.find(".sidebar").mousedown(this._onMouseDown.bind(this))
+
+    // display hide video
+    const cTiles = game.moulinette.forge.find( f => f.id == "tiles" ).instance
+    html.find(".tileres.video").mouseover(cTiles._toggleOnVideo.bind(this))
+    html.find(".tileres.video").mouseout(cTiles._toggleOffVideo.bind(this))
   }
 
   _onMouseDown(event) {
