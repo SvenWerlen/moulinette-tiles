@@ -133,7 +133,7 @@ Hooks.on('dropCanvasData', (canvas, data) => {
   if(data.source == "mtte" || data.source == "mtteSearch") {
 
     // push into history
-    if(data.type == "Tile") {
+    if(data.type == "Tile" && !data.noHistory) {
       game.moulinette.forge.find( f => f.id == "tiles" ).instance.addToHistory( data.pack, data.tile )
     }
 

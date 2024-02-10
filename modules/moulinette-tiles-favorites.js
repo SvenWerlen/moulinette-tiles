@@ -77,7 +77,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
     const URL = pack.isRemote || pack.isLocal ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
 
     r.sas = pack.sas ? "?" + pack.sas : "" // sas (Shared access signature) for accessing remote files (Azure)
-    r.assetURL = r.asset.match(/^https?:\/\//) ? r.asset : `${URL}${pack.path}/${r.asset}`
+    r.assetURL = r.asset.match(/^https?:\/\//) ? encodeURIComponent(r.asset) : `${URL}${pack.path}/${encodeURIComponent(r.asset)}`
     const thumbnailURL = pack.isRemote ? r.assetURL.substr(0, r.assetURL.lastIndexOf('.')) + "_thumb.webp" + r.sas : r.assetURL + r.sas
     return `<div class="tileres draggable" title="${r.asset}" data-idx="${idx}" data-path="${r.asset}"><img width="50" height="50" src="${thumbnailURL}"/></div>`
   }
@@ -91,7 +91,8 @@ export class MoulinetteTilesFavorites extends FormApplication {
     let idx = 0
     const favs = game.settings.get("moulinette", "favorites")
     if(this.tab in favs) {
-      for(const fav of favs[this.tab].list.reverse()) {
+      const reverseList = duplicate(favs[this.tab].list).reverse()
+      for(const fav of reverseList) {
         idx++
         const html = await this.generateAsset(fav, idx)
         if(html) {
@@ -182,17 +183,12 @@ export class MoulinetteTilesFavorites extends FormApplication {
       // retrieve selected favorite
       const favs = game.settings.get("moulinette", "favorites")
       if(this.tab in favs) {
-        const fav = favs[this.tab].list.reverse()[idx-1]
-
-        // retrieve pack & tile
-        const pack = this.assetsPacks.find( p => p.publisher == fav.pub && p.name == fav.pack )
-        const tile = this.assets.find( a => a.pack = pack.idx && a.filename == fav.asset )
-
-        await game.moulinette.forge.find( f => f.id == "tiles" ).instance.toggleFavorite(pack, tile, true)
-        $(div).hide()
+        // remove item
+        favs[this.tab].list.splice(favs[this.tab].list.length - idx, 1)
+        await game.settings.set("moulinette", "favorites", favs)
       }
+      this.render();
     }
-    this.render();
   }
 
   // re-enable listeners
@@ -274,13 +270,23 @@ export class MoulinetteTilesFavorites extends FormApplication {
     // retrieve selected favorite
     const favs = game.settings.get("moulinette", "favorites")
     const favGroup = favs[this.tab]
-    const fav = favs[this.tab].list.reverse()[idx-1]
+    const fav = duplicate(favs[this.tab].list).reverse()[idx-1]
     if(favGroup.size > 0) { size = favGroup.size; }
 
     // retrieve pack & tile
     const pack = this.assetsPacks.find( p => p.publisher == fav.pub && p.name == fav.pack )
+    if(!pack) {
+      console.log("Moulinette Favorites | Pack not found", fav)
+      return;
+    }
+
     const tile = this.assets.find( a => a.pack == pack.idx && a.filename == fav.asset )
-    tile.sas = "?" + pack.sas
+    if(!tile) {
+      console.log("Moulinette Favorites | Tile not found", fav)
+      return;
+    }
+    tile.assetURL = `${pack.path}/${encodeURIComponent(tile.filename)}`
+    tile.sas = pack.sas ? "?" + pack.sas : ""
 
     let dragData = {}
     if(mode == "tile") {
@@ -308,6 +314,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
     }
 
     dragData.source = "mtte"
+    dragData.noHistory = this.tab == "history" // don't add into history
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
 
