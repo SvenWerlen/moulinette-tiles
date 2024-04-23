@@ -765,6 +765,10 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const ratio = canvas.dimensions.size / (data.tileSize || canvas.dimensions.size);
     data.width = tex.baseTexture.width * ratio;
     data.height = tex.baseTexture.height * ratio;
+    
+    if(game.version.startsWith("12.")) {
+      data.texture = { src: data.img }
+    }
 
     // Validate that the drop position is in-bounds and snap to grid
     if ( !canvas.dimensions.rect.contains(data.x, data.y) ) return false;

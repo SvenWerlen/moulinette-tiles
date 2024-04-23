@@ -24,8 +24,12 @@ export class MoulinetteDropAsActor extends FormApplication {
     const actorType = game.settings.get("moulinette", "tileActorType");
 
     const actors = game.actors.map( a => { return { id: a.id, name: a.name, selected: a.id == actorId } })
-    const actorTypes = game.system.documentTypes.Actor.map( a => { return { id: a, name: a, selected: a == actorType } })
-
+    let actorTypes = []
+    if(game.version.startsWith("12.")) {
+      actorTypes = Object.keys(game.system.documentTypes.Actor).map( a => { return { id: a, name: a, selected: a == actorType } })
+    } else {
+      actorTypes = game.system.documentTypes.Actor.map( a => { return { id: a, name: a, selected: a == actorType } })
+    }
     return { actors: actors, actorId: actorId, actorLink: actorLink, actorTypes: actorTypes }
   }
   
@@ -62,15 +66,19 @@ export class MoulinetteDropAsActor extends FormApplication {
     await cTiles.MoulinetteTiles.downloadAsset(this.data)
     
     let td = null
-
+    
     // Reusing existing actor
     if(actor) {
-      td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+      if(game.version.startsWith("12.")) {
+        td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, texture: { src: this.data.img }});
+      } else {
+        td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+      }
     }
     // Creating new actor
     else {
       const actorType = this.html.find(".actorsTypes").children("option:selected").val()
-      if(!game.system.documentTypes.Actor.includes(actorType)) {
+      if(game.version.startsWith("12.") ? !Object.keys(game.system.documentTypes.Actor).includes(actorType) : !game.system.documentTypes.Actor.includes(actorType)) {
         return console.error(`MoulinetteDropAsActor | Invalid actor type ${actorType}`, game.system.documentTypes.Actor)
       }
       // keep preferences
@@ -83,7 +91,11 @@ export class MoulinetteDropAsActor extends FormApplication {
         type: actorType,
         img: this.data.img
       });
-      td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+      if(game.version.startsWith("12.")) {
+        td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, texture: { src: this.data.img }});
+      } else {
+        td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
+      }
 
       game.settings.set("moulinette", "tileActorId", actor.id);
       game.settings.set("moulinette", "tileActorLink", linked);
