@@ -717,7 +717,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     await MoulinetteTiles.downloadAsset(data)    
     
     // generate journal
-    const name = data.img.split('/').pop()
+    const name = game.moulinette.applications.Moulinette.prettyText(data.img.split('/').pop())
     const entry = await game.moulinette.applications.Moulinette.generateArticle(name, data.img, folder.id)
     const coord = canvas.grid.getSnappedPosition(data.x - canvas.grid.w/2, data.y - canvas.grid.h/2)
     
@@ -819,20 +819,34 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
 
 
   async onLeftClickGrid(eventData) {
+    
+    let tile = null
+    let pack = null
+
     const assets = game.moulinette.cache.getData("selAssets")
-    if(!assets || assets.length == 0) {
-      return console.log("Moulinette Tiles | Click on a folder (dice icon) then click on the scene to randomly drop assets from that folder")
+    
+    // board support (selected is a callback function)
+    const randomAsset = game.moulinette.board.getRandomAsset()
+    if(randomAsset) {
+      tile = randomAsset.tile
+      pack = randomAsset.pack
     }
-    if(!this.assetsPacks) {
-      await this.getPackList()
+    // moulinette tiles (randomizer)
+    else if(assets && assets.length == 0) {
+      if(!this.assetsPacks) {
+        await this.getPackList()
+      }
+      // random pick tile
+      tile = assets[Math.floor((Math.random() * assets.length))]
+      pack = this.assetsPacks[tile.pack]
+    }
+    
+    if(!tile || !pack) {
+      return console.log("Moulinette Tiles | Click on a folder (dice icon) then click on the scene to randomly drop assets from that folder")
     }
 
     const mode = game.settings.get("moulinette", "tileMode")
     const size = game.settings.get("moulinette", "tileSize")
-
-    // random pick tile
-    const tile = assets[Math.floor((Math.random() * assets.length))]
-    const pack = this.assetsPacks[tile.pack]
 
     const data = {
       x: eventData.x,
@@ -883,4 +897,124 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     this.html.find(".fallback").css("min-width", size).css("min-height", size)
   }
 
+
+  /**
+   * Support for board
+   * ============================================================================
+   */
+  getBoardDataShortcut(data) {
+    console.log(data)
+    if(data.type == "Tile" && data.pack) {
+      return {
+        name: game.moulinette.applications.Moulinette.prettyText(data.tile.filename.split("/").pop()),
+        type: "Tile",
+        icon: data.pack.isRemote ? game.moulinette.applications.MoulinetteFileUtil.getThumbnailURLMoulinetteCloud(data.pack, data.tile) : data.tile.assetURL
+      }
+    }
+  }
+
+  async getBoardDataAssets(data) {
+    if(data.type == "Tile" && data.pack) {
+      return [{
+        pack: data.pack.isRemote ? data.pack.packId : -1,
+        path: data.pack.isRemote ? data.tile.filename : `${data.pack.path}/${data.tile.filename}`
+      }]
+    }
+    return null
+  }
+
+  
+  async getImageAsset(asset) {
+    // Local indexing
+    if(asset.pack && asset.pack < 0) {
+      return {
+        pack: { isRemote: false, name: game.world.id, path: ""},
+        tile: { filename: asset.path, type: "snd", assetURL: asset.path },
+      }
+    }
+    // Moulinette Cloud
+    else if(asset.pack && asset.path) {
+      await this.getPackList() // force loading
+      const pack = this.assetsPacks.find(p => p.packId == asset.pack)
+      if(pack) {
+        const tile = this.assets.find(a => a.pack == pack.idx && a.filename == asset.path)
+        if(tile) {
+          tile.sas = pack.sas ? "?" + pack.sas : ""
+          return {
+            pack: pack,
+            tile: tile
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  
+  async getBoardDataAssetName(asset) {
+    const packAndTile = await this.getImageAsset(asset)
+    return packAndTile ? packAndTile.tile.filename.split("/").pop() : null
+  }
+
+  getBoardDataDataTransfer(asset) {
+    const mode = game.settings.get("moulinette", "tileMode")
+    const size = game.settings.get("moulinette", "tileSize")
+    
+    // prepare drag data
+    let dragData = {}
+    if(mode == "tile") {
+      dragData = {
+        type: "Tile",
+        tileSize: size
+      };
+    } else if(mode == "article") {
+      dragData = {
+        type: "JournalEntry"
+      };
+    } else if(mode == "actor") {
+      dragData = {
+        type: "Actor"
+      }
+    }
+    dragData.source = "mtte"
+
+    // Local indexing
+    if(asset.pack && asset.pack < 0) {
+      dragData["tile"] = { filename: asset.path, type: "img", assetURL: asset.path },
+      dragData["pack"] = { isRemote: false, name: game.world.id, publisher: "Board", path: ""}
+      return dragData
+    }
+    else if(asset.pack && asset.path) {
+      if(!this.assetsPacks) {
+        ui.notifications.warn(game.i18n.localize("mtte.errorBoardCloudLoading"));
+        this.getPackList()
+        return {}
+      }
+      const pack = this.assetsPacks.find(p => p.packId == asset.pack)
+      if(pack) {
+        const tile = this.assets.find(a => a.pack == pack.idx && a.filename == asset.path)
+        if(tile) {
+          dragData["tile"] = tile
+          dragData["pack"] = pack
+          return dragData
+        }
+      }
+    }
+  }
+
+  async executeBoardDataAsset(asset) {
+    const packAndTile = await this.getImageAsset(asset)
+    if(packAndTile) {
+      // download tile
+      let tileData = { tile: packAndTile.tile, pack: packAndTile.pack }
+      await MoulinetteTiles.downloadAsset(tileData)
+      // create folder (where to store the journal article)
+      const folder = await MoulinetteTiles.getOrCreateArticleFolder("Board", packAndTile.pack.name)
+      // generate journal
+      const name = game.moulinette.applications.Moulinette.prettyText(tileData.img.split("/").pop())
+      const entry = await game.moulinette.applications.Moulinette.generateArticle(name, tileData.img, folder.id)
+      return entry.sheet.render(true)
+    }
+    return true
+  }
 }

@@ -80,7 +80,8 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
       // retrieve favorites
       const favs = duplicate(game.settings.get("moulinette", "favorites"))
 
-      SceneNavigation.displayProgressBar({label: game.i18n.localize("mtte.updating"), pct: 1});
+      const progressbar = (new game.moulinette.applications.MoulinetteProgress(game.i18n.localize("mtte.updating")))
+      progressbar.render(true)
 
       let idx = 0
       let payloads = []
@@ -115,13 +116,13 @@ export class MoulinetteTilesFavoritesCategories extends FormApplication {
             console.warn(e)
           });
 
-          SceneNavigation.displayProgressBar({label: game.i18n.localize("mtte.updating"), pct: Math.round(idx * 100 / this.elements.length)});
+          progressbar.setProgress(Math.round(idx * 100 / this.elements.length))
           payloads = []
         }
       }
 
       // completed
-      SceneNavigation.displayProgressBar({label: game.i18n.localize("mtte.updating"), pct: 100});
+      progressbar.setProgress(100)
       ui.notifications.info(game.i18n.localize("mtte.categoriesUpdateCompleted"));
 
       $(event.submitter).prop('disabled',"")
