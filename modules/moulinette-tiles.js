@@ -903,7 +903,6 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
    * ============================================================================
    */
   getBoardDataShortcut(data) {
-    console.log(data)
     if(data.type == "Tile" && data.pack) {
       return {
         name: game.moulinette.applications.Moulinette.prettyText(data.tile.filename.split("/").pop()),
@@ -1016,5 +1015,30 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       return entry.sheet.render(true)
     }
     return true
+  }
+
+  async generateHTML4Image(asset, size = 125) {
+    const packAndTile = await this.getImageAsset(asset)
+    if(packAndTile) {
+      const thumbnailURL = packAndTile.pack.path + "/" + (packAndTile.pack.isRemote ? packAndTile.tile.filename.substr(0, packAndTile.tile.filename.lastIndexOf('.')) + "_thumb.webp" + packAndTile.tile.sas : packAndTile.tile.filename)
+      return `<img src="${thumbnailURL}" width="${size}" height="${size}"/>`
+    }
+    return ""
+  }
+
+  async getBoardDataPreview(boardItem) {
+    let html = `<h3><i class="fas fa-puzzle-piece fa-lg"></i> ${boardItem.name}</h3>`
+    if(boardItem.assets.length > 1) {
+      html += game.i18n.format("mtte.boardAssetsCountImages", { count: boardItem.assets.length})
+      for(let i = 0; i < boardItem.assets.length && i < 4; i++) {
+        html += await this.generateHTML4Image(boardItem.assets[i], 75)
+      }
+    }
+    else if(boardItem.assets.length == 1) {
+      html += await this.generateHTML4Image(boardItem.assets[0])
+    }
+    html += '<hr>' + game.i18n.localize("mtte.boardInstructionsTile") + game.i18n.localize("mtte.boardInstructionsCommon")
+    
+    return html
   }
 }
