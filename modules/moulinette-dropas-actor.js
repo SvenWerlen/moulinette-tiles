@@ -69,11 +69,7 @@ export class MoulinetteDropAsActor extends FormApplication {
     
     // Reusing existing actor
     if(actor) {
-      if(game.version.startsWith("12.")) {
-        td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, texture: { src: this.data.img }});
-      } else {
-        td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
-      }
+      td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, texture: { src: this.data.img }});
     }
     // Creating new actor
     else {
@@ -86,16 +82,20 @@ export class MoulinetteDropAsActor extends FormApplication {
 
       // extracts the filename and replace all filename separators by spaces
       const name = this.data.img.split("/").pop().split(".")[0].replaceAll("_", " ").replaceAll("-", " ").replace(/  +/g, ' ');
-      actor = await getDocumentClass("Actor").create({
+      actor = await Actor.implementation.create({
         name: name,
         type: actorType,
         img: this.data.img
       });
-      if(game.version.startsWith("12.")) {
-        td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, texture: { src: this.data.img }});
-      } else {
-        td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, img: this.data.img});
-      }
+      // update token
+      await actor.update({prototypeToken: {
+        name: name,
+        actorLink: linked,
+        texture: {
+          src: this.data.img,
+        }
+      }}, { noHook: true})
+      td = await actor.getTokenDocument({x: this.data.x, y: this.data.y, actorLink: linked, texture: { src: this.data.img }});
 
       game.settings.set("moulinette", "tileActorId", actor.id);
       game.settings.set("moulinette", "tileActorLink", linked);
@@ -104,7 +104,7 @@ export class MoulinetteDropAsActor extends FormApplication {
     // Adjust token position
     const hw = canvas.grid.w/2;
     const hh = canvas.grid.h/2;
-    td.update(canvas.grid.getSnappedPosition(td.x - (td.width*hw), td.y - (td.height*hh)));
+    td.updateSource(canvas.grid.getSnappedPosition(td.x - (td.width*hw), td.y - (td.height*hh)));
 
     if ( !canvas.dimensions.rect.contains(td.x, td.y) ) return false;
 
