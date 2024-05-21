@@ -1021,7 +1021,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     const packAndTile = await this.getImageAsset(asset)
     if(packAndTile) {
       const thumbnailURL = packAndTile.pack.path + "/" + (packAndTile.pack.isRemote ? packAndTile.tile.filename.substr(0, packAndTile.tile.filename.lastIndexOf('.')) + "_thumb.webp" + packAndTile.tile.sas : packAndTile.tile.filename)
-      return `<img src="${thumbnailURL}" width="${size}" height="${size}"/>`
+      return `<img src="${thumbnailURL}" width="${size}" height="${size}" class="boardprev" />`
     }
     return ""
   }
