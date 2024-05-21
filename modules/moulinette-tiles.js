@@ -794,7 +794,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
     tile = tile._object
     tile.control() // automatically select dropped tile
 
-    if(!canvas.tiles.active && canvas.activeLayer.name != "MoulinetteLayer") {
+    if(!canvas.tiles.active && !canvas.moulinette.active) {
       canvas.tiles.activate()
     }
     
