@@ -67,14 +67,14 @@ export class MoulinetteTilesFavorites extends FormApplication {
   /**
    * Generate a new asset (HTML) for the given result and idx
    */
-  async generateAsset(r, idx) {
+  generateAsset(r, idx) {
     const pack = this.assetsPacks.find(p => p.publisher == r.pub && p.name == r.pack)
 
     if(!pack) {
       return null
     }
 
-    const URL = pack.isRemote || pack.isLocal ? "" : await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
+    const URL = pack.isRemote || pack.isLocal ? "" : this.baseURL
 
     r.sas = pack.sas ? "?" + pack.sas : "" // sas (Shared access signature) for accessing remote files (Azure)
     r.assetURL = r.asset.match(/^https?:\/\//) ? encodeURIComponent(r.asset) : `${URL}${pack.path}/${encodeURIComponent(r.asset)}`
@@ -94,6 +94,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
   async getData() {
     this.curAssets = []
     await this.getPackList()
+    this.baseURL = await game.moulinette.applications.MoulinetteFileUtil.getBaseURL()
 
     let notFound = []
     let idx = 0
@@ -102,7 +103,7 @@ export class MoulinetteTilesFavorites extends FormApplication {
       const reverseList = duplicate(favs[this.tab].list).reverse()
       for(const fav of reverseList) {
         idx++
-        const html = await this.generateAsset(fav, idx)
+        const html = this.generateAsset(fav, idx)
         if(html) {
           this.curAssets.push(html)
         } else {
@@ -298,7 +299,9 @@ export class MoulinetteTilesFavorites extends FormApplication {
       console.log("Moulinette Favorites | Tile not found", fav)
       return;
     }
-    tile.assetURL = `${pack.path}/${encodeURIComponent(tile.filename)}`
+
+    const URL = pack.isRemote || pack.isLocal ? "" : this.baseURL
+    tile.assetURL = `${URL}${pack.path}/${encodeURIComponent(tile.filename)}`
     tile.sas = pack.sas ? "?" + pack.sas : ""
 
     let dragData = {}
