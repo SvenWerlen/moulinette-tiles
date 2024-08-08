@@ -832,7 +832,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       pack = randomAsset.pack
     }
     // moulinette tiles (randomizer)
-    else if(assets && assets.length == 0) {
+    else if(assets && assets.length > 0) {
       if(!this.assetsPacks) {
         await this.getPackList()
       }
