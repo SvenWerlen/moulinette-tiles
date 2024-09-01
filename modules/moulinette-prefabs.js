@@ -194,36 +194,6 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
   
-  
-  /**
-   * Generates moulinette folders
-   */
-  static async getOrCreateActorFolder(publisher, pack) {
-    let moulinetteFolder = game.folders.filter( f => f.name == "Moulinette" && f.type == "Actor" )
-
-    // main
-    if( moulinetteFolder.length == 0 ) {
-      moulinetteFolder = await Folder.create({name:"Moulinette", type:"Actor", parent: null})
-    } else {
-      moulinetteFolder = moulinetteFolder[0]
-    }
-    // publisher level
-    let publisherFolder = moulinetteFolder.children ? moulinetteFolder.children.filter( c => c.folder.name == publisher ) : []
-    if( publisherFolder.length == 0 ) {
-      publisherFolder = await Folder.create({name: publisher, type: "Actor", parent: moulinetteFolder.id })
-    } else {
-      publisherFolder = publisherFolder[0].folder
-    }
-    // pack level
-    let packFolder = publisherFolder.children ? publisherFolder.children.filter( c => c.folder.name == pack ) : []
-    if( packFolder.length == 0 ) {
-      packFolder = await Folder.create({name: pack, type: "Actor", parent: publisherFolder.id })
-    } else {
-      packFolder = packFolder[0].folder
-    }
-    return packFolder
-  }
-  
   /**
    * Generate a prefab (ie actor)
    */
