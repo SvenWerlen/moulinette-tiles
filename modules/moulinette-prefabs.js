@@ -268,7 +268,7 @@ export class MoulinettePrefabs extends game.moulinette.applications.MoulinetteFo
       }
 
       // force folder
-      actorData.folder = await MoulinettePrefabs.getOrCreateActorFolder(pack.publisher, pack.name)
+      actorData.folder = await game.moulinette.applications.Moulinette.getOrCreateFolder(pack.publisher, pack.name, "Actor")
 
       const actor = await getDocumentClass("Actor").create(actorData);
 
