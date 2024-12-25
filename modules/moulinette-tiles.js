@@ -643,7 +643,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
   static async downloadAsset(data) {
     const FILEUTIL = game.moulinette.applications.MoulinetteFileUtil
     const baseURL = await FILEUTIL.getBaseURL()
-    // new faceted search?
+    // image search (clipboard, google, bing, ...)
     if(data.tile.search) {
       const today = new Date()
       const imageFileName = data.tile.filename
@@ -653,7 +653,7 @@ export class MoulinetteTiles extends game.moulinette.applications.MoulinetteForg
       
       // download & upload image
       const headers = { method: "POST", headers: { 'Content-Type': 'application/json'}, body: JSON.stringify({ url: data.tile.search.url }) }
-      const res = await fetch(game.moulinette.applications.MoulinetteClient.SERVER_URL + "/search/download", headers)
+      const res = await fetch(game.moulinette.applications.MoulinetteClient.SERVER_URL + "/api/v2/download-file", headers)
       const blob = await res.blob()
       await FILEUTIL.uploadFile(new File([blob], imageFileName, { type: blob.type, lastModified: today }), imageFileName, path, false)
       data.img = baseURL + `${path}/${imageFileName}`

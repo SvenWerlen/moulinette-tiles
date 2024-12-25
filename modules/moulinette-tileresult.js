@@ -13,7 +13,7 @@ export class MoulinetteTileResult extends FormApplication {
     this.tile = duplicate(tile);
     this.tile.pack = pack;
     this.pack = pack
-    this.isCloud = pack.isRemote && !pack.path.startsWith("https://mttecloudstorage.blob.core.windows.net/user")
+    this.isCloud = pack.isRemote && !pack.path.startsWith("https://mttestorage.blob.core.windows.net/user")
     this.isV2 = isV2
   }
   
