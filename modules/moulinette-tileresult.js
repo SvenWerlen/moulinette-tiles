@@ -5,7 +5,6 @@ import { MoulinetteSearchUtils } from "./moulinette-searchUtils.js"
  *************************/
 export class MoulinetteTileResult extends FormApplication {
   
-  static KEY_CATEGORY = "imageCategories"
   static DEFAULT_WEBM_PREVIEW = "icons/svg/video.svg" // don't forget to change it also in moulinette-tiles.js
   
   constructor(tile, pack, isV2 = false) {
@@ -37,42 +36,10 @@ export class MoulinetteTileResult extends FormApplication {
       this.tile.isVideo = true
     }
 
-    // retrieve categories
-    this.categories = null
     const cloudEnabled = game.settings.get("moulinette-core", "enableMoulinetteCloud")
-    if(this.isCloud && cloudEnabled) {
-      this.categories = await MoulinetteSearchUtils.getCategories()
-
-      // apply categories
-      let categoriesValues = await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/search/categories/${game.moulinette.user.id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            packId: this.pack.packId,
-            asset: this.tile.filename,
-          })
-      }).catch(function(e) {
-        console.log(`MoulinetteTileResult | Something went wrong while fetching categories on the server`)
-        console.warn(e)
-      });
-      categoriesValues = await categoriesValues.json()
-      for(const c of this.categories) {
-        c.options = []
-        for(const v of c.values) {
-          c.options.push({
-            id: v,
-            name: MoulinetteSearchUtils.getTranslation(c.id, v),
-            selected: c.id in categoriesValues && categoriesValues[c.id] == v
-          })
-        }
-        c.options.sort((a,b) => { return ('' + a.name).localeCompare(b.name) })
-      }
-    }
     return {
       tile: this.tile,
-      categories: this.categories,
       cloudEnabled: cloudEnabled,
-      noCategories: !this.categories || this.categories.length == 0,
       user: game.moulinette.user
     }
   }
@@ -205,36 +172,6 @@ export class MoulinetteTileResult extends FormApplication {
       const entry = await game.moulinette.applications.Moulinette.generateArticle(name, data.img, folder.id)
       return entry.sheet.render(true)
     }
-    else if(event.submitter.className == "saveCategories") {
-      $(event.submitter).prop('disabled',"disabled")
-      const payloads = []
-      const parent = this
-      const categoryId = this.html.find(`[data-id='ImageType']`).val()
-      this.html.find('.combo').each(function(idx, sel) {
-        const categoryId = $(sel).data('id')
-        const categoryVal = $(sel).is(':visible') ? $(sel).find(":selected").val() : "" // invisible means doesn't meet dependencies
-        payloads.push({
-          packId: parent.pack.packId,
-          asset: parent.tile.filename,
-          categoryKey: categoryId,
-          categoryVal: categoryVal
-        })
-      });
-
-      await fetch(`${game.moulinette.applications.MoulinetteClient.SERVER_URL}/search/categories/${game.moulinette.user.id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payloads)
-      }).catch(function(e) {
-        console.log(`MoulinetteTileResult | Something went wrong while updating the categories on the server`)
-        console.warn(e)
-        ui.notifications.error(game.i18n.localize("mtte.errorUpdateCategories"));
-        return this.render()
-      });
-
-      ui.notifications.info(game.i18n.localize("mtte.updateCategoriesSuccess"));
-      this.render()
-    }
   }
   
   _onDragStart(event) {
@@ -254,24 +191,6 @@ export class MoulinetteTileResult extends FormApplication {
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
   }
 
-  // automatically show/hide categories based on dependencies
-  toggleCategories() {
-    const parent = this
-    this.html.find(".category").each(function(idx, el) {
-      const id = $(el).data('id')
-      const req = parent.categories.find(c => c.id == id).requires
-      if(req) {
-        for(const k of Object.keys(req)) {
-          const value = k == "category" ? "image" : parent.html.find(`.combo[data-id='${k}']`).val()
-          if(value != req[k]) {
-            return $(el).hide()
-          }
-        }
-      }
-      $(el).show()
-    })
-  }
-
   activateListeners(html) {
     super.activateListeners(html);
     this.bringToTop()
@@ -280,9 +199,6 @@ export class MoulinetteTileResult extends FormApplication {
     html.find('#previewImage').on("load", function() {  
       html.find('.imageSizes').text(`${this.naturalWidth} x ${this.naturalHeight}`)
     });
-
-    html.find('.combo').change(this.toggleCategories.bind(this))
-    this.toggleCategories()
   }
   
 }

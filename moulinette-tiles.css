@@ -2,6 +2,7 @@
   display: inline-flex;
   cursor: pointer;
   position: relative;
+  margin: auto
 }
 
 .mtte.forge .tileres:hover {

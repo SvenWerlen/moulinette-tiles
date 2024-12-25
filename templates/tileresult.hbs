@@ -13,27 +13,6 @@
       </video>
       {{/if}}
     </div>
-    <div class="categories">
-      <h2>{{localize "mtte.categories"}}</h2>
-      {{#unless cloudEnabled}}<div class="error">{{localize "mtte.moulinetteCloudDisabledCategories"}}</div>{{/unless}}
-      {{#if cloudEnabled}}
-        {{#if noCategories}}<div class="error">{{localize "mtte.categorizationWarning"}}</div>{{/if}}
-        {{#unless noCategories}}
-          {{#each categories as |c|}}
-            <div class="category" data-id="{{c.id}}"><span class="label">{{c.name}}</span>
-            <select class="combo" data-id="{{c.id}}" {{#unless ../user.patron}}disabled{{/unless}}>
-            <option value="">---</option>
-            {{#each c.options as |o|}}<option value="{{o.id}}" {{#if o.selected}}selected{{/if}}>{{o.name}}</option>{{/each}}
-            </select>
-            </div>
-          {{/each}}
-          <button class="saveCategories" title="{{localize "mtte.saveCategoriesToolTip"}}" {{#unless user.patron}}disabled{{/unless}}><i class="fas fa-save"></i> {{localize "mtte.saveCategories"}}</button>
-          <div class="links">
-            <a href="https://www.moulinette.cloud/getting-started/use-moulinette-to-access-creators-assets/categories" target="_blank">{{ localize "mtte.categorizeHowTo"}}</a>
-          </div>
-        {{/unless}}
-      {{/if}}
-    </div>
   </div>
 
   <p>

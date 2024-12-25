@@ -72,10 +72,6 @@ Hooks.once("setup", async function () {
       id: "favorites",
       name: game.i18n.localize("mtte.favorites"),
       icon: "fas fa-heart"
-    }, {
-      id: "search",
-      name: game.i18n.localize("mtte.moulinetteSearch"),
-      icon: "fas fa-search-plus"
     }]
   })
   
